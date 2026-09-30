@@ -1,5 +1,5 @@
 {
- "at": "2026-09-30T06:21:20",
+ "at": "2026-09-30T06:46:49",
  "results": {
   "005930_integration.txt": {
    "status": 200,
@@ -9,7 +9,7 @@
   "005930_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/basic",
-   "bytes": 4028
+   "bytes": 4031
   },
   "005930_trend20.txt": {
    "status": 200,
@@ -54,7 +54,7 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10055
+   "bytes": 10061
   },
   "247540_integration.txt": {
    "status": 200,
@@ -64,7 +64,7 @@
   "247540_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/basic",
-   "bytes": 4200
+   "bytes": 4203
   },
   "247540_trend20.txt": {
    "status": 200,
