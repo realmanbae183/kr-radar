@@ -30,9 +30,10 @@ def build_universe() -> tuple[list[dict], list[str]]:
         stocks += [{"code": c, "name": n, "market": "KOSPI"} for c, n in k200.data if not is_excluded(c, n)]
     else:
         notes.append(k200.error + " → 코스피 시총 상위 200으로 대체")
+        print("  ! 코스피200 명단 실패:", k200.error)
         rank = S.fetch_marcap_rank(0, 6)
         if not rank.ok:
-            raise RuntimeError("코스피 종목 명단을 어느 곳에서도 못 받음: " + rank.error)
+            raise RuntimeError("코스피 종목 명단을 어느 곳에서도 못 받음: " + rank.error + " / 코스피200: " + k200.error)
         picked = [r for r in rank.data if not is_excluded(r["code"], r["name"])][: C.KOSPI_COUNT]
         stocks += [{"code": r["code"], "name": r["name"], "market": "KOSPI", "marcap": r["marcap"]} for r in picked]
 

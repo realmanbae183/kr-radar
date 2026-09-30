@@ -158,21 +158,69 @@ def parse_marcap_page(html: str) -> list[dict]:
                 v = to_num(row["시가총액"])
                 if v is not None:
                     caps[str(row["종목명"]).strip()] = v
+    if not links:                       # 클래스 이름이 바뀐 경우: 표 영역 안의 모든 종목 링크를 사용
+        start = html.find("type_2")
+        links = parse_code_name_links(html[start:] if start >= 0 else html)
     return [{"code": c, "name": n, "marcap": caps.get(n)} for c, n in links]
 
 
-def fetch_marcap_rank(sosok: int, pages: int) -> Fetch:
-    """sosok=0 코스피, 1 코스닥. 한 페이지에 50종목."""
+def _snippet(text: str, n: int = 160) -> str:
+    return re.sub(r"\s+", " ", text or "")[:n]
+
+
+def fetch_marcap_json(market: str, pages: int) -> Fetch:
+    """네이버 모바일 증권 API (JSON). market='KOSPI' 또는 'KOSDAQ'. 한 페이지 60종목."""
     rows: list[dict] = []
     try:
         for p in range(1, pages + 1):
-            html = get_text(f"https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={p}")
-            rows += parse_marcap_page(html)
+            url = f"https://m.stock.naver.com/api/stocks/marketValue/{market}?page={p}&pageSize=60"
+            r = _session().get(url, headers={"Referer": "https://m.stock.naver.com/"}, timeout=15)
+            time.sleep(C.REQUEST_SLEEP)
+            if r.status_code != 200:
+                return Fetch(False, rows, f"JSON API {r.status_code}: {_snippet(r.text)}")
+            try:
+                j = r.json()
+            except ValueError:
+                return Fetch(False, rows, f"JSON이 아닌 응답: {_snippet(r.text)}")
+            stocks = j.get("stocks") or []
+            if not stocks:
+                break
+            for it in stocks:
+                code = it.get("itemCode") or it.get("symbolCode")
+                name = it.get("stockName") or it.get("stockNameEng")
+                if code and name:
+                    rows.append({"code": str(code), "name": str(name).strip(), "marcap": parse_korean_money_eok(it.get("marketValue"))
+                                 if it.get("marketValue") not in (None, "") else None})
     except Exception as e:
-        return Fetch(False, rows, f"시가총액 순위 조회 실패: {e}")
+        return Fetch(False, rows, f"JSON API 조회 오류: {e}")
     if not rows:
-        return Fetch(False, rows, "시가총액 순위에서 종목을 하나도 못 읽음 (페이지 구조 변경 의심)")
+        return Fetch(False, rows, "JSON API에서 종목을 하나도 못 읽음")
     return Fetch(True, rows)
+
+
+def fetch_marcap_rank(sosok: int, pages: int) -> Fetch:
+    """sosok=0 코스피, 1 코스닥. JSON API를 먼저 쓰고, 안 되면 HTML 페이지를 읽는다."""
+    market = "KOSPI" if sosok == 0 else "KOSDAQ"
+    per_page = 60
+    need_pages = max(1, -(-pages * 50 // per_page))         # HTML 50개짜리 페이지 수 → JSON 60개짜리 페이지 수
+    j = fetch_marcap_json(market, need_pages)
+    if j.ok:
+        return j
+    rows: list[dict] = []
+    err_html = ""
+    try:
+        for p in range(1, pages + 1):
+            html = get_text(f"https://finance.naver.com/sise/sise_market_sum.naver?sosok={sosok}&page={p}")
+            got = parse_marcap_page(html)
+            if not got and p == 1:
+                err_html = f"HTML 페이지에서 종목을 못 읽음 (받은 글자 {len(html)}자, 앞부분: {_snippet(html, 200)})"
+                break
+            rows += got
+    except Exception as e:
+        err_html = f"HTML 조회 실패: {e}"
+    if rows:
+        return Fetch(True, rows)
+    return Fetch(False, rows, f"[JSON] {j.error} / [HTML] {err_html}")
 
 
 # ─────────────────────────────────────────────
