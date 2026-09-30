@@ -156,7 +156,7 @@ class DemoProvider:
         y, q = self._fin_rows(code)
         return Fetch(True, y if freq == "Y" else q)
 
-    def flows(self, code):
+    def flows(self, code, main=None):
         r = self._rng(code, 3)
         px = self.prices(code).data
         t = px.tail(20)

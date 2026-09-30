@@ -267,21 +267,24 @@ def risk_screen(prices: pd.DataFrame | None, fin_y, fin_q, flows: pd.DataFrame |
 
     # 5) 기관·외국인 수급
     ex = f"최근 {C.FLOW_DAYS}거래일 기관+외국인 순매수 금액이 시가총액 대비 얼마인가 (큰손이 팔고 있나)"
-    if flows is None or len(flows) < 10:
+    if flows is None or len(flows) < 3:
         add("flow", "기관·외국인 수급", "unknown", flows_err or "매매동향 데이터 부족", explain=ex)
     else:
         f = flows.tail(C.FLOW_DAYS)
+        days = len(f)
+        scale = days / C.FLOW_DAYS              # 20일치가 없으면 기준도 일수만큼 줄임
         inst = float((f["inst"].fillna(0) * f["close"]).sum()) / 1e8
         frgn = float((f["foreign"].fillna(0) * f["close"]).sum()) / 1e8
         tot = inst + frgn
         pct = tot / marcap_eok * 100 if marcap_eok else None
-        txt = f"기관 {inst:+,.0f}억 · 외국인 {frgn:+,.0f}억 (합계 {tot:+,.0f}억" + (f", 시총의 {pct:+.2f}%)" if pct is not None else ")")
+        txt = (f"최근 {days}일 " if days < C.FLOW_DAYS else "") + \
+            f"기관 {inst:+,.0f}억 · 외국인 {frgn:+,.0f}억 (합계 {tot:+,.0f}억" + (f", 시총의 {pct:+.2f}%)" if pct is not None else ")")
         extra = {"inst": round(inst, 1), "foreign": round(frgn, 1), "pct": pct}
         if pct is None:
             add("flow", "기관·외국인 수급", "unknown", txt + " — 시가총액 몰라서 비교 불가", explain=ex)
-        elif pct <= -C.FLOW_SELL_PCT:
+        elif pct <= -C.FLOW_SELL_PCT * scale:
             add("flow", "기관·외국인 수급", "bad", "대량 순매도: " + txt, P["flow_sell"], explain=ex)
-        elif pct <= -C.FLOW_SELL_MILD_PCT:
+        elif pct <= -C.FLOW_SELL_MILD_PCT * scale:
             add("flow", "기관·외국인 수급", "warn", "순매도: " + txt, P["flow_sell_mild"], explain=ex)
         else:
             add("flow", "기관·외국인 수급", "ok", ("순매수: " if tot >= 0 else "소폭 순매도: ") + txt, explain=ex)

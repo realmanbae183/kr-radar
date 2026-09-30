@@ -145,3 +145,4 @@ TOTAL_WEIGHTS = {"chart": 0.40, "fin": 0.35, "risk": 0.25}
 SITE_DIR = "site"
 STATE_DIR = "state"
 SITE_TITLE = "버거대왕의 국장 레이더"
+US_SCREENER_URL = "https://realmanbae183.github.io/screener/"   # 위쪽 메뉴 '미장' 버튼이 여는 주소

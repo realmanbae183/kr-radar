@@ -362,7 +362,7 @@ def parse_main_page(html: str) -> dict:
     return res
 
 
-def fetch_main(code: str) -> Fetch:
+def fetch_main_pc(code: str) -> Fetch:
     try:
         html = get_text(f"https://finance.naver.com/item/main.naver?code={code}")
         d = parse_main_page(html)
@@ -451,7 +451,7 @@ def parse_frgn(html: str) -> pd.DataFrame:
     raise RuntimeError("기관/외국인 표를 못 찾음")
 
 
-def fetch_flows(code: str) -> Fetch:
+def fetch_flows_pc(code: str) -> Fetch:
     try:
         html = get_text(f"https://finance.naver.com/item/frgn.naver?code={code}",
                         referer=f"https://finance.naver.com/item/main.naver?code={code}")
@@ -459,6 +459,293 @@ def fetch_flows(code: str) -> Fetch:
         return Fetch(True, df)
     except Exception as e:
         return Fetch(False, None, str(e))
+
+
+# ─────────────────────────────────────────────
+# 네이버 모바일 증권 API (JSON) + 와이즈리포트 기업개요
+#   2026-09-30 첫 실행에서 finance.naver.com PC 페이지(종목 메인·투자자별 매매)가
+#   GitHub 서버에서 전부 실패(표 없음 / 410)해서, 실제로 성공한 곳(모바일 API, 와이즈리포트)으로 옮김.
+#   응답 모양은 확인 전이라 여러 모양을 모두 받아들이도록 넓게 해석한다.
+# ─────────────────────────────────────────────
+MOBILE = "https://m.stock.naver.com"
+WISE = "https://navercomp.wisereport.co.kr/v2/company"
+
+
+def get_json(url: str, referer: str = MOBILE + "/", tries: int = 2):
+    last = None
+    for i in range(tries):
+        try:
+            r = _session().get(url, headers={"Referer": referer, "Accept": "application/json, text/plain, */*"}, timeout=15)
+            time.sleep(C.REQUEST_SLEEP)
+            if r.status_code == 404:
+                raise RuntimeError(f"404: {url}")
+            r.raise_for_status()
+            return r.json()
+        except ValueError as e:
+            raise RuntimeError(f"JSON 아님: {url} ({_snippet(r.text, 120)})") from e
+        except Exception as e:
+            last = e
+            if "404" in str(e):
+                break
+            time.sleep(1.0 + i)
+    raise RuntimeError(f"요청 실패: {url} ({last})")
+
+
+def _walk(obj):
+    """JSON 안의 모든 dict/list를 차례로 돌려준다."""
+    stack = [obj]
+    while stack:
+        x = stack.pop()
+        yield x
+        if isinstance(x, dict):
+            stack.extend(x.values())
+        elif isinstance(x, list):
+            stack.extend(x)
+
+
+def _pick(d: dict, *patterns):
+    """dict 키 중 정규식에 맞는 첫 값."""
+    for pat in patterns:
+        for k, v in d.items():
+            if re.search(pat, str(k), re.I):
+                return v
+    return None
+
+
+def _to_date(v):
+    s = re.sub(r"\D", "", str(v or ""))[:8]
+    return pd.to_datetime(s, format="%Y%m%d", errors="coerce") if len(s) == 8 else pd.NaT
+
+
+def parse_flow_json(obj) -> pd.DataFrame:
+    """{..., [{bizdate, foreignerPureBuyQuant, organPureBuyQuant, closePrice}, ...]} 모양 어디든 찾아서 표로."""
+    best = None
+    for x in _walk(obj):
+        if isinstance(x, list) and x and isinstance(x[0], dict):
+            keys = " ".join(x[0].keys())
+            if re.search(r"foreign", keys, re.I) and re.search(r"organ|institution", keys, re.I):
+                if best is None or len(x) > len(best):
+                    best = x
+    if not best:
+        raise RuntimeError("기관/외국인 순매수 목록을 JSON에서 못 찾음")
+    rows = []
+    for it in best:
+        rows.append({
+            "date": _to_date(_pick(it, r"^bizdate$", r"date", r"^dt$")),
+            "close": to_num(_pick(it, r"^closePrice$", r"close")),
+            "inst": to_num(_pick(it, r"organ.*pure.*(buy|quant)", r"organ.*net", r"institution.*net", r"^organ")),
+            "foreign": to_num(_pick(it, r"foreign(er)?.*pure.*(buy|quant)", r"foreign.*net", r"^foreign(er)?PureBuy")),
+        })
+    df = pd.DataFrame(rows).dropna(subset=["date"])
+    if df.empty:
+        raise RuntimeError("순매수 목록에 날짜가 없음")
+    return df.sort_values("date").drop_duplicates("date").reset_index(drop=True)
+
+
+def parse_mobile_finance(obj) -> dict:
+    """모바일 '재무' JSON (trTitleList + rowList) → {"annual":[...]} 같은 모양 (기간 표)."""
+    titles, rows = None, None
+    for x in _walk(obj):
+        if isinstance(x, dict) and "rowList" in x and ("trTitleList" in x or "titleList" in x):
+            titles, rows = x.get("trTitleList") or x.get("titleList"), x["rowList"]
+            break
+    if not titles or not rows:
+        raise RuntimeError("재무 JSON에서 표(rowList)를 못 찾음")
+    cols = []
+    for t in titles:
+        key = str(t.get("key") or t.get("title") or "")
+        m = re.search(r"(\d{4})\.?(\d{2})", str(t.get("title") or key))
+        cols.append({"key": key, "period": f"{m.group(1)}/{m.group(2)}" if m else "",
+                     "est": str(t.get("isConsensus", "N")).upper() == "Y" or "(E)" in str(t.get("title"))})
+    out = []
+    for c in cols:
+        if not c["period"]:
+            continue
+        vals = {}
+        for r in rows:
+            key = _label_key(str(r.get("title") or ""))
+            if not key or key in vals:
+                continue
+            cell = (r.get("columns") or {}).get(c["key"])
+            v = to_num(cell.get("value") if isinstance(cell, dict) else cell)
+            if v is not None:
+                vals[key] = v
+        out.append({"period": c["period"], "est": c["est"], "v": vals})
+    return out
+
+
+def parse_wise_overview(html: str) -> dict:
+    """와이즈리포트 기업개요(c1010001): 업종(WICS), 투자의견·목표주가."""
+    res: dict[str, Any] = {}
+    text = re.sub(r"<[^>]+>", " ", html)
+    text = re.sub(r"&nbsp;|\s+", " ", text)
+    m = re.search(r"WICS\s*:\s*([^<]+?)\s*<", html) or re.search(r"WICS\s*:\s*(\S+)", text)
+    if m:
+        res["sector"] = m.group(1).strip()
+    try:
+        for t in pd.read_html(io.StringIO(html)):
+            flat = " ".join(" ".join(map(str, c)) if isinstance(c, tuple) else str(c) for c in t.columns)
+            if "목표주가" in flat and "투자의견" in flat and len(t):
+                cols = [(" ".join(map(str, c)) if isinstance(c, tuple) else str(c)) for c in t.columns]
+                row = t.iloc[0]
+                for c, v in zip(cols, row):
+                    if "목표주가" in c:
+                        res["target_price"] = to_num(v)
+                    elif "투자의견" in c:
+                        n = to_num(v)
+                        res["opinion"] = _opinion_label(n) if n is not None else (str(v) if str(v) != "nan" else None)
+                break
+    except (ValueError, IndexError):
+        pass
+    return res
+
+
+def _opinion_label(mean: float | None) -> str | None:
+    """증권사 투자의견 평균(1 매도 ~ 5 적극매수) → 글자."""
+    if mean is None:
+        return None
+    return "적극매수" if mean >= 4.5 else "매수" if mean >= 3.5 else "중립" if mean >= 2.5 else "매도"
+
+
+def parse_integration(obj) -> dict:
+    """모바일 종합정보: 시가총액, 컨센서스(목표주가·투자의견), 최근 매매동향(있으면)."""
+    res: dict[str, Any] = {}
+    for x in _walk(obj):
+        if isinstance(x, dict) and ("code" in x or "key" in x) and "value" in x:
+            k = f"{x.get('code', '')} {x.get('key', '')}"
+            if re.search(r"marketValue|시총|시가총액", k):
+                res["marcap"] = parse_korean_money_eok(x["value"])
+    cons = obj.get("consensusInfo") if isinstance(obj, dict) else None
+    if isinstance(cons, dict):
+        res["target_price"] = to_num(_pick(cons, r"priceTarget", r"target"))
+        res["opinion"] = _opinion_label(to_num(_pick(cons, r"recomm", r"opinion")))
+    ind = _pick(obj, r"^industryName$", r"industryGroupKor") if isinstance(obj, dict) else None
+    if ind:
+        res["sector"] = str(ind)
+    try:
+        res["flows"] = parse_flow_json(obj)
+    except RuntimeError:
+        res["flows"] = None
+    return res
+
+
+def fetch_main(code: str) -> Fetch:
+    """종목 기본정보 = 모바일 종합정보 + 와이즈리포트 기업개요 + 모바일 연간 재무(당좌비율)."""
+    d: dict[str, Any] = {"sector": None, "marcap": None, "target_price": None, "opinion": None, "perf": None}
+    errs = []
+    try:
+        integ = parse_integration(get_json(f"{MOBILE}/api/stock/{code}/integration"))
+        d.update({k: v for k, v in integ.items() if v is not None and k != "flows"})
+        d["_flows"] = integ.get("flows")
+    except Exception as e:
+        errs.append(f"종합정보: {e}")
+    try:
+        w = parse_wise_overview(get_text(f"{WISE}/c1010001.aspx?cmp_cd={code}", referer=f"{WISE}/c1010001.aspx?cmp_cd={code}"))
+        for k, v in w.items():
+            if v is not None and not d.get(k):
+                d[k] = v
+    except Exception as e:
+        errs.append(f"기업개요: {e}")
+    try:
+        ann = parse_mobile_finance(get_json(f"{MOBILE}/api/stock/{code}/finance/annual"))
+        d["perf"] = {"annual": ann, "quarter": []}
+    except Exception as e:
+        errs.append(f"연간재무(당좌비율): {e}")
+    if d["perf"] is None and d["sector"] is None and d["target_price"] is None and d["marcap"] is None:
+        return Fetch(False, d, " / ".join(errs) or "아무것도 못 읽음")
+    d["_partial_errors"] = errs
+    return Fetch(True, d)
+
+
+FLOW_URLS = [
+    MOBILE + "/api/stock/{code}/trend?pageSize=20",
+    MOBILE + "/api/stock/{code}/trend",
+]
+
+
+def fetch_flows(code: str, integ_flows: pd.DataFrame | None = None) -> Fetch:
+    """기관·외국인 순매수: 모바일 매매동향(20일) → 안 되면 종합정보 안의 최근 며칠치."""
+    errs = []
+    for tpl in FLOW_URLS:
+        try:
+            df = parse_flow_json(get_json(tpl.format(code=code)))
+            if len(df) >= 5:
+                return Fetch(True, df)
+            errs.append(f"{len(df)}일치뿐")
+        except Exception as e:
+            errs.append(str(e)[:120])
+    if integ_flows is not None and len(integ_flows) >= 3:
+        return Fetch(True, integ_flows)
+    return Fetch(False, None, " / ".join(errs))
+
+
+def fetch_disclosures_mobile(code: str) -> Fetch:
+    """DART 인증키가 없을 때 쓰는 예비: 모바일 공시 목록 (최근 20건)."""
+    errs = []
+    for url in (f"{MOBILE}/api/stock/{code}/disclosure?pageSize=20&page=1",
+                f"{MOBILE}/api/stock/{code}/disclosure"):
+        try:
+            obj = get_json(url)
+            items = []
+            for x in _walk(obj):
+                if isinstance(x, list) and x and isinstance(x[0], dict) and _pick(x[0], r"title"):
+                    for it in x:
+                        dt = _to_date(_pick(it, r"datetime", r"date", r"^dt$"))
+                        items.append({"date": dt.strftime("%Y%m%d") if not pd.isna(dt) else "",
+                                      "title": str(_pick(it, r"^title$", r"title") or "").strip(),
+                                      "url": f"https://m.stock.naver.com/domestic/stock/{code}/notice"})
+                    break
+            cutoff = (datetime.now() - timedelta(days=C.DISCLOSURE_DAYS)).strftime("%Y%m%d")
+            items = [i for i in items if i["title"] and (not i["date"] or i["date"] >= cutoff)]
+            if items or obj:
+                return Fetch(True, items)
+        except Exception as e:
+            errs.append(str(e)[:120])
+    return Fetch(False, None, "네이버 공시 목록 조회 실패: " + " / ".join(errs))
+
+
+PROBE_URLS = {
+    "integration": MOBILE + "/api/stock/{code}/integration",
+    "basic": MOBILE + "/api/stock/{code}/basic",
+    "trend20": MOBILE + "/api/stock/{code}/trend?pageSize=20",
+    "trend": MOBILE + "/api/stock/{code}/trend",
+    "finance_annual": MOBILE + "/api/stock/{code}/finance/annual",
+    "finance_quarter": MOBILE + "/api/stock/{code}/finance/quarter",
+    "disclosure": MOBILE + "/api/stock/{code}/disclosure?pageSize=20&page=1",
+    "wise_overview": WISE + "/c1010001.aspx?cmp_cd={code}",
+    "pc_main": "https://finance.naver.com/item/main.naver?code={code}",
+    "pc_frgn": "https://finance.naver.com/item/frgn.naver?code={code}",
+    "marcap_kospi": MOBILE + "/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
+}
+
+
+def probe(out_dir: str, codes=("005930", "247540")) -> dict:
+    """각 주소의 실제 응답 원본을 파일로 저장 (Claude가 GitHub에서 직접 읽어 고칠 수 있게)."""
+    os.makedirs(out_dir, exist_ok=True)
+    summary = {"at": datetime.now().isoformat(timespec="seconds"), "results": {}}
+    for code in codes:
+        for name, tpl in PROBE_URLS.items():
+            if name.startswith("marcap") and code != codes[0]:
+                continue
+            url = tpl.format(code=code)
+            try:
+                r = _session().get(url, headers={"Referer": MOBILE + "/"}, timeout=15, allow_redirects=True)
+                time.sleep(C.REQUEST_SLEEP)
+                raw = r.content
+                try:
+                    txt = raw.decode("utf-8")
+                except UnicodeDecodeError:
+                    txt = raw.decode("cp949", errors="replace")
+                fn = f"{code}_{name}.txt"
+                with open(os.path.join(out_dir, fn), "w", encoding="utf-8") as f:
+                    f.write(f"URL: {url}\nFINAL: {r.url}\nSTATUS: {r.status_code}\nTYPE: {r.headers.get('content-type')}\n\n")
+                    f.write(txt[:150_000])
+                summary["results"][fn] = {"status": r.status_code, "final": r.url, "bytes": len(raw)}
+            except Exception as e:
+                summary["results"][f"{code}_{name}"] = {"error": str(e)[:200]}
+    with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as f:
+        json.dump(summary, f, ensure_ascii=False, indent=1)
+    return summary
 
 
 # ─────────────────────────────────────────────
