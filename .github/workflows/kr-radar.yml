@@ -106,14 +106,16 @@ jobs:
 
       - name: 기록 저장 (시그널 목록·원본 응답)
         if: steps.mode.outputs.mode != 'intraday'
+        continue-on-error: true          # 기록 저장이 실패해도 웹페이지는 올린다
         run: |
           git config user.name "kr-radar-bot"
           git config user.email "actions@users.noreply.github.com"
+          git fetch origin main
+          git reset --mixed origin/main  # 저장소 최신 상태 위에 이번 기록만 얹는다 (충돌 방지)
           git add state/
           if ! git diff --cached --quiet; then
             git commit -m "state: $(TZ=Asia/Seoul date +'%F %H:%M') ${{ steps.mode.outputs.mode }}"
-            git pull --rebase --autostash || true
-            git push
+            git push origin HEAD:main
           fi
 
       - uses: actions/upload-pages-artifact@v3
