@@ -21,7 +21,7 @@ concurrency:
 
 defaults:
   run:
-   working-directory: kr-radar/kr-radar
+    working-directory: kr-radar/kr-radar
 
 jobs:
   run:
@@ -36,7 +36,7 @@ jobs:
         with:
           python-version: "3.11"
           cache: pip
-   cache-dependency-path: kr-radar/kr-radar/requirements.txt
+          cache-dependency-path: kr-radar/kr-radar/requirements.txt
       - run: pip install -r requirements.txt
       - name: 검증 테스트
         run: python -m pytest -q tests
@@ -68,7 +68,7 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         if: ${{ !inputs.diagnose }}
         with:
-   path: kr-radar/kr-radar/site
+          path: kr-radar/kr-radar/site
       - id: deploy
         if: ${{ !inputs.diagnose }}
         uses: actions/deploy-pages@v4
