@@ -1,15 +1,15 @@
 {
- "at": "2026-09-30T04:03:01",
+ "at": "2026-09-30T06:21:20",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9222
+   "bytes": 9226
   },
   "005930_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/basic",
-   "bytes": 4032
+   "bytes": 4028
   },
   "005930_trend20.txt": {
    "status": 200,
@@ -54,17 +54,17 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10058
+   "bytes": 10055
   },
   "247540_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/integration",
-   "bytes": 9421
+   "bytes": 9422
   },
   "247540_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/basic",
-   "bytes": 4204
+   "bytes": 4200
   },
   "247540_trend20.txt": {
    "status": 200,
