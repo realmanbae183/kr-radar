@@ -1,25 +1,25 @@
 {
- "at": "2026-09-30T09:24:25",
+ "at": "2026-10-01T06:48:11",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9226
+   "bytes": 9239
   },
   "005930_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/basic",
-   "bytes": 4028
+   "bytes": 4025
   },
   "005930_trend20.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/trend?pageSize=20",
-   "bytes": 7018
+   "bytes": 7026
   },
   "005930_trend.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/trend",
-   "bytes": 3516
+   "bytes": 3515
   },
   "005930_finance_annual.txt": {
    "status": 200,
@@ -36,8 +36,10 @@
    "final": "https://m.stock.naver.com/api/stock/005930/disclosure?pageSize=20&page=1",
    "bytes": 3606
   },
-  "005930_wise_overview": {
-   "error": "HTTPSConnectionPool(host='navercomp.wisereport.co.kr', port=443): Max retries exceeded with url: /v2/company/c1010001.aspx?cmp_cd=005930 (Caused by ConnectTimeoutError(<HTTPSConnection(host='navercomp"
+  "005930_wise_overview.txt": {
+   "status": 200,
+   "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930",
+   "bytes": 91298
   },
   "005930_pc_main.txt": {
    "status": 200,
@@ -52,27 +54,27 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10061
+   "bytes": 10041
   },
   "247540_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/integration",
-   "bytes": 9422
+   "bytes": 9421
   },
   "247540_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/basic",
-   "bytes": 4200
+   "bytes": 4203
   },
   "247540_trend20.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/trend?pageSize=20",
-   "bytes": 6827
+   "bytes": 6826
   },
   "247540_trend.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/trend",
-   "bytes": 3416
+   "bytes": 3411
   },
   "247540_finance_annual.txt": {
    "status": 200,
@@ -87,7 +89,7 @@
   "247540_disclosure.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/disclosure?pageSize=20&page=1",
-   "bytes": 3816
+   "bytes": 3782
   },
   "247540_wise_overview.txt": {
    "status": 200,
