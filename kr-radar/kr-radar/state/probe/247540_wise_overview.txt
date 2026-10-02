@@ -103,9 +103,9 @@ TYPE: text/html; charset=utf-8
 						
 						<dt>EPS <b class="num">447</b></dt>
 						<dt class="line-left">BPS <b class="num">18,351</b></dt>
-						<dt class="line-left">PER <b class="num">244.00</b></dt>
+						<dt class="line-left">PER <b class="num">256.53</b></dt>
 						<dt class="line-left">업종PER <b class="num">N/A</b></dt>
-						<dt class="line-left">PBR <b class="num">5.95</b></dt>
+						<dt class="line-left">PBR <b class="num">6.25</b></dt>
 						<dt class="line-left">현금배당수익률 <b class="num">0.09%</b></dt>
 						<dt class="right">12월 결산</dt>
 						
@@ -139,7 +139,7 @@ TYPE: text/html; charset=utf-8
 											<dl class="header-table-row">
 												<dd class="header-table-cell"><h5><span>시세</span> 및 주주현황</h5></dd>
 												<dd class="header-table-cell unit">
-													<p>[기준:2026.09.30]</p>
+													<p>[기준:2026.10.01]</p>
 												</dd>
 											</dl>
 										</div>
@@ -154,8 +154,8 @@ TYPE: text/html; charset=utf-8
 													<tr>
 														<th scope="row" class="txt">주가/전일대비/수익률</th>
 														<td class="num"><strong>
-															109,100</strong>원 /
-														<span class="cUp">+3,000원</span> / <span class="cUp">+2.83%</span>
+															114,700</strong>원 /
+														<span class="cUp">+5,600원</span> / <span class="cUp">+5.13%</span>
 														</td>
 													</tr>
 													<tr>
@@ -174,14 +174,14 @@ TYPE: text/html; charset=utf-8
 													<tr>
 														<th scope="row" class="txt">거래량/거래대금</th>
 														<td class="num">
-															352,142주 /
-														383억원
+															368,177주 /
+														414억원
 														</td>
 													</tr>
 													<tr>
 														<th scope="row" class="txt">시가총액</th>
 														<td class="num">
-															106,733억원
+															112,212억원
 														</td>
 													</tr>
 													<tr>
@@ -199,12 +199,12 @@ TYPE: text/html; charset=utf-8
 													<tr>
 														<th scope="row" class="txt">외국인지분율</th>
 														<td class="num">
-															15.10%</td>
+															15.05%</td>
 													</tr>
 													<tr>
 														<th scope="row" class="txt noline-bottom">수익률 <span class="span-sub">(1M/3M/6M/1Y)</span></th>
 														<td class="num noline-bottom">
-															<span class="cDn">-6.22%</span>/ <span class="cDn">-22.21%</span>/ <span class="cDn">-45.53%</span>/ <span class="cDn">-1.91%</span>
+															<span class="cUp">+0.29%</span>/ <span class="cDn">-12.18%</span>/ <span class="cDn">-42.31%</span>/ <span class="cUp">+3.49%</span>
 														</td>
 													</tr>
 												</tbody>
@@ -315,7 +315,7 @@ TYPE: text/html; charset=utf-8
 										<div class="header-table">
 											<table class="cmp-table" style="width:100%">
 												<tr class="cmp-table-row">
-													<td class="cmp-table-cell unit" style="*margin-top:-2px;padding-right:0">[기준: 2026.09.30]</td>
+													<td class="cmp-table-cell unit" style="*margin-top:-2px;padding-right:0">[기준: 2026.10.01]</td>
 												</tr>
 											</table>
 										</div>
@@ -429,44 +429,44 @@ TYPE: text/html; charset=utf-8
 											
 											<tr>
 												<th class="left" scope="row">PER</th>
-												<td class="num">271.01</td>
-												<td class="num noline-right">902.06</td>
+												<td class="num">284.93</td>
+												<td class="num noline-right">886.72</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">PBR</th>
-												<td class="num">6.17</td>
-												<td class="num noline-right">6.95</td>
+												<td class="num">6.49</td>
+												<td class="num noline-right">7.32</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">PCR</th>
-												<td class="num">49.70</td>
-												<td class="num noline-right">91.59</td>
+												<td class="num">52.25</td>
+												<td class="num noline-right">96.96</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">EV/EBITDA</th>
-												<td class="num">63.85</td>
-												<td class="num noline-right">86.65</td>
+												<td class="num">66.66</td>
+												<td class="num noline-right">91.21</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">EPS</th>
 												<td class="num">403원</td>
-												<td class="num noline-right">121원</td>
+												<td class="num noline-right">129원</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">BPS</th>
 												<td class="num">17,677원</td>
-												<td class="num noline-right">15,689원</td>
+												<td class="num noline-right">15,665원</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">EBITDA</th>
 												<td class="num">2,141.6억원</td>
-												<td class="num noline-right">1,614.7억원</td>
+												<td class="num noline-right">1,600.1억원</td>
 											</tr>
 											
 											<tr>
@@ -796,7 +796,7 @@ TYPE: text/html; charset=utf-8
 									</tr>
 								</table>
 								
-                                <div id="TDdCYnFkT0"></div>
+                                <div id="RVArcVR1a2"></div>
 
 								<div class="gibun_exp7_1 all clr">
 									
@@ -826,7 +826,7 @@ TYPE: text/html; charset=utf-8
 												<h5><span>투자의견</span> 컨센서스</h5>
 											</dd>
 											<dd class="header-table-cell unit">
-												<p>[기준:2026.09.30]</p>
+												<p>[기준:2026.10.01]</p>
 											</dd>
 										</dl>
 									</div>
@@ -843,9 +843,9 @@ TYPE: text/html; charset=utf-8
 										<tr>
 											<td class="line-right noline-bottom center" rowspan="2">
 												<div id="pointerBG">
-													<span id="pointer" style="LEFT: 67.3846%"></span><span id="pointerVal" class="cUp num" style="LEFT: 67.3846%">3.77</span>
+													<span id="pointer" style="LEFT: 67%"></span><span id="pointerVal" class="cUp num" style="LEFT: 67%">3.75</span>
 													<br />
-													<img height="25" src="/images/graph_bar.gif" alt="투자의견 컨센서스 그래프(강력매도1|매도2|중립3|매수4|강력매수5), 값:3.77" usemap="#imgmap" />
+													<img height="25" src="/images/graph_bar.gif" alt="투자의견 컨센서스 그래프(강력매도1|매도2|중립3|매수4|강력매수5), 값:3.75" usemap="#imgmap" />
 													<map id="imgmap" name="imgmap">
 														<area shape="rect" coords="0,0,60,17" alt="강력매도" title="강력매도">
 														<area shape="rect" coords="60,0,120,17" alt="매도" title="매도">
@@ -864,12 +864,12 @@ TYPE: text/html; charset=utf-8
 										
 												<tr>
 													<td class="noline-bottom line-right center cUp">
-														<b>3.77</b>
+														<b>3.75</b>
 													</td>
-													<td class="noline-bottom line-right center">167,681</td>
-													<td class="noline-bottom line-right center">121</td>
-													<td class="noline-bottom line-right center">902.06</td>
-													<td class="noline-bottom center">13</td>
+													<td class="noline-bottom line-right center">164,430</td>
+													<td class="noline-bottom line-right center">129</td>
+													<td class="noline-bottom line-right center">886.72</td>
+													<td class="noline-bottom center">12</td>
 												</tr>
 											
 									</table>
@@ -1212,7 +1212,7 @@ TYPE: text/html; charset=utf-8
 						flag: 4,
 						cmp_cd: '247540',
 						grp_cd: grp==10?"01":"03",
-                        encparam: 'eUNJdVNtamJQdUhONjNwd05PalViZz09'
+                        encparam: 'd3Q1VVhDNFhSN1RxWERVWFNwOGhJQT09'
 					}
 				, function (res) {
 					var data = []
@@ -1289,13 +1289,13 @@ TYPE: text/html; charset=utf-8
 					eid = $(e.target).children().attr("id");
 				switch (eid) {
 					case "ct1":
-						Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", $("#ct1").data('flag'), "247540;20260930");
+						Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", $("#ct1").data('flag'), "247540;20261001");
 					break;
 				case "ct2":
 					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt2", "ct2", "247540");
 					break;
 				case "ct3":
-					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt3", "ct3", "247540;20260930");
+					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt3", "ct3", "247540;20261001");
 					break;
 				case "ct4":
 					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt4", "ct4", "247540;" + $("#bandChartGubun").val());
@@ -1321,7 +1321,7 @@ TYPE: text/html; charset=utf-8
 			, {
 				flag: flag,
 				cmp_cd: '247540',
-                encparam: 'eUNJdVNtamJQdUhONjNwd05PalViZz09'
+                encparam: 'd3Q1VVhDNFhSN1RxWERVWFNwOGhJQT09'
 			}
 				, function (res) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
@@ -1561,7 +1561,7 @@ TYPE: text/html; charset=utf-8
 		else{
 			if($('#stock_price_relative_chart img').attr('src') == undefined)
 			{
-				$('#stock_price_relative_chart').html('<img src="/chartimg/page1/chart1/247540c1.png?20260930" />')
+				$('#stock_price_relative_chart').html('<img src="/chartimg/page1/chart1/247540c1.png?20261001" />')
 					
 			}
 			var src = $('#stock_price_relative_chart img').attr('src')
@@ -1572,7 +1572,7 @@ TYPE: text/html; charset=utf-8
 
 	// 펀더멘털 > 어닝서프라이즈
 	var EarnigList = function () {
-		var res = {"yymm":["202512","202603","202606"],"data":[{"1":253.785714285700,"2":98.062500000000,"3":236.823529411800},{"1":410.080000000000,"2":209.420000000000,"3":180.110000000000},{"1":61.585140000000,"2":113.557680000000,"3":-23.947590000000},{"1":1286.649080000000,"2":822.572990000000,"3":-63.243570000000},{"1":-18.764700000000,"2":-49.608350000000,"3":-13.997330000000},{"1":191.000000000000,"2":-23.333333333300,"3":46.555555555600},{"1":107.910000000000,"2":121.620000000000,"3":-4.550000000000},{"1":-43.502620000000,"2":621.228570000000,"3":-109.773270000000},{"1":198.418840000000,"2":222.001020000000,"3":-101.327880000000},{"1":-78.009220000000,"2":-33.251220000000,"3":-103.742940000000}],"yymmdd":["2026/02/05(연결)","2026/04/29(연결)","2026/07/31(연결)"],"type":[0,0,0]};
+		var res = {"yymm":["202603","202606","202609"],"data":[{"1":98.062500000000,"2":236.823529411800,"3":173.916666666700},{"1":209.420000000000,"2":180.110000000000,"3":null},{"1":113.557680000000,"2":-23.947590000000,"3":null},{"1":822.572990000000,"2":-63.243570000000,"3":null},{"1":-49.608350000000,"2":-13.997330000000,"3":null},{"1":-23.333333333300,"2":46.555555555600,"3":28.166666666700},{"1":121.620000000000,"2":-4.550000000000,"3":null},{"1":621.228570000000,"2":-109.773270000000,"3":null},{"1":222.001020000000,"2":-101.327880000000,"3":null},{"1":-33.251220000000,"2":-103.742940000000,"3":null}],"yymmdd":["2026/04/29(연결)","2026/07/31(연결)",null],"type":[0,0,0]};
 		tmp = _.template($("#tmpl-list").html());
 		$("#earning_list tbody").html(tmp(res));
 
@@ -1623,12 +1623,12 @@ TYPE: text/html; charset=utf-8
 				, freq_typ: _freq_typ
 				, extY: extY
                 , extQ: extQ
-                , encparam: 'eUNJdVNtamJQdUhONjNwd05PalViZz09'
-                , id: 'TDdCYnFkT0' ? 'TDdCYnFkT0' : ''
+                , encparam: 'd3Q1VVhDNFhSN1RxWERVWFNwOGhJQT09'
+                , id: 'RVArcVR1a2' ? 'RVArcVR1a2' : ''
 				},
 				success: function (data) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
-					$('#TDdCYnFkT0').html(data);
+					$('#RVArcVR1a2').html(data);
 					if(extQ==0)
 					{
 						$('.r02c07').addClass('endLine')
@@ -1661,7 +1661,7 @@ TYPE: text/html; charset=utf-8
 		// 투자의견 및 목표주가 차트
 		$('#opinion_targetPrice').show();
 		if (chartType != 'image'){
-			var chartData2 = {"target_price":[{"x":1761868800000.0,"y":137000.0},{"x":1764288000000.0,"y":165667.0},{"x":1767052800000.0,"y":167667.0},{"x":1769731200000.0,"y":173133.0},{"x":1772150400000.0,"y":203533.0},{"x":1774915200000.0,"y":211533.0},{"x":1777507200000.0,"y":247611.0},{"x":1780012800000.0,"y":252611.0},{"x":1782777600000.0,"y":250389.0},{"x":1785456000000.0,"y":236000.0},{"x":1788134400000.0,"y":175143.0},{"x":1790726400000.0,"y":null}],"close_price":[{"x":1761868800000.0,"y":157482.0},{"x":1764288000000.0,"y":147541.0},{"x":1767052800000.0,"y":144292.0},{"x":1769731200000.0,"y":228348.0},{"x":1772150400000.0,"y":218014.0},{"x":1774915200000.0,"y":189175.0},{"x":1777507200000.0,"y":202758.0},{"x":1780012800000.0,"y":213584.0},{"x":1782777600000.0,"y":140257.0},{"x":1785456000000.0,"y":101871.0},{"x":1788134400000.0,"y":118899.0},{"x":1790726400000.0,"y":109100.0}],"deg":[{"x":1761868800000.0,"y":3.47},{"x":1764288000000.0,"y":3.56},{"x":1767052800000.0,"y":3.56},{"x":1769731200000.0,"y":3.63},{"x":1772150400000.0,"y":3.33},{"x":1774915200000.0,"y":3.40},{"x":1777507200000.0,"y":3.63},{"x":1780012800000.0,"y":3.74},{"x":1782777600000.0,"y":3.74},{"x":1785456000000.0,"y":3.91},{"x":1788134400000.0,"y":3.79},{"x":1790726400000.0,"y":null}]};
+			var chartData2 = {"target_price":[{"x":1764288000000.0,"y":165667.0},{"x":1767052800000.0,"y":167667.0},{"x":1769731200000.0,"y":173133.0},{"x":1772150400000.0,"y":203533.0},{"x":1774915200000.0,"y":211533.0},{"x":1777507200000.0,"y":247611.0},{"x":1780012800000.0,"y":252611.0},{"x":1782777600000.0,"y":250389.0},{"x":1785456000000.0,"y":236000.0},{"x":1788134400000.0,"y":175143.0},{"x":1790726400000.0,"y":172386.0},{"x":1790812800000.0,"y":null}],"close_price":[{"x":1764288000000.0,"y":147541.0},{"x":1767052800000.0,"y":144292.0},{"x":1769731200000.0,"y":228348.0},{"x":1772150400000.0,"y":218014.0},{"x":1774915200000.0,"y":189175.0},{"x":1777507200000.0,"y":202758.0},{"x":1780012800000.0,"y":213584.0},{"x":1782777600000.0,"y":140257.0},{"x":1785456000000.0,"y":101871.0},{"x":1788134400000.0,"y":118899.0},{"x":1790726400000.0,"y":109100.0},{"x":1790812800000.0,"y":114700.0}],"deg":[{"x":1764288000000.0,"y":3.56},{"x":1767052800000.0,"y":3.56},{"x":1769731200000.0,"y":3.63},{"x":1772150400000.0,"y":3.33},{"x":1774915200000.0,"y":3.40},{"x":1777507200000.0,"y":3.63},{"x":1780012800000.0,"y":3.74},{"x":1782777600000.0,"y":3.74},{"x":1785456000000.0,"y":3.91},{"x":1788134400000.0,"y":3.79},{"x":1790726400000.0,"y":3.79},{"x":1790812800000.0,"y":null}]};
 			new Highcharts.Chart({
 				chart: {
 					renderTo: 'opinion_targetPrice',
@@ -1726,13 +1726,13 @@ TYPE: text/html; charset=utf-8
 			});
 			chartData2 = null;
 		} else {
-			$('#opinion_targetPrice').html('<img src="/chartimg/page1/chart2/247540.png?20260930" />');
+			$('#opinion_targetPrice').html('<img src="/chartimg/page1/chart2/247540.png?20261001" />');
 		}
 
 		// 투자의견 분포 차트 
 		$('#opinion').show();
 		if (chartType != 'image'){
-			var chartData3 = {"today":[{"name":"강력매수","y":null},{"name":"매수","y":10.0},{"name":"중립","y":3.0},{"name":"매도","y":null},{"name":"강력매도","y":null}],"a_month_ago":[{"name":"강력매수","y":null},{"name":"매수","y":11.0},{"name":"중립","y":3.0},{"name":"매도","y":null},{"name":"강력매도","y":null}]};
+			var chartData3 = {"today":[{"name":"강력매수","y":null},{"name":"매수","y":9.0},{"name":"중립","y":3.0},{"name":"매도","y":null},{"name":"강력매도","y":null}],"a_month_ago":[{"name":"강력매수","y":null},{"name":"매수","y":11.0},{"name":"중립","y":3.0},{"name":"매도","y":null},{"name":"강력매도","y":null}]};
 			new Highcharts.Chart({
 				chart: {
 					renderTo: 'opinion',
@@ -1773,7 +1773,7 @@ TYPE: text/html; charset=utf-8
 			});
 			chartData3 = null;
 		} else {
-			$('#opinion').html('<img src="/chartimg/page1/chart3/247540.png?20260930" />');
+			$('#opinion').html('<img src="/chartimg/page1/chart3/247540.png?20261001" />');
 		} 
 	//자동완성 상단 검색에서의 highlight기능추가하기
 	jQuery.fn.highlight = function (str, className) {
@@ -2015,8 +2015,8 @@ TYPE: text/html; charset=utf-8
 			});
 		}
 		else {
-			$('#per-chart').html("<img src='/chartimg/bandchart/per/" + cmp_cd + "_" + gubun + ".png?20260930' alt='PER 밴드 차트 이미지'/>");
-			$('#pbr-chart').html("<img src='/chartimg/bandchart/pbr/" + cmp_cd + "_" + gubun + ".png?20260930' alt='PBR 밴드 차트 이미지'/>");
+			$('#per-chart').html("<img src='/chartimg/bandchart/per/" + cmp_cd + "_" + gubun + ".png?20261001' alt='PER 밴드 차트 이미지'/>");
+			$('#pbr-chart').html("<img src='/chartimg/bandchart/pbr/" + cmp_cd + "_" + gubun + ".png?20261001' alt='PBR 밴드 차트 이미지'/>");
 		}
 	}
 	function RequestBandChart() {
