@@ -52,6 +52,16 @@ class DemoProvider:
                                 "seed": seed * 1000 + i})
         self.by_code = {s["code"]: s for s in self.stocks}
         self._px: dict[str, pd.DataFrame] = {}
+        # 시장 전체 흐름: 평소엔 잔잔하다가 가끔 며칠 급락 → 반등 (다 같이 빠지는 날을 만들기 위해)
+        g = np.random.default_rng(seed)
+        nb = C.HISTORY_BARS
+        mkt = g.normal(0.0004, 0.007, nb)
+        for st in list(g.integers(150, nb - 60, 9)) + [nb - 4]:
+            st = int(st)
+            mkt[st:st + 4] += g.uniform(-0.032, -0.018, len(mkt[st:st + 4]))
+            mkt[st + 4:st + 12] += g.uniform(0.004, 0.012, len(mkt[st + 4:st + 12]))
+        self.mkt = mkt
+        self.days = pd.bdate_range(end=datetime(2026, 9, 29), periods=nb)
 
     def universe(self):
         return ([{"code": s["code"], "name": s["name"], "market": s["market"]} for s in self.stocks],
@@ -60,7 +70,7 @@ class DemoProvider:
     # ───── 시세 ─────
     def _gen_prices(self, s) -> pd.DataFrame:
         rng = np.random.default_rng(s["seed"])
-        n = C.PRICE_BARS
+        n = C.HISTORY_BARS
         sc = s["scenario"]
         vol = rng.uniform(0.013, 0.03) * (1.4 if "바이오" in s["sector"] or "생물" in s["sector"] else 1)
         drift = np.full(n, 0.0)
@@ -81,7 +91,7 @@ class DemoProvider:
             drift[:n - 30] = 0.0025; drift[n - 30:n - 22] = -0.04; drift[n - 22:] = 0.001
         else:
             drift[:] = 0.0
-        ret = drift + rng.normal(0, vol, n)
+        ret = drift * 0.6 + rng.uniform(0.7, 1.5) * self.mkt + rng.normal(0, vol * 0.8, n)
         base = float(rng.choice([3000, 8000, 15000, 42000, 95000, 180000, 350000]))
         close = base * np.exp(np.cumsum(ret))
         tick = np.where(close > 50000, 100, np.where(close > 5000, 10, 1))
@@ -90,15 +100,20 @@ class DemoProvider:
         hi = np.maximum(op, close) * (1 + np.abs(rng.normal(0, vol / 2, n)))
         lo = np.minimum(op, close) * (1 - np.abs(rng.normal(0, vol / 2, n)))
         v = rng.lognormal(12.5, 0.45, n) * (1 + 3 * (np.abs(ret) > vol * 1.8))
-        end = datetime(2026, 9, 29)
-        days = pd.bdate_range(end=end, periods=n)
+        days = self.days
         return pd.DataFrame({"Open": np.round(op), "High": np.round(hi), "Low": np.round(lo),
                              "Close": close, "Volume": np.round(v)}, index=days)
 
-    def prices(self, code):
+    def prices(self, code, bars=None):
         if code not in self._px:
             self._px[code] = self._gen_prices(self.by_code[code])
-        return Fetch(True, self._px[code])
+        df = self._px[code]
+        return Fetch(True, df.tail(bars) if bars else df)
+
+    def index(self, bars=None):
+        c = 2600 * np.exp(np.cumsum(self.mkt))
+        df = pd.DataFrame({"Open": c, "High": c, "Low": c, "Close": c, "Volume": 1.0}, index=self.days)
+        return Fetch(True, df.tail(bars) if bars else df)
 
     # ───── 재무 ─────
     def _rng(self, code, salt):

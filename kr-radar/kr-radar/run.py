@@ -1,12 +1,19 @@
 """
 run.py — 실행 입구
 
-  python run.py                 정식 실행: 350종목 전부 새로 받기 → site/ 웹페이지 + 텔레그램 알림
-  python run.py --intraday      장중 가벼운 실행: 시세만 새로 받고 재무·수급·공시는 저장분 재사용 (알림 없음)
+  python run.py                 정식 실행: 5년치 시세로 과거 성과표를 다시 만들고, 재무·수급·공시까지 전부 새로 받음 → 텔레그램 알림
+  python run.py --intraday      장중 가벼운 실행: 시세만 새로 받고 나머지는 저장분 재사용 (알림 없음)
   python run.py --demo          가상 종목(샘플 데이터)으로 화면만 확인
   python run.py --limit 20      앞 20종목만 (빠른 점검용)
   python run.py --diagnose      데이터 출처별로 제대로 읽히는지 점검만
-  python run.py --probe         데이터 출처의 실제 응답 원본을 state/probe/ 에 저장 (고칠 때 참고용)
+  python run.py --probe         데이터 출처의 실제 응답 원본을 state/probe/ 에 저장
+
+흐름
+  1) 350종목 + 코스피 지수 시세를 받는다
+  2) 지표를 붙이고, 시장 폭(20일선 위 종목 비율)을 계산한다
+  3) (정식) 과거 성과표를 만든다 / (장중) 저장해 둔 성과표를 쓴다
+  4) 종목마다 지금 상태를 읽고 성과표에서 같은 상태의 기록을 붙인다 + 재무 점수·악재 스크리닝
+  5) 웹페이지를 만든다
 """
 from __future__ import annotations
 
@@ -16,13 +23,15 @@ import os
 import sys
 import time
 import traceback
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta, timezone
 
 import pandas as pd
 
 import config as C
 import fundamental as F
+import history as H
+import indicators as I
 import signals as SG
 import sources as S
 
@@ -32,7 +41,7 @@ CACHE_PATH = os.path.join(HERE, "cache", "fund.json")
 
 
 # ─────────────────────────────────────────────
-# 저장분(캐시): 정식 실행에서 받은 재무·수급·공시를 장중 실행이 다시 쓴다
+# 저장분: 정식 실행에서 받은 재무·수급·공시와 과거 성과표를 장중 실행이 다시 쓴다
 # ─────────────────────────────────────────────
 def _flows_to_json(df):
     if df is None:
@@ -64,9 +73,6 @@ def save_cache(cache: dict) -> None:
         json.dump(cache, f, ensure_ascii=False, separators=(",", ":"), default=str)
 
 
-# ─────────────────────────────────────────────
-# 데이터 공급기
-# ─────────────────────────────────────────────
 class NaverProvider:
     """실제 데이터: 네이버 금융(모바일 API·차트) + 와이즈리포트 + DART."""
     name = "live"
@@ -78,8 +84,11 @@ class NaverProvider:
         import universe
         return universe.build_universe()
 
-    def prices(self, code):
-        return S.fetch_prices(code)
+    def prices(self, code, bars):
+        return S.fetch_prices(code, bars)
+
+    def index(self, bars):
+        return S.fetch_prices("KOSPI", bars)
 
     def main(self, code):
         return S.fetch_main(code)
@@ -99,90 +108,90 @@ class NaverProvider:
         return S.Fetch(False, None, self.dart.error + " / " + r.error)
 
 
-def process_stock(p, s: dict, cache: dict, intraday: bool) -> tuple[dict, dict]:
-    """한 종목 처리. 반환: (웹페이지용 기록, 저장분에 넣을 원재료)"""
+def fundamentals(p, s: dict, cache: dict, intraday: bool, errs: dict) -> dict:
+    """재무·수급·공시 원재료. 장중이면 저장분, 정식이면 새로 받고 실패 시 저장분으로 대신(그 사실을 기록)."""
     code = s["code"]
-    errs: dict[str, str] = {}
     cached = (cache.get("stocks") or {}).get(code) or {}
     at = cache.get("saved", "")[:16].replace("T", " ")
-    rec = {"code": code, "name": s["name"], "market": s["market"], "sector": None, "marcap": s.get("marcap")}
 
-    pr = p.prices(code)
-    prices = pr.data if pr.ok else None
-    if not pr.ok:
-        errs["prices"] = pr.error
-
-    chart = None
-    if prices is not None:
-        try:
-            chart = SG.analyze_chart(prices)
-            chart.pop("_df", None)
-        except Exception as e:
-            errs["chart"] = f"차트 계산 오류: {e}"
-
-    def get(key, fetch, conv_in=lambda x: x):
-        """intraday면 저장분, 아니면 새로 받고 실패 시 저장분으로 대신 (그 사실을 기록)."""
+    def get(key, fetch, conv=lambda x: x):
         if intraday and cached.get(key) is not None:
-            return conv_in(cached[key]), "cached"
+            return conv(cached[key])
         r = fetch()
         if r.ok:
-            return r.data, "ok"
+            return r.data
         if cached.get(key) is not None:
             errs[key] = f"오늘 조회 실패 → {at} 저장분 사용 ({str(r.error)[:120]})"
-            return conv_in(cached[key]), "stale"
+            return conv(cached[key])
         errs[key] = r.error or "조회 실패"
-        return None, "fail"
+        return None
 
-    main, st_main = get("main", lambda: p.main(code))
-    fin_y, _ = get("fin_y", lambda: p.fin(code, "Y"))
-    fin_q, _ = get("fin_q", lambda: p.fin(code, "Q"))
-    flows, st_flow = get("flows", lambda: p.flows(code, main), _flows_from_json)
-    disc, _ = get("dart", lambda: p.disclosures(code))
-    if st_main == "ok" and main and main.get("_partial_errors"):
+    main = get("main", lambda: p.main(code))
+    fin_y = get("fin_y", lambda: p.fin(code, "Y"))
+    fin_q = get("fin_q", lambda: p.fin(code, "Q"))
+    flows = get("flows", lambda: p.flows(code, main), _flows_from_json)
+    disc = get("dart", lambda: p.disclosures(code))
+    if main and main.get("_partial_errors") and "main" not in errs:
         errs["main_partial"] = " / ".join(main["_partial_errors"])[:300]
+    return {"main": main, "fin_y": fin_y, "fin_q": fin_q, "flows": flows, "dart": disc,
+            "sector": (main or {}).get("sector") or cached.get("sector")}
 
-    rec["sector"] = (main or {}).get("sector") or cached.get("sector")
+
+def build_record(p, s, d, breadth, market, table, cache, intraday, price_err) -> tuple[dict, dict]:
+    code = s["code"]
+    errs: dict[str, str] = {}
+    if price_err:
+        errs["prices"] = price_err
+    rec = {"code": code, "name": s["name"], "market": s["market"], "sector": None, "marcap": s.get("marcap")}
+
+    sig = None
+    if d is not None:
+        try:
+            sig = SG.analyze(d, breadth, market, table)
+        except Exception as e:
+            errs["chart"] = f"신호 계산 오류: {e}"
+    raw = fundamentals(p, s, cache, intraday, errs)
+    main, fin_y = raw["main"], raw["fin_y"]
+    rec["sector"] = raw["sector"]
     if not rec["marcap"] and main and main.get("marcap"):
         rec["marcap"] = main["marcap"]
-    close = chart["stats"]["close"] if chart else None
+    close = sig["stats"]["close"] if sig else None
     if not rec["marcap"] and fin_y and close:
         sh = next((r["v"].get("shares") for r in reversed(fin_y["annual"]) if r["v"].get("shares")), None)
         if sh:
             rec["marcap"] = sh * close / 1e8
 
     fin = F.fin_score(fin_y, main, close, rec["sector"])
-    risk = F.risk_screen(prices, fin_y, fin_q, flows, errs.get("flows", ""),
-                         disc, errs.get("dart", ""), rec["marcap"], errs)
-    total = F.total_score(chart["score"] if chart else None, fin["score"], risk["score"])
-    rec.update({"chart": chart, "fin": fin, "risk": risk, "total": total, "errors": errs})
-
+    risk = F.risk_screen(d[["Close"]] if d is not None else None, fin_y, raw["fin_q"], raw["flows"], errs.get("flows", ""),
+                         raw["dart"], errs.get("dart", ""), rec["marcap"], errs)
+    chart = sig.pop("chart") if sig else None
+    rec.update({"sig": sig, "chart": chart, "fin": fin, "risk": risk, "errors": errs})
     main_clean = {k: v for k, v in (main or {}).items() if not k.startswith("_")} if main else None
-    raw = {"main": main_clean, "fin_y": fin_y, "fin_q": fin_q,
-           "flows": _flows_to_json(flows) if isinstance(flows, pd.DataFrame) else None,
-           "dart": disc, "sector": rec["sector"]}
-    return rec, raw
+    store = {"main": main_clean, "fin_y": fin_y, "fin_q": raw["fin_q"],
+             "flows": _flows_to_json(raw["flows"]) if isinstance(raw["flows"], pd.DataFrame) else None,
+             "dart": raw["dart"], "sector": rec["sector"]}
+    return rec, store
 
 
 def market_phase(intraday: bool, as_of: str | None) -> dict:
     now = datetime.now(KST)
-    today = now.strftime("%Y-%m-%d")
+    stamp = now.strftime("%m/%d %H:%M")
     if not intraday:
-        return {"key": "close", "label": "종가 확정", "now": now.strftime("%m/%d %H:%M")}
-    if as_of and as_of < today:
-        return {"key": "holiday", "label": "휴장·개장 전 (직전 거래일 종가)", "now": now.strftime("%m/%d %H:%M")}
+        return {"key": "close", "label": "종가 확정", "now": stamp}
+    if as_of and as_of < now.strftime("%Y-%m-%d"):
+        return {"key": "holiday", "label": "휴장·개장 전", "now": stamp}
     if now.hour * 60 + now.minute >= 15 * 60 + 30:
-        return {"key": "close", "label": "종가", "now": now.strftime("%m/%d %H:%M")}
-    return {"key": "intraday", "label": "장중 잠정", "now": now.strftime("%m/%d %H:%M")}
+        return {"key": "close", "label": "종가", "now": stamp}
+    return {"key": "intraday", "label": "장중 잠정", "now": stamp}
 
 
 def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[list[dict], dict]:
     t0 = time.time()
-    cache = load_cache() if provider.name == "live" else {}
-    if intraday and not cache.get("stocks"):
-        print("[장중] 저장분이 없어서 이번엔 전부 새로 받습니다")
-        intraday_eff = False
-    else:
-        intraday_eff = intraday
+    live = provider.name == "live"
+    cache = load_cache() if live else {}
+    intraday_eff = intraday and bool(cache.get("stocks")) and bool(cache.get("table"))
+    if intraday and not intraday_eff:
+        print("[장중] 저장분이 없어서 이번엔 정식 실행으로 돕니다")
 
     if intraday_eff and cache.get("universe"):
         uni, notes = cache["universe"], list(cache.get("notes", []))
@@ -190,24 +199,71 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
         uni, notes = provider.universe()
     if limit:
         uni = uni[:limit]
-    print(f"[유니버스] {len(uni)}종목 ({'장중 가벼운 실행' if intraday_eff else '정식 실행'})")
-    for n in notes:
-        print("  ·", n)
+    bars = C.PRICE_BARS if intraday_eff else C.HISTORY_BARS
+    print(f"[1/4] {len(uni)}종목 시세 받는 중 ({'장중 가벼운 실행' if intraday_eff else '정식 실행'}, {bars}봉)")
 
-    recs, raws = [], {}
+    # 1) 시세
+    def one(s):
+        try:
+            r = provider.prices(s["code"], bars)
+            return s["code"], (r.data if r.ok else None), ("" if r.ok else r.error)
+        except Exception as e:
+            return s["code"], None, str(e)
+
+    prices, perr = {}, {}
     with ThreadPoolExecutor(max_workers=C.MAX_WORKERS) as ex:
-        futs = {ex.submit(process_stock, provider, s, cache, intraday_eff): s for s in uni}
-        for i, fu in enumerate(as_completed(futs), 1):
-            s = futs[fu]
-            try:
-                rec, raw = fu.result()
-                recs.append(rec)
-                raws[s["code"]] = raw
-            except Exception as e:
-                traceback.print_exc()
-                recs.append({"code": s["code"], "name": s["name"], "market": s["market"], "chart": None,
-                             "fin": None, "risk": None, "total": {"score": None}, "errors": {"fatal": str(e)}})
-            if i % 25 == 0 or i == len(uni):
+        for code, df, err in ex.map(one, uni):
+            if df is not None:
+                prices[code] = df
+            else:
+                perr[code] = err or "시세 조회 실패"
+    ix = provider.index(bars)
+
+    # 2) 지표 + 시장 폭
+    prepared = {}
+    for code, df in prices.items():
+        try:
+            prepared[code] = I.compute_all(df)
+        except Exception as e:
+            perr[code] = f"지표 계산 오류: {e}"
+    breadth = I.breadth_series(prepared) if prepared else pd.Series(dtype=float)
+    if ix.ok:
+        market = I.market_frame(ix.data["Close"])
+        market_src = "코스피 지수"
+    else:
+        eq = pd.DataFrame({k: v["Close"] / v["Close"].iloc[0] for k, v in prices.items()}).mean(axis=1)
+        market = I.market_frame(eq)
+        market_src = "350종목 평균 (코스피 지수 조회 실패)"
+        notes.append("코스피 지수를 못 받아서 350종목 평균으로 시장을 판단: " + str(ix.error)[:120])
+    print(f"[2/4] 지표 계산 완료 · 시세 실패 {len(perr)}종목 · 시장 폭 {breadth.dropna().iloc[-1]:.0f}%" if len(breadth.dropna()) else "[2/4] 지표 계산 완료")
+
+    # 3) 과거 성과표
+    info = {u["code"]: u for u in uni}
+    if intraday_eff:
+        table = cache["table"]
+    else:
+        table = H.build(prepared, breadth, market, info)
+    tm = table.get("meta", {})
+    print(f"[3/4] 과거 성과표: {tm.get('from')} ~ {tm.get('to')} · {tm.get('stocks')}종목 ({'저장분' if intraday_eff else '새로 계산'})")
+
+    # 4) 종목별 상태 + 재무·악재
+    recs, stores = [], {}
+
+    def two(s):
+        try:
+            return build_record(provider, s, prepared.get(s["code"]), breadth, market, table, cache, intraday_eff,
+                                perr.get(s["code"]))
+        except Exception as e:
+            traceback.print_exc()
+            return ({"code": s["code"], "name": s["name"], "market": s["market"], "sig": None, "chart": None,
+                     "fin": None, "risk": None, "errors": {"fatal": str(e)}}, None)
+
+    with ThreadPoolExecutor(max_workers=C.MAX_WORKERS) as ex:
+        for i, (rec, store) in enumerate(ex.map(two, uni), 1):
+            recs.append(rec)
+            if store is not None:
+                stores[rec["code"]] = store
+            if i % 50 == 0 or i == len(uni):
                 print(f"  {i}/{len(uni)} 처리")
 
     health = {}
@@ -215,46 +271,45 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
                        ("flows", "기관·외국인 수급"), ("dart", "공시")):
         fail = [r for r in recs if key in (r.get("errors") or {}) and "저장분 사용" not in r["errors"][key]]
         stale = [r for r in recs if key in (r.get("errors") or {}) and "저장분 사용" in r["errors"][key]]
-        sample = fail[0]["errors"][key] if fail else (stale[0]["errors"][key] if stale else "")
         h = {"label": label, "ok": len(recs) - len(fail) - len(stale), "fail": len(fail), "stale": len(stale),
-             "sample_error": sample}
+             "sample_error": (fail[0]["errors"][key] if fail else (stale[0]["errors"][key] if stale else ""))[:300]}
         if intraday_eff and key != "prices":
             h["note"] = f"장중 실행 — {cache.get('saved', '')[:16].replace('T', ' ')} 정식 실행 저장분 사용"
         health[key] = h
 
-    as_of = max((r["chart"]["stats"]["date"] for r in recs if r.get("chart")), default=None)
-    if provider.name == "demo":
-        phase = {"key": "close", "label": "샘플", "now": datetime.now(KST).strftime("%m/%d %H:%M")}
-    else:
-        phase = market_phase(intraday, as_of)
+    as_of = max((r["sig"]["stats"]["date"] for r in recs if r.get("sig")), default=None)
+    phase = {"key": "close", "label": "샘플", "now": datetime.now(KST).strftime("%m/%d %H:%M")} if not live \
+        else market_phase(intraday, as_of)
+
+    def is_os(r):
+        e = (r.get("sig") or {}).get("os", {}).get("event")
+        return bool(e and e["n"] >= C.OS_MIN_COUNT)
+
     meta = {
         "generated": datetime.now(KST).strftime("%Y-%m-%d %H:%M"),
-        "as_of": as_of,
-        "phase": phase,
-        "count": len(recs),
-        "signals": sum(1 for r in recs if r.get("chart") and r["chart"]["is_signal"]),
-        "notes": notes,
-        "health": health,
-        "mode": provider.name,
+        "as_of": as_of, "phase": phase, "count": len(recs),
+        "os_count": sum(1 for r in recs if is_os(r)),
+        "os_today": sum(1 for r in recs if is_os(r) and r["sig"]["os"]["event"]["ago"] == 0),
+        "bo_count": sum(1 for r in recs if (r.get("sig") or {}).get("bo")),
+        "market": SG.market_summary(breadth, market, table, len(prepared)), "market_src": market_src,
+        "table": table, "notes": notes, "health": health, "mode": provider.name,
         "run_kind": "intraday" if intraday_eff else "full",
         "fund_saved": cache.get("saved") if intraday_eff else datetime.now(KST).isoformat(timespec="minutes"),
         "elapsed_sec": round(time.time() - t0),
-        "weights": C.TOTAL_WEIGHTS,
-        "signal_meta": {k: {"name": v[0], "group": v[1], "desc": v[2]} for k, v in SG.SIGNAL_META.items()},
-        "chart_points": C.CHART_POINTS,
-        "regime_adjust": C.REGIME_ADJUST,
-        "signal_min": C.SIGNAL_MIN_SCORE,
-        "lookback": C.SIGNAL_LOOKBACK,
-        "us_url": C.US_SCREENER_URL,
+        "rules": {"os_rsi": C.OS_RSI, "os_bb": C.OS_BB_Z, "os_gap": C.OS_GAP_PCT, "min_count": C.OS_MIN_COUNT,
+                  "lookback": C.SIGNAL_LOOKBACK, "min_sample": C.MIN_SAMPLE, "grade": C.GRADE_RULE,
+                  "cost": C.COST_PCT, "bo_vol": C.BREAKOUT_VOLUME},
+        "us_url": C.US_SCREENER_URL, "refresh_url": C.REFRESH_URL, "ui": C.UI_VERSION,
     }
 
-    # 정식 실행이면 저장분 갱신 (다음 장중 실행이 씀). 일부만 돌린 --limit 실행은 저장하지 않음
-    if provider.name == "live" and not intraday_eff and not limit:
+    if live and not intraday_eff and not limit:
         save_cache({"saved": datetime.now(KST).isoformat(timespec="minutes"), "universe": uni, "notes": notes,
-                    "stocks": raws})
+                    "stocks": stores, "table": table})
         print(f"[저장분] {CACHE_PATH}")
 
-    print(f"[완료] {len(recs)}종목, 시그널 {meta['signals']}개, {meta['elapsed_sec']}초, {phase['label']}")
+    m = meta["market"]
+    print(f"[4/4] 완료 {len(recs)}종목 · 과매도 후보 {meta['os_count']}(오늘 {meta['os_today']}) · 돌파 {meta['bo_count']} · "
+          f"시장 폭 {m['breadth']}% · {meta['elapsed_sec']}초 · {phase['label']}")
     for h in health.values():
         if h["fail"] or h["stale"]:
             print(f"  ! {h['label']} 실패 {h['fail']} · 저장분 대체 {h['stale']} — 예: {h['sample_error'][:200]}")
@@ -262,32 +317,25 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
 
 
 def diagnose():
-    """데이터 출처가 제대로 읽히는지 점검."""
     print("=== 데이터 출처 점검 ===")
-    for code, nm in (("005930", "삼성전자"), ("247540", "에코프로비엠")):
-        print(f"\n[{nm} {code}]")
-        r = S.fetch_prices(code)
-        print(" 시세:", "OK" if r.ok else "실패", (f"{len(r.data)}봉, 마지막 {r.data.index[-1].date()} 종가 {r.data['Close'].iloc[-1]:,.0f}" if r.ok else r.error))
+    for code, nm in (("005930", "삼성전자"), ("247540", "에코프로비엠"), ("KOSPI", "코스피 지수")):
+        r = S.fetch_prices(code, C.HISTORY_BARS)
+        print(f"[{nm}] 시세:", "OK" if r.ok else "실패",
+              (f"{len(r.data)}봉, {r.data.index[0].date()} ~ {r.data.index[-1].date()} 종가 {r.data['Close'].iloc[-1]:,.0f}" if r.ok else r.error))
+        if code == "KOSPI":
+            continue
         m = S.fetch_main(code)
-        print(" 기본정보:", "OK" if m.ok else "실패",
-              json.dumps({k: v for k, v in (m.data or {}).items() if k not in ('perf', '_flows')}, ensure_ascii=False, default=str)[:600])
-        if m.data and m.data.get("perf"):
-            print("   당좌비율:", [(x["period"], x["est"], x["v"].get("quick_ratio")) for x in m.data["perf"]["annual"]])
+        print("  기본정보:", "OK" if m.ok else "실패",
+              json.dumps({k: v for k, v in (m.data or {}).items() if k not in ('perf', '_flows')}, ensure_ascii=False, default=str)[:500])
         for fq in ("Y", "Q"):
             r = S.fetch_fin_summary(code, fq)
-            if r.ok:
-                rows = r.data["annual"] + r.data["quarter"]
-                print(f" 재무({fq}): OK", [(x["period"], "E" if x["est"] else "", x["v"].get("op"), x["v"].get("ocf")) for x in rows])
-            else:
-                print(f" 재무({fq}): 실패", r.error)
+            print(f"  재무({fq}):", "OK" if r.ok else "실패", "" if r.ok else r.error)
         r = S.fetch_flows(code, (m.data or {}).get("_flows"))
-        print(" 수급:", "OK" if r.ok else "실패", (f"{len(r.data)}일 " + str(r.data.tail(2).to_dict('records')) if r.ok else r.error))
+        print("  수급:", "OK" if r.ok else "실패", (f"{len(r.data)}일" if r.ok else r.error))
         r = S.fetch_disclosures_mobile(code)
-        print(" 공시(네이버):", "OK" if r.ok else "실패", (r.data[:3] if r.ok else r.error))
+        print("  공시(네이버):", "OK" if r.ok else "실패", (f"{len(r.data)}건" if r.ok else r.error))
     d = S.Dart(os.getenv("DART_API_KEY"))
-    print("\nDART:", "OK" if d.ok else "사용 안 함/실패", d.error or f"회사코드 {len(d.corp)}개")
-    q = S.fetch_marcap_rank(1, 1)
-    print("코스닥 시총 순위:", "OK" if q.ok else "실패", (q.data or [])[:3], q.error)
+    print("DART:", "OK" if d.ok else "사용 안 함/실패", d.error or f"회사코드 {len(d.corp)}개")
 
 
 def main():
@@ -301,9 +349,7 @@ def main():
     a = ap.parse_args()
 
     if a.probe:
-        out = os.path.join(HERE, C.STATE_DIR, "probe")
-        summ = S.probe(out)
-        print(json.dumps(summ, ensure_ascii=False, indent=1))
+        print(json.dumps(S.probe(os.path.join(HERE, C.STATE_DIR, "probe")), ensure_ascii=False, indent=1))
         return
     if a.diagnose:
         diagnose()
@@ -314,7 +360,7 @@ def main():
     else:
         provider = NaverProvider()
     recs, meta = run(provider, a.limit, intraday=a.intraday)
-    if not a.demo and sum(1 for r in recs if r.get("chart")) < len(recs) * 0.5:
+    if not a.demo and sum(1 for r in recs if r.get("sig")) < len(recs) * 0.5:
         print("!! 시세가 절반 이상 실패 — 페이지를 갱신하지 않고 종료 (이전 페이지 유지)")
         sys.exit(1)
 
