@@ -65,6 +65,17 @@ h1,h2,h3{text-wrap:balance}
 .nav a[aria-current="page"]{background:var(--navy);color:var(--paper)}
 :root[data-theme="dark"] .nav a[aria-current="page"]{color:#12172a}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nav a[aria-current="page"]{color:#12172a}}
+.clocks{display:flex;gap:6px;flex-wrap:wrap}
+@media (max-width:640px){.bar{position:static}}
+.clock{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:4px 11px;font-size:12.5px;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.clock b{color:var(--ink);font-weight:700}
+.clock.kr.live{border-color:var(--warn);background:var(--warn-soft);color:var(--warn)}
+.clock.us{border-color:var(--navy)}
+.clock.us:hover{background:var(--navy-soft)}
+.phase-banner{border-radius:12px;padding:10px 14px;font-size:14px;margin-bottom:18px;border:1px solid}
+.phase-banner.intraday{background:var(--warn-soft);color:var(--warn);border-color:var(--warn)}
+.phase-banner.holiday{background:var(--navy-soft);color:var(--navy);border-color:var(--navy)}
+.phase-banner b{font-weight:700}
 .theme-btn{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:5px 10px;cursor:pointer;font-size:13px}
 
 /* ── 히어로: 하늘과 성 ── */
@@ -291,6 +302,10 @@ dialog button{border:0;background:var(--gold);color:#3a2413;font-weight:700;bord
       <a href="#search" data-nav="search">총점 검색</a>
       <a href="#rules" data-nav="rules">왕의 규칙</a>
     </nav>
+    <div class="clocks">
+      <span class="clock kr" id="krClock" title="이 페이지(국장)가 계산된 시각"><b>국장</b> <span id="krClockTxt">–</span></span>
+      <a class="clock us" id="usLink" href="#" target="_blank" rel="noopener" title="미장 과매도 스크리너 열기"><b>미장 ↗</b> <span id="usClockTxt">시각 확인 중</span></a>
+    </div>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="화면 테마 바꾸기">🌙 밤</button>
   </div>
 </header>
@@ -302,14 +317,14 @@ dialog button{border:0;background:var(--gold);color:#3a2413;font-weight:700;bord
     <div class="hero-copy">
       <span class="ribbon">코스피·코스닥 350 차트 레이팅</span>
       <h1 class="title">버거대왕의<span class="sub">국장 레이더</span></h1>
-      <p class="lede" id="lede">왕이 매일 장 마감 후 350종목의 차트를 순찰합니다. 반등·돌파 신호가 뜬 종목을 골라내고, 눌러보면 재무 점수와 악재 스크리닝까지 한 번에 확인할 수 있습니다.</p>
+      <p class="lede" id="lede">왕이 평일 장중 세 번(10·12·14시), 장 마감 후 두 번(15:30·18:10) 350종목의 차트를 순찰합니다. 반등·돌파 신호가 뜬 종목을 골라내고, 눌러보면 재무 점수와 악재 스크리닝까지 한 번에 확인할 수 있습니다.</p>
       <div class="hero-stats" id="heroStats"></div>
     </div>
     <figure class="portrait">
-      <button class="frame" id="portraitBtn" type="button" aria-label="버거대왕 모델 시트 크게 보기">
-        <img src="assets/burger-king.png" alt="버거대왕 공식 모델 시트 v1.1 — 정면·측면·뒷면·3/4 뷰, 표정 5종, 왕관·얼굴·메달·망토 디테일, $ 메달" width="1254" height="1254">
+      <button class="frame" id="portraitBtn" type="button" aria-label="버거대왕 그림 크게 보기">
+        <img src="assets/burger-king.png" alt="왕관을 쓴 버거대왕이 돋보기로 떠 있는 캔들차트 화면들을 살펴보는 모습" width="1254" height="1254">
       </button>
-      <figcaption>버거대왕 OFFICIAL MODEL v1.1 · 눌러서 크게 보기</figcaption>
+      <figcaption>버거대왕이 오늘의 차트를 살피는 중 · 눌러서 크게 보기</figcaption>
     </figure>
   </div>
   <svg class="castle" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -336,6 +351,7 @@ dialog button{border:0;background:var(--gold);color:#3a2413;font-weight:700;bord
 
 <main class="wrap">
   <div id="demoBanner" hidden></div>
+  <div id="phaseBanner" hidden></div>
 
   <!-- ① 레이팅 -->
   <section class="view" id="v-home" aria-labelledby="h-home">
@@ -389,9 +405,9 @@ dialog button{border:0;background:var(--gold);color:#3a2413;font-weight:700;bord
   <div class="wrap" id="foot"></div>
 </footer>
 
-<dialog id="portraitDlg" aria-label="버거대왕 모델 시트">
+<dialog id="portraitDlg" aria-label="버거대왕 그림">
   <form method="dialog"><button type="submit">닫기 ✕</button></form>
-  <img src="assets/burger-king.png" alt="버거대왕 공식 모델 시트 원본">
+  <img src="assets/burger-king.png" alt="버거대왕 그림 원본" width="1254" height="1254">
 </dialog>
 
 <script src="data.js"></script>
@@ -474,6 +490,40 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{sync
 /* ── 초상화 ── */
 $("#portraitBtn").addEventListener("click",()=>{ const d=$("#portraitDlg"); if(d.showModal) d.showModal(); });
 
+/* ── 기준 시각 (국장·미장) ── */
+function clocks(){
+  const ph=M.phase||{}, el=$("#krClock");
+  $("#krClockTxt").textContent = (ph.now||M.generated||"").replace(/^\d{4}-/,"").replace("-","/") + " " + (ph.label||"");
+  if(ph.key==="intraday") el.classList.add("live");
+  const a=$("#usLink"), url=M.us_url;
+  if(!url){ a.hidden=true; return; }
+  a.href=url;
+  const two=n=>String(n).padStart(2,"0");
+  const fmt=d=>`${two(d.getMonth()+1)}/${two(d.getDate())} ${two(d.getHours())}:${two(d.getMinutes())}`;
+  fetch(url,{cache:"no-store"}).then(r=>{
+    if(!r.ok) throw new Error(r.status);
+    const lm=r.headers.get("last-modified");
+    return r.text().then(t=>({t,lm}));
+  }).then(({t,lm})=>{
+    const day=(t.match(/<title>[^<]*?(\d{4})-(\d{2})-(\d{2})/)||[]);
+    let when=null;
+    if(lm){ const d=new Date(lm); if(!isNaN(d)) when=d; }
+    if(!when){ const m=t.match(/(\d{4})년\s*(\d{2})월\s*(\d{2})일\s*(\d{2}):(\d{2})\s*기준/); if(m) when=new Date(Date.UTC(+m[1],m[2]-1,+m[3],+m[4],+m[5])); }
+    $("#usClockTxt").textContent = (when? fmt(when)+" 갱신":"") + (day[2]? ` (${day[2]}/${day[3]} 종가)`:"") || "열기";
+  }).catch(()=>{ $("#usClockTxt").textContent="열기"; });
+}
+function phaseBanner(){
+  const ph=M.phase||{}, b=$("#phaseBanner");
+  const fs=(M.fund_saved||"").slice(5,16).replace("T"," ").replace("-","/");
+  if(ph.key==="intraday"){
+    b.hidden=false; b.className="phase-banner intraday";
+    b.innerHTML=`<b>장중 잠정 · ${esc(ph.now)} 기준</b> — 오늘 일봉이 아직 완성되지 않아서 신호가 장 마감(15:30)까지 바뀔 수 있어요. 재무·수급·공시는 ${esc(fs)} 정식 실행 값을 그대로 썼어요. 텔레그램 알림은 15:30·18:10 정식 실행 때만 보내요.`;
+  } else if(ph.key==="holiday"){
+    b.hidden=false; b.className="phase-banner holiday";
+    b.innerHTML=`<b>휴장 또는 개장 전</b> — 직전 거래일(${esc(M.as_of||"")}) 종가 기준 결과예요.`;
+  }
+}
+
 /* ── 히어로 통계 ── */
 function heroStats(){
   const cnt = {}; S.forEach(s=>{ const k=s.chart?.regime?.key; if(k) cnt[k]=(cnt[k]||0)+1; });
@@ -481,12 +531,12 @@ function heroStats(){
     <div class="stat"><b>${S.length}</b><span>레이팅 종목</span></div>
     <div class="stat"><b>${M.signals??0}</b><span>시그널 발생</span></div>
     <div class="stat"><b>${cnt.uptrend_pullback||0}</b><span>상승추세 눌림목</span></div>
-    <div class="stat"><b>${esc((M.as_of||"").slice(5).replace("-","/"))||"–"}</b><span>기준일 종가</span></div>`;
+    <div class="stat"><b>${esc((M.as_of||"").slice(5).replace("-","/"))||"–"}</b><span>${M.phase&&M.phase.key==="intraday"?"오늘 장중 잠정":"기준일 종가"}</span></div>`;
   if(M.mode==="demo"){
     const b=$("#demoBanner"); b.hidden=false; b.className="demo-banner";
     b.textContent="샘플 화면입니다. 종목 이름·가격·재무는 모두 지어낸 가상 데이터예요. 실제 350종목 데이터는 GitHub에서 매일 자동 실행될 때 채워집니다.";
   }
-  $("#asOf").textContent = `${M.as_of||""} 종가 기준 · ${M.generated||""} 갱신 · 최근 ${M.lookback||5}거래일 안에 뜬 신호만 점수에 반영`;
+  $("#asOf").textContent = `${M.as_of||""} ${M.phase&&M.phase.key==="intraday"?"장중":"종가"} 기준 · ${M.generated||""} 갱신 · 최근 ${M.lookback||5}거래일 안에 뜬 신호만 점수에 반영`;
 }
 
 /* ── ① 레이팅 목록 ── */
@@ -836,9 +886,9 @@ function renderRules(){
   const sample=S.find(s=>s.fin&&s.fin.items&&s.fin.items.some(i=>i.rule));
   const finRows=(sample?sample.fin.items:[]).map(i=>`<tr><td><b>${esc(i.name)}</b><br><small style="color:var(--ink-soft)">${esc(i.explain)}</small></td><td class="n">${i.max}</td><td>${esc(i.rule||"")}</td></tr>`).join("");
   const riskSample=S.find(s=>s.risk)?.risk.items||[];
-  const health=Object.values(M.health||{}).map(h=>`<tr><td>${esc(h.label)}</td><td class="n">${h.ok}</td><td class="n" style="color:${h.fail?"var(--bad)":"inherit"}">${h.fail}</td><td><small>${esc(h.sample_error||"")}</small></td></tr>`).join("");
+  const health=Object.values(M.health||{}).map(h=>`<tr><td>${esc(h.label)}</td><td class="n">${h.ok}</td><td class="n" style="color:${h.stale?"var(--warn)":"inherit"}">${h.stale||0}</td><td class="n" style="color:${h.fail?"var(--bad)":"inherit"}">${h.fail}</td><td><small>${esc(h.note||h.sample_error||"")}</small></td></tr>`).join("");
   $("#v-rules").innerHTML=`
-    <div class="sec-head"><h2>왕의 규칙</h2><p>점수가 어떻게 매겨지는지 전부 공개합니다. 숫자는 config.py 한 곳에서만 바꿉니다.</p></div>
+    <div class="sec-head"><h2>왕의 규칙</h2><p>점수가 어떻게 매겨지는지 전부 공개합니다. 평일 10·12·14시 장중 잠정, 15:30·18:10 정식 갱신. 숫자는 config.py 한 곳에서만 바꿉니다.</p></div>
     <div class="info-note">아래 배점과 기준은 교과서적인 <b>추정치</b>이고 아직 과거 데이터로 검증(백테스트)하지 않았어요. 투자 권유가 아니라 공부용 도구입니다.</div>
     <div class="panel"><h3>① 차트 시그널 (최근 ${M.lookback||5}거래일 안에 뜬 것만 · 100점에서 자름 · ${M.signal_min}점 이상이면 ‘시그널 발생’)</h3>
       <div class="table-wrap"><table><thead><tr><th>묶음</th><th>신호</th><th>배점</th><th>뜻</th></tr></thead><tbody>
@@ -863,7 +913,7 @@ function renderRules(){
       </tbody></table></div></div>
     <div class="panel"><h3>⑤ 총점</h3><p style="margin:0">총점 = 차트 × <b>${Math.round((w.chart||0)*100)}%</b> + 재무 × <b>${Math.round((w.fin||0)*100)}%</b> + 악재 × <b>${Math.round((w.risk||0)*100)}%</b> <small style="color:var(--ink-soft)">(임시 비율)</small></p></div>
     <div class="panel"><h3>데이터 상태 (이번 실행)</h3>
-      <div class="table-wrap"><table><thead><tr><th>출처</th><th>성공</th><th>실패</th><th>실패 예시</th></tr></thead><tbody>${health}</tbody></table></div>
+      <div class="table-wrap"><table><thead><tr><th>출처</th><th>성공</th><th>저장분 대체</th><th>실패</th><th>메모</th></tr></thead><tbody>${health}</tbody></table></div>
       ${(M.notes||[]).length?`<ul class="calc">${M.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>`:""}</div>`;
 }
 
@@ -884,8 +934,8 @@ function route(){
 }
 window.addEventListener("hashchange",route);
 
-heroStats(); regimePills(); bindList(); renderList(); bindSearch(); renderTop();
-$("#foot").innerHTML=`버거대왕의 국장 레이더 · 데이터 출처: 네이버 금융(시세·재무·수급), DART 전자공시 · ${esc(M.generated||"")} 생성 (${M.elapsed_sec??"–"}초)<br>이 페이지는 공부용 자동 분석이며 투자 권유가 아닙니다. 모든 판단과 책임은 투자자 본인에게 있습니다.`;
+clocks(); phaseBanner(); heroStats(); regimePills(); bindList(); renderList(); bindSearch(); renderTop();
+$("#foot").innerHTML=`버거대왕의 국장 레이더 · 데이터 출처: 네이버 금융(시세·수급·공시), 와이즈리포트(재무), DART 전자공시 · ${esc(M.generated||"")} 생성 (${M.elapsed_sec??"–"}초)<br>이 페이지는 공부용 자동 분석이며 투자 권유가 아닙니다. 모든 판단과 책임은 투자자 본인에게 있습니다.`;
 route();
 })();
 </script>
