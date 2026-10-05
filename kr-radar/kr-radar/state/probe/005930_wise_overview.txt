@@ -796,7 +796,7 @@ TYPE: text/html; charset=utf-8
 									</tr>
 								</table>
 								
-                                <div id="ZlEwemUxRm"></div>
+                                <div id="bG05RlB6cn"></div>
 
 								<div class="gibun_exp7_1 all clr">
 									
@@ -1292,7 +1292,7 @@ TYPE: text/html; charset=utf-8
 						flag: 4,
 						cmp_cd: '005930',
 						grp_cd: grp==10?"01":"03",
-                        encparam: 'YzYxWFFXYWVFc0dXeWlZVkU2dWlEUT09'
+                        encparam: 'UTYxclRkUmZJQzYvWDNWb3FnM0RxZz09'
 					}
 				, function (res) {
 					var data = []
@@ -1401,7 +1401,7 @@ TYPE: text/html; charset=utf-8
 			, {
 				flag: flag,
 				cmp_cd: '005930',
-                encparam: 'YzYxWFFXYWVFc0dXeWlZVkU2dWlEUT09'
+                encparam: 'UTYxclRkUmZJQzYvWDNWb3FnM0RxZz09'
 			}
 				, function (res) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
@@ -1703,12 +1703,12 @@ TYPE: text/html; charset=utf-8
 				, freq_typ: _freq_typ
 				, extY: extY
                 , extQ: extQ
-                , encparam: 'YzYxWFFXYWVFc0dXeWlZVkU2dWlEUT09'
-                , id: 'ZlEwemUxRm' ? 'ZlEwemUxRm' : ''
+                , encparam: 'UTYxclRkUmZJQzYvWDNWb3FnM0RxZz09'
+                , id: 'bG05RlB6cn' ? 'bG05RlB6cn' : ''
 				},
 				success: function (data) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
-					$('#ZlEwemUxRm').html(data);
+					$('#bG05RlB6cn').html(data);
 					if(extQ==0)
 					{
 						$('.r02c07').addClass('endLine')
