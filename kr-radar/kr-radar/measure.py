@@ -262,7 +262,7 @@ def load_live():
                 print(f"  {i}/{len(uni)}")
     mk = S.fetch_prices("KOSPI", BARS)
     market = mk.data["Close"] if mk.ok else None
-    return prices, flows, market
+    return prices, flows, market, uni
 
 
 def load_demo():
@@ -273,7 +273,8 @@ def load_demo():
     for s in p.stocks:
         f = p.flows(s["code"]).data.copy()
         flows[s["code"]] = f
-    return prices, flows, None
+    uni = [{"code": s["code"], "market": s["market"], "marcap": 1000 + i * 50} for i, s in enumerate(p.stocks)]
+    return prices, flows, None, uni
 
 
 # ───────────────────────── 본체 ─────────────────────────
@@ -282,7 +283,7 @@ def main():
     ap.add_argument("--demo", action="store_true")
     a = ap.parse_args()
     t0 = time.time()
-    prices, flows, market = load_demo() if a.demo else load_live()
+    prices, flows, market, uni = load_demo() if a.demo else load_live()
     if not prices:
         print("시세를 하나도 못 받음")
         sys.exit(1)
@@ -427,6 +428,14 @@ def main():
         f.write("\n".join(L) + "\n")
     print("\n".join(L))
     print(f"\n[저장] {OUT}  ({result['meta']['elapsed']}초)")
+
+    # 2차 측정 (같은 시세로 이어서)
+    try:
+        import measure2
+        measure2.main(prices, market, uni, prepare)
+    except Exception:
+        import traceback
+        traceback.print_exc()
 
 
 if __name__ == "__main__":
