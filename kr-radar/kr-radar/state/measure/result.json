@@ -1,6 +1,6 @@
 {
  "meta": {
-  "at": "2026-10-05 20:36",
+  "at": "2026-10-05 21:53",
   "stocks": 345,
   "bars_median": 1300,
   "from": "2021-06-11",
@@ -9,7 +9,7 @@
   "market": "코스피 지수",
   "flow_days_median": 220,
   "flow_stocks": 345,
-  "elapsed": 398
+  "elapsed": 450
  },
  "baseline": {
   "전체": {
