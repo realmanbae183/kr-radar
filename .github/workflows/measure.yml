@@ -1,0 +1,40 @@
+# 신호 측정 (기준을 정하기 위한 조사). 필요할 때만 손으로 실행.
+name: measure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    working-directory: kr-radar/kr-radar
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - name: 저장분 불러오기 (종목 명단)
+        uses: actions/cache@v4
+        with:
+          path: kr-radar/kr-radar/cache
+          key: kr-fund-measure-${{ github.run_id }}
+          restore-keys: kr-fund-
+      - name: 신호 측정
+        run: python measure.py
+      - name: 결과 저장
+        run: |
+          git config user.name "kr-radar-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git fetch origin main
+          git reset --mixed origin/main
+          git add state/measure
+          git commit -m "measure: $(TZ=Asia/Seoul date +'%F %H:%M')"
+          git push origin HEAD:main
