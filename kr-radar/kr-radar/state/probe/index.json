@@ -1,25 +1,25 @@
 {
- "at": "2026-10-02T09:25:28",
+ "at": "2026-10-05T06:53:25",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9249
+   "bytes": 9243
   },
   "005930_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/basic",
-   "bytes": 4020
+   "bytes": 4019
   },
   "005930_trend20.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/trend?pageSize=20",
-   "bytes": 7027
+   "bytes": 7019
   },
   "005930_trend.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/trend",
-   "bytes": 3510
+   "bytes": 3505
   },
   "005930_finance_annual.txt": {
    "status": 200,
@@ -39,7 +39,7 @@
   "005930_wise_overview.txt": {
    "status": 200,
    "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930",
-   "bytes": 90665
+   "bytes": 90660
   },
   "005930_pc_main.txt": {
    "status": 200,
@@ -54,27 +54,27 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10033
+   "bytes": 10025
   },
   "247540_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/integration",
-   "bytes": 9424
+   "bytes": 9421
   },
   "247540_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/basic",
-   "bytes": 4196
+   "bytes": 4195
   },
   "247540_trend20.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/trend?pageSize=20",
-   "bytes": 6823
+   "bytes": 6817
   },
   "247540_trend.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/trend",
-   "bytes": 3412
+   "bytes": 3408
   },
   "247540_finance_annual.txt": {
    "status": 200,
@@ -94,7 +94,7 @@
   "247540_wise_overview.txt": {
    "status": 200,
    "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=247540",
-   "bytes": 86234
+   "bytes": 85722
   },
   "247540_pc_main.txt": {
    "status": 200,
