@@ -1,23 +1,22 @@
-# 버거대왕 국장 레이더 — 평일 하루 5번
-#   10:00 · 12:00 · 14:00  장중 가벼운 실행 (시세만 새로, 알림 없음)
-#   15:30 · 18:10          정식 실행 (전부 새로, 텔레그램 알림)
+# 버거대왕 국장 레이더
+#   평일 09:05 ~ 15:35, 30분마다   장중 가벼운 실행 (시세만 새로 받음, 알림 없음, 1~2분)
+#   평일 15:45 · 18:10             정식 실행 (전부 새로 + 과거 성과표 다시 계산 + 텔레그램 알림)
+#   '지금 갱신'은 이 화면에서 Run workflow 를 누르는 것 (기본값 '장중')
 # GitHub 시간은 UTC(한국 -9시간)라서 아래 숫자가 9시간 빠르게 적혀 있어요.
 name: kr-radar
 
 on:
   schedule:
-    - cron: "0 1 * * 1-5"      # 10:00
-    - cron: "0 3 * * 1-5"      # 12:00
-    - cron: "0 5 * * 1-5"      # 14:00
-    - cron: "30 6 * * 1-5"     # 15:30
-    - cron: "10 9 * * 1-5"     # 18:10
+    - cron: "5,35 0-6 * * 1-5"   # 09:05 ~ 15:35 장중
+    - cron: "45 6 * * 1-5"       # 15:45 정식
+    - cron: "10 9 * * 1-5"       # 18:10 정식
   workflow_dispatch:
     inputs:
       mode:
-        description: "실행 종류"
+        description: "실행 종류 (장중 = 빠른 갱신, 정식 = 전부 새로)"
         type: choice
-        options: [정식, 장중, 점검]
-        default: 정식
+        options: [장중, 정식, 점검]
+        default: 장중
 
 permissions:
   contents: write
@@ -57,7 +56,7 @@ jobs:
           M="full"
           if [ "${{ github.event_name }}" = "schedule" ]; then
             case "${{ github.event.schedule }}" in
-              "0 1 * * 1-5"|"0 3 * * 1-5"|"0 5 * * 1-5") M="intraday" ;;
+              "5,35 0-6 * * 1-5") M="intraday" ;;
             esac
           else
             case "${{ inputs.mode }}" in
@@ -69,9 +68,9 @@ jobs:
           echo "실행 종류: $M"
 
       - name: 검증 테스트
-        run: python -m pytest -q tests
+        run: python -m pytest -q checks.py
 
-      - name: 저장분(재무·수급·공시) 불러오기
+      - name: 저장분(재무·수급·공시·과거 성과표) 불러오기
         uses: actions/cache@v4
         with:
           path: kr-radar/kr-radar/cache
