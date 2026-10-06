@@ -666,3 +666,37 @@ def test_fred_calendar_merge_keeps_manual_and_adds_new():
     assert sum(1 for e in merged if e["d"] == "2026-10-14" and "소비자물가" in e["title"]) == 1
     assert sum(1 for e in merged if "PPI" in e["title"]) == 1 and all("kind" not in e for e in merged)
     assert K.build(date(2026, 10, 7), fred_key="")["auto"] == 0
+
+
+def test_today_parsers_from_real_shapes():
+    import sources as S
+    basic = {"closePrice": "6,941.39", "compareToPreviousClosePrice": "-62.35", "fluctuationsRatio": "-0.89", "marketStatus": "CLOSE", "localTradedAt": "2026-10-06T20:15:00+09:00"}
+    integ = {"totalInfos": [{"code": "highPrice", "value": "7,044.67"}, {"code": "lowPrice", "value": "6,897.38"}]}
+    minute = [{"currentPrice": 7041.46 - i} for i in range(390)]
+    ix = S.parse_today_index("코스피", basic, integ, minute)
+    assert ix["v"] == 6941.39 and ix["c"] == -62.35 and ix["p"] == -0.89 and ix["hi"] == 7044.67 and ix["lo"] <= 6897.38
+    assert 60 <= len(ix["line"]) <= 110 and ix["line"][-1] == 6941.39
+    assert S.parse_today_index("코스피", basic, {}, [])["line"] == []
+    assert S.parse_today_flow({"personalValue": "+7,441", "foreignValue": "-17,575", "institutionalValue": "-39"}) == [["개인", "ind", 7441.0], ["외국인", "for", -17575.0], ["기관", "ins", -39.0]]
+    fx = S.parse_today_market("미국 USD", "usa", {"exchangeInfo": {"closePrice": "1,339.30", "fluctuations": "-3.20", "fluctuationsRatio": "-0.24"}})
+    assert fx == {"n": "미국 USD", "i": "usa", "v": "1,339.30", "c": -3.2, "p": -0.24}
+    gold = S.parse_today_market("국제 금", "gold", {"closePrice": "4,192.30", "fluctuations": "35.50", "fluctuationsRatio": "0.85", "highPriceOf52Weeks": "5,626.80"}, "52주 최고")
+    assert gold["s"] == "52주 최고<br>5,626.80"
+    ind = {"groups": [{"name": n, "changeRate": str(i)} for i, n in enumerate("가나다라마바사아자차카")]}
+    sec = S.parse_today_sectors(ind, {n: 100 - i for i, n in enumerate("가나다라마바사아자차카")} | {"없는업종": 999})
+    assert len(sec) == 10 and sec[0][0] == "가" and sec[0][1] == 0.0
+    import pytest
+    with pytest.raises(RuntimeError):
+        S.parse_today_sectors(ind, {"가": 1})
+
+
+def test_alert_top_only_new_a_b():
+    import notify
+    def rec(code, grade, n=2, date="2026-10-06", w5=60):
+        return {"code": code, "name": code, "sig": {"os": {"grade": grade, "hist": {"n": 300, "w5": w5, "m5": 1.0},
+                "event": {"n": n, "date": date}}, "stats": {"close": 1000, "chg": -1.0}}, "verdict": {"key": "go", "signal": "os"}}
+    recs = [rec("A1", "A"), rec("B1", "B", w5=57), rec("C1", "C"), rec("A2", "A", n=1), {"code": "X", "name": "X", "sig": None}]
+    fresh, sent = notify.top_new(recs, set())
+    assert [r["code"] for r in fresh] == ["A1", "B1"] and sent == {"A1@2026-10-06", "B1@2026-10-06"}
+    fresh2, sent2 = notify.top_new(recs + [rec("A3", "A", date="2026-10-07")], sent)
+    assert [r["code"] for r in fresh2] == ["A3"] and len(sent2) == 3

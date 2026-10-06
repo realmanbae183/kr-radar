@@ -410,6 +410,10 @@ a{color:var(--navy)}
 .nav{max-width:100%;overflow-x:auto;scrollbar-width:none} .nav::-webkit-scrollbar{display:none} .nav a{white-space:nowrap;flex:none}
 @media (max-width:720px){.nav{order:9;flex:1 0 100%;margin-inline:-4px}}
 .clock{border:0;background:var(--paper);border-radius:10px;padding:6px 11px}
+.subbar{background:var(--card);border-bottom:1px solid var(--line)} .subbar .wrap{padding-block:6px} .subbar .clocks{justify-content:flex-end;gap:6px} .subbar .clock{font-size:12px;padding:4px 10px}
+.subbar .clock.kr{margin-right:auto;background:none;padding-left:0}
+body.about-on .subbar{display:none}
+.bar .theme-btn{margin-left:auto}
 .clock.kr.live{background:var(--warn-soft);color:var(--warn)}
 .clock.us{border:0;color:var(--navy);background:var(--navy-soft)} .clock.us b{color:var(--navy)}
 .clock.refresh{border:0;background:var(--navy);color:#fff}
@@ -566,6 +570,7 @@ body.about-on main{padding-bottom:0}
 .sq .g{text-align:center;transform:translateX(-50%);width:11%}
 .sq .g *{position:static;display:block}
 .sq .g img{height:5cqw;margin:0 auto .7cqw}
+.sq .g.wide{width:13.5%} .sq .g.wide b{font-size:2.3cqw} .sq .g.wide em{font-size:1.95cqw} .sq .g.wide img{height:5.6cqw}
 .sq .g .cap{font-size:1.7cqw;color:var(--ink);margin-bottom:1.1cqw}
 .sq .g b{font:700 1.85cqw/1 "Noto Sans KR",sans-serif;margin-bottom:1.3cqw;white-space:nowrap}
 .sq .g em{font:700 1.7cqw/1.25 "Noto Sans KR",sans-serif;font-style:normal;white-space:nowrap}
@@ -679,14 +684,16 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
       <a href="#rules" data-nav="rules">왕의 규칙</a>
       <a href="#about" data-nav="about">버거대왕</a>
     </nav>
-    <div class="clocks">
-      <span class="clock kr" id="krClock" title="이 페이지(국장)가 계산된 시각">–</span>
-      <a class="clock refresh" id="refreshLink" href="#" target="_blank" rel="noopener" title="GitHub 실행 화면이 열립니다. Run workflow를 누르면 2~3분 뒤 반영돼요">↻ 지금 갱신</a>
-      <a class="clock us" id="usLink" href="#" target="_blank" rel="noopener" title="미장 과매도 스크리너 열기"><b>미장 ↗</b> <span id="usClock"></span></a>
-    </div>
     <button class="theme-btn" id="themeBtn" type="button" aria-label="화면 테마 바꾸기">🌙 밤</button>
   </div>
 </header>
+<div class="subbar"><div class="wrap">
+  <div class="clocks">
+      <span class="clock kr" id="krClock" title="이 페이지(국장)가 계산된 시각">–</span>
+      <a class="clock refresh" id="refreshLink" href="#" target="_blank" rel="noopener" title="GitHub 실행 화면이 열립니다. Run workflow를 누르면 2~3분 뒤 반영돼요">↻ 지금 갱신</a>
+      <a class="clock us" id="usLink" href="#" target="_blank" rel="noopener" title="미장 과매도 스크리너 열기"><b>미장 ↗</b> <span id="usClock"></span></a>
+  </div>
+</div></div>
 
 <section class="hero" id="hero">
   <div class="stars"></div>
@@ -1339,10 +1346,13 @@ function gheat(p){ const a=Math.min(1,Math.abs(p)/3.5), m=.5+.5*a, [r,g,b]=p>=0?
   return `background:rgb(${Math.round(255-(255-r)*m)},${Math.round(255-(255-g)*m)},${Math.round(255-(255-b)*m)})`; }
 function gchart(d,i){ let s=i*7+3; const r=()=>(s=(s*9301+49297)%233280)/233280, n=46, a=[d.v-d.c];
   for(let k=1;k<n;k++){ const t=k/(n-1), dip=k<5?-(d.hi-d.lo)*.5*Math.sign(d.c)*(1-k/5)*(k/2):0; a.push((d.v-d.c)+d.c*t+dip+(r()-.5)*(d.hi-d.lo)*.16); } a[n-1]=d.v;
-  const lo=Math.min(...a,d.lo), hi=Math.max(...a,d.hi), X=k=>k/(n-1)*100, Y=v=>(hi-v)/(hi-lo)*100, col=d.c>=0?"var(--up)":"var(--down)";
+  if(d.line&&d.line.length>5){ a.length=0; a.push(...d.line); } else if(!D_SAMPLE){ return ""; }
+  const N=a.length, lo=Math.min(...a,d.lo), hi=Math.max(...a,d.hi), X=k=>k/(N-1)*100, Y=v=>(hi-v)/(hi-lo)*100, col=d.c>=0?"var(--up)":"var(--down)";
   const p=a.map((v,k)=>(k?"L":"M")+X(k).toFixed(1)+" "+Y(v).toFixed(1)).join("");
   return `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${p}L100 100L0 100Z" fill="${col}" opacity=".14"/><path d="${p}" fill="none" stroke="${col}" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`; }
+let D_SAMPLE=false;
 function renderToday(D){
+  D_SAMPLE=!!D.sample; const hasMood=(D.mood||[]).length>0, hasGlob=(D.glob||[]).length>0;
   const k=D.idx[0], upDay=k.c>=0, sq=document.getElementById("gjSq"); sq.classList.toggle("dn",!upDay);
   const ix=D.idx.map((d,i)=>{ const cx=11.5+i*22; return `
     <div class="h" style="left:${cx}%;top:1.2cqw;transform:translateX(-50%);color:var(--${d.c>=0?"up":"down"})">${d.n}</div>
@@ -1353,31 +1363,31 @@ function renderToday(D){
     <div class="ax" style="left:${cx-9}%;top:20.8cqw">10:15</div><div class="ax" style="left:${cx-3.6}%;top:20.8cqw">12:30</div><div class="ax" style="left:${cx+1.6}%;top:20.8cqw">14:30</div>
     <div class="hl num" style="left:${cx-8.6}%;top:23.4cqw">장중 최고&emsp;&emsp;${gf(d.hi)}<br>장중 최저&emsp;&emsp;${gf(d.lo)}</div>
     ${i?`<div class="vline" style="left:${cx-11}%;top:1.2cqw;height:25cqw"></div>`:""}`; }).join("");
-  const gx=[47.9,56.7,65.5,74.3], mx=[87.8,96.2].map(x=>x-1.6);
-  const cell=(g,x,unit)=>`<div class="g" style="left:${x}%;top:5.6cqw"><img src="assets/gj/${g.i}.png" alt=""><span class="cap">${g.n}</span><b class="num">${g.v}</b><em class="num ${gcl(g.c)}">${gar(g.c)} ${unit?gf(g.c,0)+"억":gf(g.c)}${unit?"":`<br>(${gsg(g.p)}${gf(g.p)}%)`}</em>${g.s?`<small class="num">${g.s}</small>`:""}</div>`;
+  const gR=hasMood?79:98.8, gW=(gR-43.2)/Math.max(1,D.glob.length), gx=D.glob.map((_,i)=>43.2+gW*(i+.5));
+  const cell=(g,x,unit)=>`<div class="g${!unit&&!hasMood?" wide":""}" style="left:${x}%;top:5.6cqw"><img src="assets/gj/${g.i}.png" alt=""><span class="cap">${g.n}</span><b class="num">${g.v}</b><em class="num ${gcl(g.c)}">${gar(g.c)} ${unit?gf(g.c,0)+"억":gf(g.c)}${unit?"":`<br>(${gsg(g.p)}${gf(g.p)}%)`}</em>${g.s?`<small class="num">${g.s}</small>`:""}</div>`;
   const s=D.sec, tile=([n,p])=>`<div class="t" style="flex:${n.length>5?1.35:1};${gheat(p)}"><span>${n}</span><b class="num">${gsg(p)}${gf(p)}%</b></div>`;
   const fx=[35,59.5,84];
   sq.innerHTML=`<img class="sky" src="assets/gj/sky.jpg" alt=""><div class="fade"></div>
   <div class="cal"><i></i><u style="left:22%"></u><u style="left:69%"></u><b>${D.date}</b><span>(${D.dow})</span></div>
-  <div class="ttl">오늘의 국장${upDay?"↑":"↓"}</div><div class="sub">한눈에 보는 국내시장</div>
+  <div class="ttl">오늘의 국장${upDay?"↑":"↓"}</div><div class="sub">한눈에 보는 국내시장${D.sample||D.closed!==false?"":" · 장중"}</div>
   <img class="king" src="assets/gj/king_${upDay?"up":"dn"}.png" alt="버거대왕" style="right:1.2%">
   <div class="bub" style="right:22.5%;top:14.2%">${upDay?"오늘도<br>돈 많이 벌어가거라!":"이런 날도<br>있는 법이니라"}</div>
   <section class="panel ix" style="top:24.6%;height:28.2%">${ix}
     <div class="vline" style="left:43.2%;top:1.2cqw;height:25cqw"></div>
-    <div class="h" style="left:61.1%;top:1.2cqw;transform:translateX(-50%);color:#1f3fae">글로벌 지표</div>
-    ${D.glob.map((g,i)=>cell(g,gx[i])).join("")}${[52.3,61.1,69.9].map(x=>`<div class="vline" style="left:${x}%;top:5.4cqw;height:21cqw"></div>`).join("")}
-    <div class="vline" style="left:79%;top:1.2cqw;height:25cqw"></div>
+    ${hasGlob?`<div class="h" style="left:${(43.2+gR)/2}%;top:1.2cqw;transform:translateX(-50%);color:#1f3fae">글로벌 지표</div>
+    ${D.glob.map((g,i)=>cell(g,gx[i])).join("")}${D.glob.slice(1).map((_,i)=>`<div class="vline" style="left:${43.2+gW*(i+1)}%;top:5.4cqw;height:21cqw"></div>`).join("")}`:""}
+    ${hasMood?`<div class="vline" style="left:79%;top:1.2cqw;height:25cqw"></div>
     <div class="h" style="left:89%;top:1.2cqw;transform:translateX(-50%);color:#167a2f">투자심리</div>
-    ${D.mood.map((g,i)=>cell(g,[84,94][i],true)).join("")}<div class="vline" style="left:89%;top:5.4cqw;height:21cqw"></div></section>
+    ${D.mood.map((g,i)=>cell(g,[84,94][i],true)).join("")}<div class="vline" style="left:89%;top:5.4cqw;height:21cqw"></div>`:""}</section>
   <section class="panel" style="top:53.4%;height:23.6%">
-    <div class="h" style="left:1.8%;top:1.2cqw">업종별 등락률 TOP 10 <span class="cap" style="position:static;font-size:1.9cqw">(단위: %)</span></div>
+    <div class="h" style="left:1.8%;top:1.2cqw">업종별 등락률 TOP 10 <span class="cap" style="position:static;font-size:1.9cqw">(시총 큰 업종, %)</span></div>
     <div class="cap" style="right:46.6%;top:1.8cqw">등락률</div>
     <div class="lg">${[-10,-5,-3,-1,-0.5,0.5,1,3,5,10].map(p=>`<span style="${gheat(p)}">${p>0?"+":""}${p}%</span>`).join("")}</div>
-    <div class="tm"><div class="big" style="${gheat(s[0][1])}"><img src="assets/gj/chip.png" alt=""><div><span>${s[0][0]}</span><b class="num">${gsg(s[0][1])}${gf(s[0][1])}%</b></div></div>
-      <div class="rt"><div class="rw">${s.slice(1,5).map(tile).join("")}</div><div class="rw">${s.slice(5).map(tile).join("")}</div></div></div></section>
+    ${s.length<6?`<div class="cap" style="left:2%;top:10cqw;font-size:2.2cqw">업종 데이터를 받지 못했어요.</div>`:`<div class="tm"><div class="big" style="${gheat(s[0][1])}"><img src="assets/gj/chip.png" alt=""><div><span>${s[0][0]}</span><b class="num">${gsg(s[0][1])}${gf(s[0][1])}%</b></div></div>
+      <div class="rt"><div class="rw">${s.slice(1,5).map(tile).join("")}</div><div class="rw">${s.slice(5).map(tile).join("")}</div></div></div>`}</section>
   <section class="panel" style="top:77.6%;height:19.4%">
     <div class="h" style="left:1.8%;top:1.2cqw">투자자 동향</div>
-    <div class="cap" style="left:1.9%;top:5.2cqw;font-size:1.8cqw">일간 · 단위: 억원</div><img src="assets/gj/crown.png" alt="" style="left:5.6%;top:8.6cqw;height:8cqw">
+    <div class="cap" style="left:1.9%;top:5.2cqw;font-size:1.8cqw">코스피 · 일간 · 억원</div><img src="assets/gj/crown.png" alt="" style="left:5.6%;top:8.6cqw;height:8cqw">
     ${D.flow.map(([n,key,v],i)=>`<div class="iv" style="left:${fx[i]}%;top:1.4cqw"><span class="cap">${n}</span><img src="assets/gj/${key}_${v>=0?"up":"dn"}.png" alt="${n} ${v>=0?"순매수":"순매도"}"><b class="num ${gcl(v)}">${gsg(v)}${gf(v,0)}억</b></div>
       <div class="cap" style="left:${fx[i]+5.8}%;top:8.6cqw;padding:.5cqw 1.3cqw;border-radius:1.4cqw;color:#fff;font-weight:700;background:var(--${v>=0?"up":"down"})">${v>=0?"순매수":"순매도"}</div>`).join("")}
     <div class="vline" style="left:23%;top:2cqw;height:15cqw"></div><div class="vline" style="left:48.8%;top:2cqw;height:15cqw"></div><div class="vline" style="left:73.4%;top:2cqw;height:15cqw"></div></section>
@@ -1478,7 +1488,7 @@ function route(){
   if(name==="search"){ renderSearch(); }
   if(name==="cal"){ renderCal(); window.scrollTo(0,0); }
   document.body.classList.toggle("about-on",name==="about"); if(name==="about"){ abShow(null); window.scrollTo(0,0); abFit(); }
-  if(name==="today"){ renderToday(M.today); $("#gjNote").textContent=M.today.sample?"견본 숫자예요. 실제 데이터 연결 전입니다.":`${M.today.date} 장 마감 기준 · 하루 한 번 갱신`; window.scrollTo(0,0); }
+  if(name==="today"){ renderToday(M.today); $("#gjNote").textContent=M.today.sample?"견본 숫자예요.":`${M.today.date} ${M.today.closed===false?"장중 (잠정)":"장 마감 기준"} · 실행할 때마다 갱신`; window.scrollTo(0,0); }
   if(name==="home"){ drawSpark(); }
 }
 window.addEventListener("hashchange",route);

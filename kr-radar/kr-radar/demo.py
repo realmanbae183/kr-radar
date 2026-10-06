@@ -122,7 +122,7 @@ class DemoProvider:
         df = pd.DataFrame({"Open": c, "High": c, "Low": c, "Close": c, "Volume": 1.0}, index=self.days)
         return Fetch(True, df.tail(bars) if bars else df)
 
-    def today(self):
+    def today(self, recs=None):
         """오늘의 국장 견본 (2026-10-01 값)."""
         return {"sample": True, "date": "10월 1일", "dow": "목",
                 "idx": [{"n": "코스피", "v": 6971.35, "c": 133.31, "p": 1.95, "hi": 6971.36, "lo": 6768.66},

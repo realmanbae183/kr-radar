@@ -737,6 +737,96 @@ PROBE_URLS = {
 
 
 API2 = "https://api.stock.naver.com"
+DOW_KR = "월화수목금토일"
+
+
+def _info(items, code: str):
+    for x in items or []:
+        if str(x.get("code", "")).lower() == code.lower():
+            return to_num(x.get("value"))
+    return None
+
+
+def parse_today_index(name: str, basic: dict, integ: dict, minute: list | None) -> dict:
+    """지수 한 개: 종가·등락·장중 최고/최저·장중 흐름(선 그래프용)."""
+    v, c, p = to_num(basic.get("closePrice")), to_num(basic.get("compareToPreviousClosePrice")), to_num(basic.get("fluctuationsRatio"))
+    if v is None or c is None:
+        raise RuntimeError(f"{name} 지수 값을 못 읽음")
+    ti = integ.get("totalInfos") if isinstance(integ, dict) else None
+    line = [float(x["currentPrice"]) for x in (minute or []) if x.get("currentPrice") is not None]
+    hi, lo = _info(ti, "highPrice"), _info(ti, "lowPrice")
+    if line:
+        hi, lo = max(hi or v, max(line)), min(lo or v, min(line))
+        step = max(1, len(line) // 80)
+        line = [round(x, 2) for x in line[::step]] + [v]
+    return {"n": name, "v": v, "c": c, "p": p if p is not None else 0.0, "hi": hi or v, "lo": lo or v, "line": line,
+            "status": basic.get("marketStatus"), "at": str(basic.get("localTradedAt") or "")}
+
+
+def parse_today_flow(trend: dict) -> list:
+    out = []
+    for label, key, field in (("개인", "ind", "personalValue"), ("외국인", "for", "foreignValue"), ("기관", "ins", "institutionalValue")):
+        n = to_num(trend.get(field))
+        if n is None:
+            raise RuntimeError("투자자 동향 값을 못 읽음")
+        out.append([label, key, n])
+    return out
+
+
+def parse_today_market(name: str, icon: str, j: dict, high_label: str | None = None) -> dict:
+    d = j.get("exchangeInfo", j)
+    c, p = to_num(d.get("fluctuations")), to_num(d.get("fluctuationsRatio"))
+    if d.get("closePrice") is None or c is None:
+        raise RuntimeError(f"{name} 값을 못 읽음")
+    out = {"n": name, "i": icon, "v": str(d["closePrice"]), "c": c, "p": p or 0.0}
+    hi = d.get("highPriceOf52Weeks") or next((x.get("value") for x in d.get("marketIndexTotalInfos") or [] if str(x.get("code", "")).lower() == "highpriceof52weeks"), None)
+    if high_label and hi:
+        out["s"] = f"{high_label}<br>{hi}"
+    return out
+
+
+def parse_today_sectors(industry: dict, sector_marcap: dict) -> list:
+    """시가총액이 큰 업종 10개와 그날 등락률. 시가총액은 우리 종목 명단의 업종별 합계."""
+    rate = {g["name"]: to_num(g.get("changeRate")) for g in industry.get("groups", [])}
+    top = [(n, m) for n, m in sorted(sector_marcap.items(), key=lambda x: -x[1]) if rate.get(n) is not None][:10]
+    if len(top) < 6:
+        raise RuntimeError(f"업종 등락률을 {len(top)}개밖에 못 맞춤")
+    return [[n.replace("반도체와반도체장비", "반도체와<br>반도체장비"), rate[n], round(m)] for n, m in top]
+
+
+def fetch_today(sector_marcap: dict) -> dict:
+    """오늘의 국장 한 장에 들어갈 숫자. 지수는 꼭 있어야 하고, 나머지는 빠지면 그 칸만 비운다."""
+    idx, errs = [], []
+    for code, name in (("KOSPI", "코스피"), ("KOSDAQ", "코스닥")):
+        basic = get_json(f"{MOBILE}/api/index/{code}/basic")
+        try:
+            integ = get_json(f"{MOBILE}/api/index/{code}/integration")
+        except Exception as e:
+            integ, _ = {}, errs.append(f"{name} 종합: {e}")
+        try:
+            minute = get_json(f"{API2}/chart/domestic/index/{code}/minute")
+        except Exception as e:
+            minute, _ = [], errs.append(f"{name} 장중 흐름: {e}")
+        idx.append(parse_today_index(name, basic, integ, minute if isinstance(minute, list) else []))
+    day = idx[0]["at"][:10]
+    y, m, d = map(int, day.split("-"))
+    out = {"date": f"{m}월 {d}일", "dow": DOW_KR[datetime(y, m, d).weekday()], "day": day, "closed": idx[0]["status"] == "CLOSE",
+           "idx": idx, "glob": [], "mood": [], "sec": [], "flow": [], "errors": errs}
+    try:
+        out["flow"] = parse_today_flow(get_json(f"{MOBILE}/api/index/KOSPI/trend"))
+    except Exception as e:
+        errs.append(f"투자자 동향: {e}")
+    for name, icon, path, hl in (("미국 USD", "usa", "exchange/FX_USDKRW", None), ("달러인덱스", "earth", "exchange/.DXY", None),
+                                 ("국제 금", "gold", "metals/GCcv1", "52주 최고"), ("WTI", "oil", "energy/CLcv1", "52주 최고")):
+        try:
+            out["glob"].append(parse_today_market(name, icon, get_json(f"{API2}/marketindex/{path}"), hl))
+        except Exception as e:
+            errs.append(f"{name}: {e}")
+    try:
+        out["sec"] = parse_today_sectors(get_json(f"{MOBILE}/api/stocks/industry?page=1&pageSize=100"), sector_marcap)
+    except Exception as e:
+        errs.append(f"업종: {e}")
+    return out
 MARKET_PROBE_URLS = {      # 종목과 상관없는 시장 전체 주소 후보 (어느 것이 살아 있는지 확인용)
     "mk_kospi_basic": MOBILE + "/api/index/KOSPI/basic",
     "mk_kosdaq_basic": MOBILE + "/api/index/KOSDAQ/basic",
@@ -765,6 +855,15 @@ MARKET_PROBE_URLS = {      # 종목과 상관없는 시장 전체 주소 후보 
     "mk_kind_newlist": "https://kind.krx.co.kr/listinvstg/listingcompany.do?method=searchListingTypeMain",
     "mk_nasdaq_earn": "https://api.nasdaq.com/api/calendar/earnings?date=" + datetime.now().strftime("%Y-%m-%d"),
     "mk_dart_earn_notice": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=" + (datetime.now() - timedelta(days=20)).strftime("%Y%m%d"),
+    "mk_dep_1": MOBILE + "/api/domestic/capital",
+    "mk_dep_2": MOBILE + "/api/stocks/deposit",
+    "mk_dep_3": MOBILE + "/api/domestic/deposit?page=1&pageSize=10",
+    "mk_dep_4": API2 + "/domestic/deposit",
+    "mk_dep_5": API2 + "/stock/domestic/deposit?page=1&pageSize=10",
+    "mk_dep_6": "https://stock.naver.com/api/domestic/market/stock/deposit?page=1&pageSize=10",
+    "mk_dep_7": "https://stock.naver.com/api/domestic/market/deposit",
+    "mk_dep_8": MOBILE + "/front-api/market/stock/kr/deposit?page=1&pageSize=10",
+    "mk_dep_page": "https://stock.naver.com/market/stock/kr/deposit",
     "mk_page_home": "https://stock.naver.com/domestic",
     "mk_page_capital": "https://stock.naver.com/domestic/capital",
     "mk_page_industry": "https://stock.naver.com/domestic/industry",
@@ -774,7 +873,26 @@ MARKET_PROBE_URLS = {      # 종목과 상관없는 시장 전체 주소 후보 
 }
 
 
+FREESIS = "https://freesis.kofia.or.kr/meta/getMetaDataList.do"
+FREESIS_OBJS = {"mk_freesis_fund": "STATSCU0100000060BO", "mk_freesis_credit": "STATSCU0100000070BO"}   # 증시자금추이, 신용공여 잔고
+
+
+def freesis_post(obj: str, days: int = 20):
+    end = datetime.now()
+    body = {"dmSearch": {"tmpV40": "1000000", "tmpV41": "1", "tmpV1": "D", "tmpV45": (end - timedelta(days=days)).strftime("%Y%m%d"),
+                         "tmpV46": end.strftime("%Y%m%d"), "OBJ_NM": obj}}
+    return _session().post(FREESIS, json=body, headers={"Referer": "https://freesis.kofia.or.kr/", "Accept": "application/json"}, timeout=20)
+
+
 def probe_market(out_dir: str, summary: dict) -> None:
+    for name, obj in FREESIS_OBJS.items():
+        try:
+            r = freesis_post(obj)
+            with open(os.path.join(out_dir, f"{name}.txt"), "w", encoding="utf-8") as f:
+                f.write(f"URL: {FREESIS} (POST {obj})\nSTATUS: {r.status_code}\nTYPE: {r.headers.get('content-type')}\n\n" + r.text[:60_000])
+            summary["results"][f"{name}.txt"] = {"status": r.status_code, "bytes": len(r.content)}
+        except Exception as e:
+            summary["results"][name] = {"error": str(e)[:200]}
     for name, url in MARKET_PROBE_URLS.items():
         try:
             if "{DART}" in url:

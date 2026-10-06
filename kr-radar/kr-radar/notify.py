@@ -1,5 +1,7 @@
 """
-notify.py — 텔레그램 알림. 정식 실행(장 마감 후) 때만, '새로 뜬 것'만 보낸다.
+notify.py — 텔레그램 알림.
+  alert_top : A·B 등급 과매도가 새로 뜨면 장중 실행(30분마다) 때도 바로 보낸다. 보낸 것은 cache/alerted.json 에 적어 두 번 안 보낸다.
+  run       : 정식 실행(장 마감 후) 때 '새로 뜬 것' 요약.
   새 과매도 후보(2개 이상 겹침) · 새 돌파 후보 · 오늘 시장 폭
 어제까지의 목록은 state/prev_signals.json 에 저장해 두고 비교한다.
 TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_ID 가 없으면 아무것도 안 보낸다.
@@ -96,3 +98,48 @@ def run(recs: list[dict], meta: dict) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
         json.dump(state, f, ensure_ascii=False, indent=0)
+
+
+def top_new(recs: list[dict], sent: set) -> tuple[list[dict], set]:
+    """A·B 등급 과매도 후보 가운데 아직 알리지 않은 것."""
+    now = {}
+    for r in recs:
+        o = (r.get("sig") or {}).get("os") or {}
+        e = o.get("event")
+        if e and e["n"] >= C.OS_MIN_COUNT and o.get("grade") in ("A", "B"):
+            now[r["code"] + "@" + e["date"]] = r
+    fresh = [now[k] for k in now if k not in sent]
+    fresh.sort(key=lambda r: (r["sig"]["os"]["grade"], -(r["sig"]["os"]["hist"] or {}).get("w5", 0)))
+    return fresh, sent | set(now)
+
+
+def alert_top(recs: list[dict], meta: dict) -> None:
+    path = os.path.join(HERE, "cache", "alerted.json")
+    try:
+        with open(path, encoding="utf-8") as f:
+            sent = set(json.load(f))
+    except (FileNotFoundError, json.JSONDecodeError, TypeError):
+        sent = set()
+    fresh, sent = top_new(recs, sent)
+    if fresh:
+        live = meta.get("run_kind") != "full"
+        lines = [f"🔔 A·B 등급 과매도 새로 {len(fresh)}종목" + (" (장중 잠정)" if live else ""),
+                 f"시장 폭 {meta['market'].get('breadth')}%"]
+        for r in fresh[:12]:
+            o = r["sig"]["os"]
+            e, st = o["event"], r["sig"]["stats"]
+            v = r.get("verdict") or {}
+            mark = {"go": " ✅추천", "veto": " ⛔비추"}.get(v.get("key") if v.get("signal") == "os" else None, "")
+            lines.append(f"[{o['grade']}] {r['name']}({r['code']}) {st.get('close'):,.0f}원 {st.get('chg', 0):+.2f}%{mark}")
+            lines.append(f"     {e['n']}개 겹침 · {_hist_line(o['hist'])}")
+        if len(fresh) > 12:
+            lines.append(f"… 외 {len(fresh) - 12}종목")
+        url = os.getenv("SITE_URL")
+        if url:
+            lines += ["", url]
+        _send("\n".join(lines))
+    else:
+        print("[알림] 새로 뜬 A·B 등급 없음")
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(sorted(sent)[-3000:], f)

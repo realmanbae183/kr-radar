@@ -62,6 +62,17 @@ MANIFEST = {
 }
 
 
+def og_tags() -> str:
+    """카톡·문자·SNS에 링크를 붙였을 때 뜨는 미리보기 카드."""
+    site = (os.getenv("SITE_URL") or "https://realmanbae183.github.io/kr-radar/").rstrip("/") + "/"
+    title, desc = "버거대왕의 국장 레이더", "오늘의 국장 한 장, 증시캘린더, 과하게 빠진 종목의 과거 기록까지. 버거대왕과 버거2세가 매일 살펴요."
+    img = site + "assets/gj/og.jpg"
+    return (f'<meta name="description" content="{desc}">\n<meta property="og:type" content="website">\n<meta property="og:site_name" content="{title}">\n'
+            f'<meta property="og:title" content="{title}">\n<meta property="og:description" content="{desc}">\n<meta property="og:url" content="{site}">\n'
+            f'<meta property="og:image" content="{img}">\n<meta property="og:image:width" content="1200">\n<meta property="og:image:height" content="630">\n'
+            f'<meta name="twitter:card" content="summary_large_image">\n<meta name="twitter:image" content="{img}">\n')
+
+
 def find_image() -> str:
     for p in (os.path.join(HERE, "burger-king.png"), os.path.join(HERE, "web", "burger-king.png")):
         if os.path.exists(p):
@@ -102,6 +113,7 @@ def build(recs: list[dict], meta: dict, out_dir: str | None = None, inline_chart
         f.write(js)
     page = ('<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            + og_tags() +
             '<meta name="theme-color" content="#eaf3ff">\n'
             '<meta name="mobile-web-app-capable" content="yes">\n'
             '<meta name="apple-mobile-web-app-capable" content="yes">\n'

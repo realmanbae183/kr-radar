@@ -99,6 +99,13 @@ class NaverProvider:
     def flows(self, code, main=None):
         return S.fetch_flows(code, (main or {}).get("_flows"))
 
+    def today(self, recs=None):
+        cap = {}
+        for r in recs or []:
+            if r.get("sector") and r.get("marcap"):
+                cap[r["sector"]] = cap.get(r["sector"], 0) + r["marcap"]
+        return S.fetch_today(cap)
+
     def disclosures(self, code):
         if self.dart.ok:
             return self.dart.disclosures(code)
@@ -343,7 +350,9 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
         meta.setdefault("notes", []).append(f"증시캘린더 실패: {e}")
     if hasattr(provider, "today"):          # 오늘의 국장 (시장 요약 한 장)
         try:
-            meta["today"] = provider.today()
+            meta["today"] = provider.today(recs)
+            for msg in (meta["today"].get("errors") or [])[:4]:
+                meta.setdefault("notes", []).append("오늘의 국장 일부 실패 — " + str(msg)[:140])
         except Exception as e:
             meta.setdefault("notes", []).append(f"오늘의 국장 데이터 실패: {e}")
     return recs, meta
@@ -399,9 +408,11 @@ def main():
 
     import report
     report.build(recs, meta)
-    if not a.no_notify and not a.demo and meta["run_kind"] == "full" and not a.limit:
+    if not a.no_notify and not a.demo and not a.limit:
         import notify
-        notify.run(recs, meta)
+        notify.alert_top(recs, meta)                 # A·B 등급이 새로 뜨면 장중에도 바로
+        if meta["run_kind"] == "full":
+            notify.run(recs, meta)
 
 
 if __name__ == "__main__":
