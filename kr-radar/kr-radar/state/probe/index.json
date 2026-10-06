@@ -1,10 +1,10 @@
 {
- "at": "2026-10-06T05:12:15",
+ "at": "2026-10-06T05:56:12",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9240
+   "bytes": 9236
   },
   "005930_basic.txt": {
    "status": 200,
@@ -36,10 +36,8 @@
    "final": "https://m.stock.naver.com/api/stock/005930/disclosure?pageSize=20&page=1",
    "bytes": 3606
   },
-  "005930_wise_overview.txt": {
-   "status": 200,
-   "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930",
-   "bytes": 90660
+  "005930_wise_overview": {
+   "error": "HTTPSConnectionPool(host='navercomp.wisereport.co.kr', port=443): Max retries exceeded with url: /v2/company/c1010001.aspx?cmp_cd=005930 (Caused by ConnectTimeoutError(<HTTPSConnection(host='navercomp"
   },
   "005930_pc_main.txt": {
    "status": 200,
@@ -54,12 +52,12 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10079
+   "bytes": 10073
   },
   "247540_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/integration",
-   "bytes": 9423
+   "bytes": 9424
   },
   "247540_basic.txt": {
    "status": 200,
@@ -91,10 +89,8 @@
    "final": "https://m.stock.naver.com/api/stock/247540/disclosure?pageSize=20&page=1",
    "bytes": 3731
   },
-  "247540_wise_overview.txt": {
-   "status": 200,
-   "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=247540",
-   "bytes": 85722
+  "247540_wise_overview": {
+   "error": "HTTPSConnectionPool(host='navercomp.wisereport.co.kr', port=443): Max retries exceeded with url: /v2/company/c1010001.aspx?cmp_cd=247540 (Caused by ConnectTimeoutError(<HTTPSConnection(host='navercomp"
   },
   "247540_pc_main.txt": {
    "status": 200,
