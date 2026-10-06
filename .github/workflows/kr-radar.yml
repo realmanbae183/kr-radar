@@ -80,24 +80,29 @@ jobs:
       - name: 데이터 출처 원본 저장 (고칠 때 참고용)
         if: steps.mode.outputs.mode != 'intraday'
         continue-on-error: true
+        env:
+          DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: python run.py --probe > /dev/null
 
       - name: 데이터 출처 점검
         if: steps.mode.outputs.mode == 'diagnose'
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python run.py --diagnose
 
       - name: 장중 가벼운 실행
         if: steps.mode.outputs.mode == 'intraday'
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
         run: python run.py --intraday
 
       - name: 정식 실행 (코스피 전 종목 + 코스닥 150)
         if: steps.mode.outputs.mode == 'full'
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
