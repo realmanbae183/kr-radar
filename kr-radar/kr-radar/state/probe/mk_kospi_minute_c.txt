@@ -1,0 +1,9 @@
+URL: https://fchart.stock.naver.com/sise.nhn?symbol=KOSPI&timeframe=minute&count=420&requestType=0
+FINAL: https://fchart.stock.naver.com/sise.nhn?symbol=KOSPI&timeframe=minute&count=420&requestType=0
+STATUS: 200
+TYPE: text/xml;charset=EUC-KR
+
+
+
+<?xml version="1.0" encoding="EUC-KR" ?>
+<protocol />

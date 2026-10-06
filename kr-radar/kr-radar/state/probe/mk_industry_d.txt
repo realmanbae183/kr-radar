@@ -1,0 +1,6 @@
+URL: https://m.stock.naver.com/front-api/domestic/industry/marketValue?pageSize=10
+FINAL: https://m.stock.naver.com/front-api/domestic/industry/marketValue?pageSize=10
+STATUS: 404
+TYPE: application/json; charset=utf-8
+
+{"message":"Route GET:/front-api/domestic/industry/marketValue?pageSize=10 not found","error":"Not Found","statusCode":404}

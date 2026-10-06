@@ -1,0 +1,6 @@
+URL: https://m.stock.naver.com/front-api/calendar/list?type=week
+FINAL: https://m.stock.naver.com/front-api/calendar/list?type=week
+STATUS: 404
+TYPE: application/json; charset=utf-8
+
+{"message":"Route GET:/front-api/calendar/list?type=week not found","error":"Not Found","statusCode":404}

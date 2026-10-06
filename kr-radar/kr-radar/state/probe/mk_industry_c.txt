@@ -1,0 +1,5 @@
+URL: https://m.stock.naver.com/api/stocks/upjong?page=1&pageSize=100
+FINAL: https://m.stock.naver.com/api/stocks/upjong?page=1&pageSize=100
+STATUS: 404
+TYPE: None
+
