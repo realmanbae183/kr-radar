@@ -947,6 +947,11 @@ def probe(out_dir: str, codes=("005930", "247540")) -> dict:
             except Exception as e:
                 summary["results"][f"{code}_{name}"] = {"error": str(e)[:200]}
     try:
+        import kis
+        summary["results"].update(kis.probe(out_dir))
+    except Exception as e:
+        summary["results"]["kis_error"] = {"error": str(e)[:200]}
+    try:
         probe_market(out_dir, summary)
     except Exception as e:                       # 탐색이 실패해도 본 실행에는 영향 없게
         summary["results"]["mk_error"] = {"error": str(e)[:200]}
