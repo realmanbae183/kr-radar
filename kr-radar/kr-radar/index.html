@@ -1381,7 +1381,6 @@ function renderToday(D){
     ${D.mood.map((g,i)=>cell(g,[84,94][i],true)).join("")}<div class="vline" style="left:89%;top:5.4cqw;height:21cqw"></div>`:""}</section>
   <section class="panel" style="top:53.4%;height:23.6%">
     <div class="h" style="left:1.8%;top:1.2cqw">업종별 등락률 TOP 10 <span class="cap" style="position:static;font-size:1.9cqw">(${esc(D.sec_label||"시총 큰 업종")}, %)</span></div>
-    <div class="cap" style="right:46.6%;top:1.8cqw">등락률</div>
     <div class="lg">${[-10,-5,-3,-1,-0.5,0.5,1,3,5,10].map(p=>`<span style="${gheat(p)}">${p>0?"+":""}${p}%</span>`).join("")}</div>
     ${s.length<6?`<div class="cap" style="left:2%;top:10cqw;font-size:2.2cqw">업종 데이터를 받지 못했어요.</div>`:`<div class="tm"><div class="big" style="${gheat(s[0][1])}"><img src="assets/gj/chip.png" alt=""><div><span>${s[0][0]}</span><b class="num">${gsg(s[0][1])}${gf(s[0][1])}%</b></div></div>
       <div class="rt"><div class="rw">${s.slice(1,5).map(tile).join("")}</div><div class="rw">${s.slice(5).map(tile).join("")}</div></div></div>`}</section>
@@ -1391,7 +1390,7 @@ function renderToday(D){
     ${D.flow.map(([n,key,v],i)=>`<div class="iv" style="left:${fx[i]}%;top:1.4cqw"><span class="cap">${n}</span><img src="assets/gj/${key}_${v>=0?"up":"dn"}.png" alt="${n} ${v>=0?"순매수":"순매도"}"><b class="num ${gcl(v)}">${gsg(v)}${gf(v,0)}억</b></div>
       <div class="cap" style="left:${fx[i]+5.8}%;top:8.6cqw;padding:.5cqw 1.3cqw;border-radius:1.4cqw;color:#fff;font-weight:700;background:var(--${v>=0?"up":"down"})">${v>=0?"순매수":"순매도"}</div>`).join("")}
     <div class="vline" style="left:23%;top:2cqw;height:15cqw"></div><div class="vline" style="left:48.8%;top:2cqw;height:15cqw"></div><div class="vline" style="left:73.4%;top:2cqw;height:15cqw"></div></section>
-  <div class="note">※ 본 정보는 투자 참고용이며, 투자의 책임은 본인에게 있습니다.</div><div class="src">데이터: ${esc(D.src||"견본")}</div>`;
+  <div class="note">※ 본 정보는 투자 참고용이며, 투자의 책임은 본인에게 있습니다.</div>`;
 }
 
 function loadScript(src){ return new Promise((ok,no)=>{ if(window.htmlToImage) return ok(); const t=document.createElement("script"); t.src=src; t.onload=ok; t.onerror=()=>no(new Error("저장 도구를 못 불러왔어요")); document.head.appendChild(t); }); }

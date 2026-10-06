@@ -100,12 +100,12 @@ class NaverProvider:
         return S.fetch_flows(code, (main or {}).get("_flows"))
 
     def today(self, recs=None):
-        """오늘의 국장은 한국투자증권 공식 API로만 받는다. 키가 없으면 화면에서 그 메뉴를 감춘다."""
-        import kis
-        k, s = kis.keys()
-        if not (k and s):
-            raise RuntimeError("한국투자증권 키가 없어 건너뜀 (GitHub Secrets 에 KIS_APP_KEY, KIS_APP_SECRET 등록 필요)")
-        return kis.fetch_today(kis.Client(k, s))
+        """오늘의 국장: 지수·업종·투자자·환율 (네이버 증권). 예탁금·신용잔고는 당일 숫자를 구할 수 없어 넣지 않는다."""
+        cap = {}
+        for x in recs or []:
+            if x.get("sector") and x.get("marcap"):
+                cap[x["sector"]] = cap.get(x["sector"], 0) + x["marcap"]
+        return S.fetch_today(cap)
 
     def disclosures(self, code):
         if self.dart.ok:

@@ -702,35 +702,10 @@ def test_alert_top_only_new_a_b():
     assert [r["code"] for r in fresh2] == ["A3"] and len(sent2) == 3
 
 
-def test_kis_today_with_mocked_api(tmp_path):
-    import kis
-    from datetime import datetime
-    posts = []
-    def post(url, body):
-        posts.append(url); return {"access_token": "T", "expires_in": 86400}
-    def get(url, headers, params):
-        assert headers["authorization"] == "Bearer T" and headers["custtype"] == "P"
-        tr = headers["tr_id"]
-        if tr == "FHPUP02100000":
-            return {"rt_cd": "0", "output": {"bstp_nmix_prpr": "6941.39", "bstp_nmix_prdy_vrss": "62.35", "bstp_nmix_prdy_ctrt": "-0.89", "bstp_nmix_hgpr": "7044.67", "bstp_nmix_lwpr": "6897.38"}}
-        if tr == "FHKUP03500200":
-            return {"rt_cd": "0", "output2": [{"stck_bsop_date": "20261006", "stck_cntg_hour": f"{9 + i // 12:02d}{i % 12 * 5:02d}00", "bstp_nmix_prpr": str(7000 - i)} for i in range(40)][::-1]}
-        if tr == "FHPTJ04040000":
-            return {"rt_cd": "0", "output": [{"prsn_ntby_tr_pbmn": "744100", "frgn_ntby_tr_pbmn": "-1757500", "orgn_ntby_tr_pbmn": "-3900"}]}
-        if tr == "FHPUP02140000":
-            return {"rt_cd": "0", "output2": [{"hts_kor_isnm": "종합", "bstp_nmix_prdy_ctrt": "-0.89", "acml_tr_pbmn": "9999"}] + [{"hts_kor_isnm": f"업종{i}", "bstp_nmix_prdy_ctrt": str(i - 5), "acml_tr_pbmn": str(100 - i)} for i in range(12)]}
-        if tr == "FHKST649100C0":
-            return {"rt_cd": "0", "output": [{"cust_dpmn_amt": "1077257", "crdt_loan_rmnd": "325091"}, {"cust_dpmn_amt": "1044893", "crdt_loan_rmnd": "324428"}]}
-        if params["FID_INPUT_ISCD"] == "FX@KRW":
-            return {"rt_cd": "0", "output1": {"ovrs_nmix_prpr": "1339.30", "ovrs_nmix_prdy_vrss": "3.20", "prdy_vrss_sign": "5", "prdy_ctrt": "0.24"}}
-        return {"rt_cd": "1", "msg1": "없는 종목"}
-    cl = kis.Client("K", "S", cache_dir=str(tmp_path), post=post, get=get)
-    t = kis.fetch_today(cl, datetime(2026, 10, 6, 18, 0, tzinfo=kis.KST))
-    assert t["src"] == "한국투자증권 오픈API" and t["date"] == "10월 6일" and t["dow"] == "화" and t["closed"] is True
-    assert t["idx"][0]["v"] == 6941.39 and t["idx"][0]["c"] == -62.35 and len(t["idx"][0]["line"]) == 40 and t["idx"][0]["line"][0] == 7000.0
-    assert t["flow"] == [["개인", "ind", 7441], ["외국인", "for", -17575], ["기관", "ins", -39]]
-    assert len(t["sec"]) == 10 and t["sec"][0][0] == "업종0"
-    assert t["mood"][0] == {"n": "고객예탁금", "i": "cash", "v": "1,077,257억", "c": 32364.0} and t["mood"][1]["c"] == 663.0
-    assert t["glob"] == [{"n": "미국 USD", "i": "usa", "v": "1,339.30", "c": -3.2, "p": -0.24}] and len(t["errors"]) == 3
-    kis.Client("K", "S", cache_dir=str(tmp_path), post=post, get=get).token()
-    assert len(posts) == 1                       # 토큰은 저장해 두고 다시 쓴다
+def test_freesis_mood_from_real_shape():
+    import sources as S
+    fund = {"ds1": [{"TMPV1": "20261001", "TMPV2": 104637666}, {"TMPV1": "20261002", "TMPV2": 100842194}]}
+    credit = {"ds1": [{"TMPV1": "20261002", "TMPV2": 33628238}, {"TMPV1": "20261001", "TMPV2": 33480843}]}
+    m = S.parse_freesis_mood(fund, credit)
+    assert m[0] == {"n": "고객예탁금", "i": "cash", "v": "1,008,422억", "c": -37955, "asof": "10/2"}
+    assert m[1]["v"] == "336,282억" and m[1]["c"] == 1474

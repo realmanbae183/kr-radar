@@ -810,7 +810,7 @@ def fetch_today(sector_marcap: dict) -> dict:
         idx.append(parse_today_index(name, basic, integ, minute if isinstance(minute, list) else []))
     day = idx[0]["at"][:10]
     y, m, d = map(int, day.split("-"))
-    out = {"date": f"{m}월 {d}일", "dow": DOW_KR[datetime(y, m, d).weekday()], "day": day, "closed": idx[0]["status"] == "CLOSE",
+    out = {"src": "네이버 증권", "date": f"{m}월 {d}일", "dow": DOW_KR[datetime(y, m, d).weekday()], "day": day, "closed": idx[0]["status"] == "CLOSE",
            "idx": idx, "glob": [], "mood": [], "sec": [], "flow": [], "errors": errs}
     try:
         out["flow"] = parse_today_flow(get_json(f"{MOBILE}/api/index/KOSPI/trend"))
@@ -884,6 +884,26 @@ def freesis_post(obj: str, days: int = 20):
     return _session().post(FREESIS, json=body, headers={"Referer": "https://freesis.kofia.or.kr/", "Accept": "application/json"}, timeout=20)
 
 
+def parse_freesis_mood(fund: dict, credit: dict) -> list:
+    """금융투자협회 통계: 투자자예탁금(TMPV2)과 신용거래융자 잔고(TMPV2), 단위 백만원 → 억원. 최신일과 그 전날 차이."""
+    out = []
+    for label, icon, j in (("고객예탁금", "cash", fund), ("신용잔고", "graph", credit)):
+        rows = sorted((r for r in j.get("ds1") or [] if r.get("TMPV2") is not None), key=lambda r: str(r.get("TMPV1")), reverse=True)
+        if not rows:
+            continue
+        v = float(rows[0]["TMPV2"]) / 100
+        c = v - float(rows[1]["TMPV2"]) / 100 if len(rows) > 1 else 0.0
+        d = str(rows[0]["TMPV1"])
+        out.append({"n": label, "i": icon, "v": f"{v:,.0f}억", "c": round(c), "asof": f"{int(d[4:6])}/{int(d[6:8])}"})
+    if not out:
+        raise RuntimeError("금융투자협회 응답에서 예탁금·신용잔고를 못 읽음")
+    return out
+
+
+def fetch_mood_freesis() -> list:
+    return parse_freesis_mood(freesis_post(FREESIS_OBJS["mk_freesis_fund"]).json(), freesis_post(FREESIS_OBJS["mk_freesis_credit"]).json())
+
+
 def probe_market(out_dir: str, summary: dict) -> None:
     for name, obj in FREESIS_OBJS.items():
         try:
@@ -946,11 +966,6 @@ def probe(out_dir: str, codes=("005930", "247540")) -> dict:
                 summary["results"][fn] = {"status": r.status_code, "final": r.url, "bytes": len(raw)}
             except Exception as e:
                 summary["results"][f"{code}_{name}"] = {"error": str(e)[:200]}
-    try:
-        import kis
-        summary["results"].update(kis.probe(out_dir))
-    except Exception as e:
-        summary["results"]["kis_error"] = {"error": str(e)[:200]}
     try:
         probe_market(out_dir, summary)
     except Exception as e:                       # 탐색이 실패해도 본 실행에는 영향 없게
