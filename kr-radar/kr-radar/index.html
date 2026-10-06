@@ -462,6 +462,15 @@ main{padding-block:26px 64px}
 .filters input[type=search],.filters select{border:0;background:var(--card);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow)}
 .toggle{font-weight:500;color:var(--ink-soft)} .toggle input{accent-color:var(--navy)}
 .count-line{color:var(--ink-faint)}
+.rk-list{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.rk-row{display:grid;grid-template-columns:3.2em minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 14px;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.rk-row:last-child{border-bottom:0} .rk-row:hover{background:var(--paper-2)} .rk-row:focus-visible{outline:2px solid var(--navy);outline-offset:-2px}
+.rk-no{font-family:var(--f-num);font-weight:600;font-size:15px;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.rk-row.top .rk-no{color:var(--navy)}
+.rk-nm{min-width:0} .rk-nm b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-nm small{display:block;font-size:12px;color:var(--ink-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rk-val{text-align:right;font-family:var(--f-num);font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rk-val small{display:block;font-family:var(--f-body);font-weight:400;font-size:12px;color:var(--ink-faint)}
 .grid{gap:14px;grid-template-columns:repeat(auto-fill,minmax(310px,1fr))}
 .card{border-radius:22px;padding:18px;gap:12px}
 .card:hover{transform:translateY(-3px);box-shadow:0 2px 4px rgba(25,31,40,.05),0 16px 30px -16px rgba(25,31,40,.32)}
@@ -596,8 +605,16 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
       <button type="button" role="tab" id="tabOs" aria-selected="true">과매도</button>
       <button type="button" role="tab" id="tabNh" aria-selected="false">52주 신고가</button>
       <button type="button" role="tab" id="tabBo" aria-selected="false">거래량 실린 돌파</button>
+      <button type="button" role="tab" id="tabRk" aria-selected="false">순위</button>
     </div>
-    <div class="filters" role="group" aria-label="목록 거르기">
+    <div class="filters" id="rkBar" role="group" aria-label="순위 기준" hidden>
+      <select id="rkBy" aria-label="순위 기준"></select>
+      <select id="rkScope" aria-label="범위"></select>
+      <input type="search" id="rkQ" placeholder="순위 안에서 종목 찾기" aria-label="순위 안에서 찾기">
+      <label class="toggle" id="rkFinLbl"><input type="checkbox" id="rkFin"> 재무 상위 30% 안에서만</label>
+      <label class="toggle"><input type="checkbox" id="rkThin"> 거래 적은 종목 숨기기</label>
+    </div>
+    <div class="filters" id="listBar" role="group" aria-label="목록 거르기">
       <input type="search" id="q" placeholder="종목명·코드·초성 (예: ㅅㅅㅈㅈ)" aria-label="목록 안에서 찾기">
       <select id="mkt" aria-label="시장"><option value="all">코스피+코스닥</option><option value="KOSPI">코스피</option><option value="KOSDAQ">코스닥</option></select>
       <select id="sort" aria-label="정렬"><option value="grade">등급 순</option><option value="win">과거 승률 순</option><option value="recent">최근 신호 순</option><option value="deep">많이 빠진 순</option><option value="marcap">시가총액 순</option></select>
@@ -607,6 +624,7 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
     </div>
     <div class="count-line" id="tabNote"></div>
     <div class="grid" id="rows"></div>
+    <div class="rk-list" id="rkRows" hidden></div>
     <button class="more" id="moreBtn" type="button" hidden>더 보기</button>
   </div>
 
@@ -809,10 +827,58 @@ function cardHtml(s,p,tab,rank){
       <div class="coin g${g||"N"}" title="${g?`과거 같은 상태의 5일 승률 등급 ${g}`:"등급 없음"}"><div><b>${g||"–"}</b><small>등급</small></div></div></div></button>`;
 }
 function rowHtml(x,i){ return cardHtml(x.s,x.p,st.tab,i+1); }
+
+/* ── 순위 ── */
+const rk={by:"fin", scope:"all", q:"", fin:false, thin:false, shown:50};
+const fitem=(s,k)=>(s.fin?.items||[]).find(i=>i.key===k);
+const RK=[
+  {k:"fin", g:"재무", n:"재무 종합 점수", v:s=>s.fin?.score, d:-1, show:v=>v+"점", note:"재무 점수가 높은 순서예요. 점수는 기준값이 아니라 다른 종목을 얼마나 이겼는지로 매겨요. PER·PBR은 같은 업종끼리 비교했어요."},
+  ...Object.keys(FT).map(k=>({k:"f_"+k, g:"재무", n:FT[k].name, v:s=>{const i=fitem(s,k); return i&&i.status==="ok"?i.pct:null;}, d:-1, show:(v,s)=>fitem(s,k).display, sub:v=>`${v}% 이김`, note:`${FT[k].name}: ${FT[k].explain}. 좋은 쪽이 위로 오게 줄 세웠어요.`})),
+  {k:"risk", g:"악재", n:"악재 점수 (깨끗한 순)", v:s=>s.risk?.score, d:-1, show:v=>v+"점", note:"악재 스크리닝 점수가 높은(걸린 게 적은) 순서예요. 100점이면 공시·실적·수급에서 걸린 게 없다는 뜻이에요."},
+  {k:"rsi", g:"차트", chart:1, n:"RSI 낮은 순", v:s=>s.sig?.stats?.rsi, d:1, show:v=>v.toFixed(1), note:"RSI가 낮을수록 최근에 많이 빠졌다는 뜻이에요. 1등이 가장 좋다는 뜻이 아니라 가장 많이 빠졌다는 뜻이에요."},
+  {k:"gap", g:"차트", chart:1, n:"20일선에서 많이 떨어진 순", v:s=>s.sig?.stats?.gap, d:1, show:v=>pct(v), note:"주가가 20일 평균보다 얼마나 아래에 있는지예요. 1등이 가장 좋다는 뜻이 아니라 가장 많이 떨어져 있다는 뜻이에요."},
+  {k:"dd", g:"차트", chart:1, n:"고점 대비 많이 빠진 순", v:s=>s.sig?.stats?.drawdown, d:1, show:v=>pct(v), note:"최근 고점에서 얼마나 내려왔는지예요. 많이 빠진 순서일 뿐, 싸다는 뜻은 아니에요."},
+  {k:"marcap", g:"크기", n:"시가총액", v:s=>s.marcap, d:-1, show:v=>v>=10000?(v/10000).toFixed(1)+"조":Math.round(v).toLocaleString()+"억", note:"시가총액이 큰 순서예요."},
+];
+function rkSetup(){
+  const gs=[...new Set(RK.map(r=>r.g))];
+  $("#rkBy").innerHTML=gs.map(g=>`<optgroup label="${g}">${RK.filter(r=>r.g===g).map(r=>`<option value="${r.k}">${esc(r.n)}</option>`).join("")}</optgroup>`).join("");
+  const sec={}; S.forEach(s=>{ if(s.sector) sec[s.sector]=(sec[s.sector]||0)+1; });
+  const secs=Object.keys(sec).filter(k=>sec[k]>=(RU.sector_min||8)).sort((a,b)=>a.localeCompare(b,"ko"));
+  $("#rkScope").innerHTML=`<option value="all">전 종목</option><option value="KL">코스피 대형</option><option value="KM">코스피 중소형</option><option value="KQ">코스닥 150</option>`+(secs.length?`<optgroup label="같은 업종끼리">${secs.map(k=>`<option value="s:${esc(k)}">${esc(k)} (${sec[k]})</option>`).join("")}</optgroup>`:"");
+  $("#rkBy").addEventListener("change",e=>{rk.by=e.target.value;rk.shown=50;renderRank();});
+  $("#rkScope").addEventListener("change",e=>{rk.scope=e.target.value;rk.shown=50;renderRank();});
+  $("#rkQ").addEventListener("input",e=>{rk.q=e.target.value;rk.shown=50;renderRank();});
+  $("#rkFin").addEventListener("change",e=>{rk.fin=e.target.checked;rk.shown=50;renderRank();});
+  $("#rkThin").addEventListener("change",e=>{rk.thin=e.target.checked;rk.shown=50;renderRank();});
+  $("#rkRows").addEventListener("click",e=>{ const b=e.target.closest("[data-code]"); if(b) location.hash="stock-"+b.dataset.code;});
+}
+function renderRank(){
+  const c=RK.find(r=>r.k===rk.by)||RK[0];
+  $("#rkFinLbl").hidden=!c.chart;
+  let a=S.filter(s=>rk.scope==="all"? true : rk.scope.startsWith("s:")? s.sector===rk.scope.slice(2) : s.group===rk.scope);
+  if(rk.thin) a=a.filter(s=>!s.sig?.stats?.low_value);
+  if(c.chart && rk.fin) a=a.filter(s=>s.fin?.rank && s.fin.rank.bottom_pct>=70);
+  const total=a.length;
+  a=a.map(s=>({s,v:c.v(s)})).filter(x=>x.v!=null && !Number.isNaN(x.v));
+  a.sort((x,y)=>c.d*(x.v-y.v) || (y.s.marcap||0)-(x.s.marcap||0));
+  a.forEach((x,i)=>{ x.no = i && a[i-1].v===x.v ? a[i-1].no : i+1; });
+  const n=a.length, shown=a.filter(x=>matches(x.s,rk.q));
+  const scopeName=rk.scope==="all"?"전 종목":rk.scope.startsWith("s:")?rk.scope.slice(2):GN[rk.scope];
+  $("#tabNote").textContent=`${c.note} ${scopeName} ${cnt(n)}종목 중 순위예요.${total>n?` 데이터가 없는 ${total-n}종목은 뺐어요.`:""}${c.chart&&rk.fin?" 재무 점수가 전 종목 상위 30% 안인 종목만 남겼어요.":""}`;
+  $("#rkRows").innerHTML = shown.length? shown.slice(0,rk.shown).map(x=>{ const s=x.s, sub=c.sub?c.sub(x.v,s):c.chart?`${cnt(n)}종목 중`:`상위 ${Math.max(1,Math.round(x.no/n*100))}%`;
+    return `<button class="rk-row${x.no<=3?" top":""}" type="button" data-code="${esc(s.code)}"><span class="rk-no">${x.no}</span>
+      <span class="rk-nm"><b>${esc(s.name)}</b><small>${esc(GN[s.group]||mktName(s.market))}${s.sector?" · "+esc(s.sector):""}</small></span>
+      <span class="rk-val">${esc(c.show(x.v,s))}<small>${esc(sub)}</small></span></button>`; }).join("") : `<p class="empty">조건에 맞는 종목이 없어요.</p>`;
+  $("#moreBtn").hidden=shown.length<=rk.shown; $("#moreBtn").textContent=`더 보기 (${shown.length-rk.shown}종목)`;
+}
 function renderList(){
-  const a=candidates();
+  const a=st.tab==="rank"?[]:candidates();
   $("#tabOs").textContent=`과매도 ${M.os_count??0}`; $("#tabNh").textContent=`52주 신고가 ${M.nh_count??0}`; $("#tabBo").textContent=`거래량 실린 돌파 ${M.bo_count??0}`;
-  [["os","#tabOs"],["nh","#tabNh"],["bo","#tabBo"]].forEach(([k,id])=>$(id).setAttribute("aria-selected",st.tab===k));
+  [["os","#tabOs"],["nh","#tabNh"],["bo","#tabBo"],["rank","#tabRk"]].forEach(([k,id])=>$(id).setAttribute("aria-selected",st.tab===k));
+  const isRk=st.tab==="rank"; $("#listBar").hidden=isRk; $("#rows").hidden=isRk; $("#rkBar").hidden=!isRk; $("#rkRows").hidden=!isRk;
+  $("#h-cand").textContent=isRk?"순위":"오늘의 후보";
+  if(isRk){ renderRank(); return; }
   $("#weakLbl").hidden = st.tab!=="os";
   $("#tabNote").textContent = st.tab==="os"
     ? `최근 ${RU.lookback||5}거래일 안에 과매도 조건(RSI ${RU.os_rsi} 아래 · 볼린저 하단 이탈 · 20일선 대비 -${RU.os_gap}%)이 새로 켜진 종목. 두 개 이상 겹친 것만 보여줘요. 등급은 그 종목이 속한 묶음(코스피 대형·중소형·코스닥 150)에서 과거 같은 상태였던 날들의 5일 승률(A ${RU.grade?.A}% 이상, B ${RU.grade?.B}%, C ${RU.grade?.C}%)이에요.`
@@ -832,7 +898,9 @@ function bindList(){
   $("#weak").addEventListener("change",e=>{st.weak=e.target.checked;saveSt();renderList();});
   $("#onlyGo").addEventListener("change",e=>{st.onlyGo=e.target.checked;saveSt();renderList();});
   $("#hideThin").addEventListener("change",e=>{st.hideThin=e.target.checked;saveSt();renderList();});
-  $("#moreBtn").addEventListener("click",()=>{st.shown+=40;renderList();});
+  $("#tabRk").addEventListener("click",()=>{st.tab="rank";renderList();});
+  rkSetup();
+  $("#moreBtn").addEventListener("click",()=>{ if(st.tab==="rank") rk.shown+=50; else st.shown+=40; renderList();});
   $("#rows").addEventListener("click",e=>{ const b=e.target.closest(".card"); if(b) location.hash="stock-"+b.dataset.code;});
   $("#mkt").value=st.mkt; $("#sort").value=st.sort; $("#weak").checked=st.weak; $("#onlyGo").checked=st.onlyGo; $("#hideThin").checked=st.hideThin;
 }
