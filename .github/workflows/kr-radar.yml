@@ -37,7 +37,7 @@ defaults:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -94,7 +94,7 @@ jobs:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
         run: python run.py --intraday
 
-      - name: 정식 실행 (350종목)
+      - name: 정식 실행 (코스피 전 종목 + 코스닥 150)
         if: steps.mode.outputs.mode == 'full'
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
