@@ -73,8 +73,10 @@ def depth_note(rsi, gap) -> str | None:
     return " · ".join(notes) or None
 
 
-def analyze(d: pd.DataFrame, breadth: pd.Series, market: pd.DataFrame, table: dict | None) -> dict:
-    """d: indicators.compute_all 을 거친 일봉."""
+def analyze(d: pd.DataFrame, breadth: pd.Series, market: pd.DataFrame, table: dict | None, group: str | None = None) -> dict:
+    """d: indicators.compute_all 을 거친 일봉. group: 종목 묶음(KL/KM/KQ) — 그 묶음의 과거 기록으로 등급을 매긴다."""
+    full_table = table
+    table = H.for_group(table, group)
     last = d.iloc[-1]
     n = len(d)
     close = float(last["Close"])
@@ -120,6 +122,23 @@ def analyze(d: pd.DataFrame, breadth: pd.Series, market: pd.DataFrame, table: di
               "hist": look["stat"], "hist_key": look["key"], "hist_label": cell_label(look["key"]),
               "hist_level": look["level"], "grade": H.grade(look["stat"])}
 
+    # ── 52주 신고가 돌파 ──
+    nh = None
+    ago = _last_event(d["nh_event"] & d["valid"], C.SIGNAL_LOOKBACK)
+    if ago is not None:
+        t = n - 1 - ago
+        e = d.iloc[t]
+        bucket = I.breadth_bucket(br.iloc[t])
+        if close >= float(e["Close"]) * 0.95:                                 # 돌파 뒤 5% 넘게 밀렸으면 무효
+            look = H.lookup_nh(table, bucket)
+            nh = {"ago": ago, "date": d.index[t].strftime("%Y-%m-%d"), "close": _f(e["Close"], 0),
+                  "ret_since": _f((close / e["Close"] - 1) * 100, 1), "vol_mult": _f(e["vol_mult"], 1),
+                  "trend_up": bool(e["trend_up"]), "breadth": _f(br.iloc[t], 1), "bucket": bucket,
+                  "market_ok": bucket == "ge50",
+                  "hist": look["stat"], "hist_key": look["key"], "hist_level": look["level"],
+                  "hist_label": "52주 신고가 돌파" + ("" if look["key"] == "*" else " · " + BUCKET_NAMES[look["key"]]),
+                  "grade": H.grade(look["stat"])}
+
     # ── 구름대 (목표가 참고) ──
     cloud = None
     top, bot = last["cloud_top"], last["cloud_bot"]
@@ -137,12 +156,12 @@ def analyze(d: pd.DataFrame, breadth: pd.Series, market: pd.DataFrame, table: di
                 cloud = {"entered_ago": ago, "conds": conds, "count": cnt,
                          "top": _f(top, 0), "bot": _f(bot, 0),
                          "up_room": _f((top / close - 1) * 100, 1), "down_room": _f((close / bot - 1) * 100, 1),
-                         "hist": ((table or {}).get("cloud") or {}).get(key)}
+                         "hist": ((full_table or {}).get("cloud") or {}).get(key)}
 
     position = "구름 위" if (not pd.isna(top) and close >= top) else "구름 안" if (not pd.isna(bot) and close >= bot) else \
         "구름 아래" if not pd.isna(bot) else None
     return {
-        "os": os_, "bo": bo, "cloud": cloud,
+        "os": os_, "bo": bo, "nh": nh, "cloud": cloud, "group": group,
         "trend_up": bool(last["trend_up"]),
         "stats": {
             "close": _f(close, 0), "chg": _f(last["chg"]), "date": d.index[-1].strftime("%Y-%m-%d"),
@@ -153,6 +172,7 @@ def analyze(d: pd.DataFrame, breadth: pd.Series, market: pd.DataFrame, table: di
             if n > C.TREND_SLOPE_DAYS + 1 and not pd.isna(d["ma120"].iloc[-1 - C.TREND_SLOPE_DAYS]) else None,
             "drawdown": _f((close / d["High"].iloc[-250:].max() - 1) * 100, 1),
             "vol_mult": _f(last["vol_mult"], 1), "cloud_pos": position,
+            "value20": _f(last["value20"], 1), "low_value": bool(last["value20"] < C.LOW_VALUE_EOK) if not pd.isna(last["value20"]) else None,
         },
         "chart": chart_payload(d),
     }
@@ -168,6 +188,8 @@ def chart_payload(d: pd.DataFrame) -> dict:
         marks.append({"i": int(i), "k": "os", "n": int(t["n_os"].iloc[i])})
     for i in np.flatnonzero((t["bo_event"] & t["valid"]).to_numpy()):
         marks.append({"i": int(i), "k": "bo"})
+    for i in np.flatnonzero((t["nh_event"] & t["valid"]).to_numpy()):
+        marks.append({"i": int(i), "k": "nh"})
     return {
         "d": [x.strftime("%y%m%d") for x in t.index],
         "o": r0(t["Open"]), "h": r0(t["High"]), "l": r0(t["Low"]), "c": r0(t["Close"]),
@@ -202,5 +224,6 @@ def market_summary(breadth: pd.Series, market: pd.DataFrame, table: dict | None,
         "vol": _f(last["vol"], 1) if last is not None else None,
         # 오늘 같은 시장 폭에서 과매도 2개 겹침의 과거 성과 (종목 추세 무관) 와 기준선
         "os2_here": os2.get(f"2|*|{bucket}"), "os3_here": os2.get(f"3|*|{bucket}"),
+        "nh_here": ((table or {}).get("nh") or {}).get(bucket),
         "base_here": base.get(bucket), "base_all": base.get("all"),
     }

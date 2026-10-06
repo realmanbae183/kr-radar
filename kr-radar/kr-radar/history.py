@@ -89,7 +89,7 @@ class Bag:
 def build(prepared: dict[str, pd.DataFrame], breadth: pd.Series, market: pd.DataFrame,
           info: dict[str, dict]) -> dict:
     """prepared: 종목코드 → compute_all 을 거친 일봉(가능한 길게). 반환: 성과표(dict)."""
-    base, osb, single, bob, hold = Bag(), Bag(), Bag(), Bag(), Bag()
+    base, osb, single, bob, hold, nhb, chase = Bag(), Bag(), Bag(), Bag(), Bag(), Bag(), Bag()
     cloud_rows: list[tuple[int, str]] = []
     bcount = {"lt30": 0, "30_50": 0, "ge50": 0}
     bb = breadth.map(I.breadth_bucket)
@@ -149,6 +149,17 @@ def build(prepared: dict[str, pd.DataFrame], breadth: pd.Series, market: pd.Data
             for mname, mm in (("both_up", both_up), ("other", ~both_up)):
                 bob.add(f"{t}|{mname}", bo & tm & mm, cols)
 
+        # 52주 신고가 돌파: 시장 폭별 (과매도와 반대로 시장이 멀쩡할 때 통했다)
+        nh = d["nh_event"].to_numpy() & valid
+        nhb.add("*", nh, cols)
+        for b in ("lt30", "30_50", "ge50"):
+            nhb.add(b, nh & (bk == b), cols)
+        # 거래량 급등 추격 (코스닥150에서만 플러스, 코스피 중소형에서는 손해 — 묶음별 표에서 확인용)
+        vm = d["vol_mult"]
+        up_day = ((d["Close"] > d["Open"]) & (d["Close"] > d["Close"].shift(1))).fillna(False)
+        chase.add("vol3", ((vm >= 3) & up_day).fillna(False).to_numpy() & valid, cols)
+        chase.add("vol2", ((vm >= 2) & up_day).fillna(False).to_numpy() & valid, cols)
+
         # 구름대 진입 뒤 20일: 상단에 먼저 닿나, 하단 아래로 먼저 빠지나
         top, bot = d["cloud_top"].to_numpy(float), d["cloud_bot"].to_numpy(float)
         for t in np.flatnonzero(d["cloud_in"].to_numpy() & valid):
@@ -171,7 +182,11 @@ def build(prepared: dict[str, pd.DataFrame], breadth: pd.Series, market: pd.Data
         if m2.any():
             hold.add(mkt_name, m2, {"mae60": mae60, "r5": cols["r5"], "date": dates})
 
-    table: dict = {"baseline": {}, "os": {}, "single": {}, "bo": {}, "cloud": {}, "hold": {}}
+    table: dict = {"baseline": {}, "os": {}, "single": {}, "bo": {}, "cloud": {}, "hold": {}, "nh": {}, "chase": {}}
+    for k in nhb.d:
+        table["nh"][k] = nhb.stat(k)
+    for k in chase.d:
+        table["chase"][k] = chase.stat(k)
     for k in base.d:
         table["baseline"][k] = base.stat(k)
     for k in osb.d:
@@ -203,6 +218,35 @@ def build(prepared: dict[str, pd.DataFrame], breadth: pd.Series, market: pd.Data
         "breadth_days": bcount,
     }
     return table
+
+
+def build_all(prepared: dict[str, pd.DataFrame], breadth: pd.Series, market: pd.DataFrame, info: dict[str, dict]) -> dict:
+    """전 종목 표 + 묶음별(KL/KM/KQ) 표. 묶음 표는 table["groups"][묶음] 에 들어간다."""
+    table = build(prepared, breadth, market, info)
+    table["groups"] = {}
+    for g in C.GROUP_NAMES:
+        sub = {c: d for c, d in prepared.items() if (info.get(c) or {}).get("group") == g}
+        if len(sub) >= 20:
+            t = build(sub, breadth, market, info)
+            t.pop("cloud", None)
+            table["groups"][g] = t
+    return table
+
+
+def for_group(table: dict | None, group: str | None) -> dict | None:
+    """그 종목이 속한 묶음의 표 (없으면 전 종목 표)."""
+    if not table:
+        return table
+    return (table.get("groups") or {}).get(group) or table
+
+
+def lookup_nh(table: dict | None, bucket: str) -> dict:
+    if not table:
+        return {"stat": None, "key": None, "level": "none"}
+    st = (table.get("nh") or {}).get(bucket)
+    if st and st["n"] >= C.MIN_SAMPLE:
+        return {"stat": st, "key": bucket, "level": "full"}
+    return {"stat": (table.get("nh") or {}).get("*"), "key": "*", "level": "thin"}
 
 
 # ─────────────────────────────────────────────

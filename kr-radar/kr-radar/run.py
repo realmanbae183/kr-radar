@@ -142,17 +142,20 @@ def build_record(p, s, d, breadth, market, table, cache, intraday, price_err) ->
     errs: dict[str, str] = {}
     if price_err:
         errs["prices"] = price_err
-    rec = {"code": code, "name": s["name"], "market": s["market"], "sector": None, "marcap": s.get("marcap")}
+    rec = {"code": code, "name": s["name"], "market": s["market"], "sector": None, "marcap": s.get("marcap"),
+           "group": s.get("group") or ("KQ" if s["market"] == "KOSDAQ" else "KL"), "halt": bool(s.get("halt"))}
 
     sig = None
     if d is not None:
         try:
-            sig = SG.analyze(d, breadth, market, table)
+            sig = SG.analyze(d, breadth, market, table, rec["group"])
         except Exception as e:
             errs["chart"] = f"신호 계산 오류: {e}"
     raw = fundamentals(p, s, cache, intraday, errs)
     main, fin_y = raw["main"], raw["fin_y"]
     rec["sector"] = raw["sector"]
+    rec["desc"] = (main or {}).get("desc")
+    rec["desc_date"] = (main or {}).get("desc_date")
     if not rec["marcap"] and main and main.get("marcap"):
         rec["marcap"] = main["marcap"]
     close = sig["stats"]["close"] if sig else None
@@ -189,6 +192,9 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
     t0 = time.time()
     live = provider.name == "live"
     cache = load_cache() if live else {}
+    if cache and cache.get("ver") != C.CACHE_VER:
+        print("[저장분] 형식이 옛것이라 버리고 새로 받습니다")
+        cache = {}
     intraday_eff = intraday and bool(cache.get("stocks")) and bool(cache.get("table"))
     if intraday and not intraday_eff:
         print("[장중] 저장분이 없어서 이번엔 정식 실행으로 돕니다")
@@ -242,7 +248,7 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
     if intraday_eff:
         table = cache["table"]
     else:
-        table = H.build(prepared, breadth, market, info)
+        table = H.build_all(prepared, breadth, market, info)
     tm = table.get("meta", {})
     print(f"[3/4] 과거 성과표: {tm.get('from')} ~ {tm.get('to')} · {tm.get('stocks')}종목 ({'저장분' if intraday_eff else '새로 계산'})")
 
@@ -265,6 +271,16 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
                 stores[rec["code"]] = store
             if i % 50 == 0 or i == len(uni):
                 print(f"  {i}/{len(uni)} 처리")
+
+    # 전 종목이 모인 뒤에야 할 수 있는 것: 재무 상대평가·순위, 많이 빠진 순위, 최종 판정
+    F.rank_pass(recs)
+    with_sig = [r for r in recs if r.get("sig")]
+    for key in ("rsi", "gap"):
+        order = sorted((r for r in with_sig if r["sig"]["stats"].get(key) is not None), key=lambda r: r["sig"]["stats"][key])
+        for i, r in enumerate(order, 1):
+            r["sig"]["stats"][key + "_rank"] = [i, len(order)]
+    for r in recs:
+        r["verdict"] = F.verdict(r)
 
     health = {}
     for key, label in (("prices", "시세"), ("main", "종목 기본정보"), ("fin_y", "연간 재무"), ("fin_q", "분기 재무"),
@@ -291,6 +307,10 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
         "os_count": sum(1 for r in recs if is_os(r)),
         "os_today": sum(1 for r in recs if is_os(r) and r["sig"]["os"]["event"]["ago"] == 0),
         "bo_count": sum(1 for r in recs if (r.get("sig") or {}).get("bo")),
+        "nh_count": sum(1 for r in recs if (r.get("sig") or {}).get("nh")),
+        "go_count": sum(1 for r in recs if r["verdict"]["key"] == "go"),
+        "groups": C.GROUP_NAMES,
+        "group_count": {g: sum(1 for r in recs if r.get("group") == g) for g in C.GROUP_NAMES},
         "market": SG.market_summary(breadth, market, table, len(prepared)), "market_src": market_src,
         "table": table, "notes": notes, "health": health, "mode": provider.name,
         "run_kind": "intraday" if intraday_eff else "full",
@@ -298,17 +318,18 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
         "elapsed_sec": round(time.time() - t0),
         "rules": {"os_rsi": C.OS_RSI, "os_bb": C.OS_BB_Z, "os_gap": C.OS_GAP_PCT, "min_count": C.OS_MIN_COUNT,
                   "lookback": C.SIGNAL_LOOKBACK, "min_sample": C.MIN_SAMPLE, "grade": C.GRADE_RULE,
-                  "cost": C.COST_PCT, "bo_vol": C.BREAKOUT_VOLUME},
+                  "cost": C.COST_PCT, "bo_vol": C.BREAKOUT_VOLUME, "win_min": C.WIN_MIN, "fin_veto": C.FIN_VETO_PCT,
+                  "low_value": C.LOW_VALUE_EOK, "sector_min": C.FIN_SECTOR_MIN},
         "us_url": C.US_SCREENER_URL, "refresh_url": C.REFRESH_URL, "ui": C.UI_VERSION,
     }
 
     if live and not intraday_eff and not limit:
-        save_cache({"saved": datetime.now(KST).isoformat(timespec="minutes"), "universe": uni, "notes": notes,
+        save_cache({"ver": C.CACHE_VER, "saved": datetime.now(KST).isoformat(timespec="minutes"), "universe": uni, "notes": notes,
                     "stocks": stores, "table": table})
         print(f"[저장분] {CACHE_PATH}")
 
     m = meta["market"]
-    print(f"[4/4] 완료 {len(recs)}종목 · 과매도 후보 {meta['os_count']}(오늘 {meta['os_today']}) · 돌파 {meta['bo_count']} · "
+    print(f"[4/4] 완료 {len(recs)}종목 · 과매도 후보 {meta['os_count']}(오늘 {meta['os_today']}) · 돌파 {meta['bo_count']} · 신고가 {meta['nh_count']} · 조건 통과 {meta['go_count']} · "
           f"시장 폭 {m['breadth']}% · {meta['elapsed_sec']}초 · {phase['label']}")
     for h in health.values():
         if h["fail"] or h["stale"]:

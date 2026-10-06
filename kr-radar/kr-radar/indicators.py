@@ -88,6 +88,11 @@ def compute_all(df: pd.DataFrame) -> pd.DataFrame:
     out["os_event"] = newly
     # 돌파 '신호일' = 종가가 구름대 상단을 뚫고 올라갔고 거래량이 1.5배 이상
     out["bo_event"] = (cross_up(c, out["cloud_top"]) & (out["vol_mult"] >= C.BREAKOUT_VOLUME)).fillna(False)
+    # 52주 신고가 돌파일 = 직전 250거래일 고가를 종가로 처음 넘은 날
+    hi52 = h.rolling(C.NH_BARS, min_periods=200).max().shift(1)
+    above = (c > hi52).fillna(False)
+    out["nh_event"] = above & ~above.shift(1, fill_value=False)
+    out["value20"] = (c * v).rolling(20).mean() / 1e8            # 최근 20일 하루 평균 거래대금(억)
     # 구름대 진입일 = 어제는 구름 아래, 오늘은 구름 안
     out["cloud_in"] = ((c.shift(1) < out["cloud_bot"].shift(1)) & (c >= out["cloud_bot"]) & (c < out["cloud_top"])).fillna(False)
     out["valid"] = out["ma120"].notna() & out["cloud_top"].notna()

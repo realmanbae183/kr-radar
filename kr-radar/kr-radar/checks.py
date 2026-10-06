@@ -377,29 +377,89 @@ FIN_MAIN = {"perf": {"annual": [{"period": "2025/12", "est": False, "v": {"quick
         "target_price": None, "opinion": None}
 
 
-def test_perfect_textbook_company_scores_100():
-    r = F.fin_score(fin_rows(), FIN_MAIN, close=8000, sector="화학")   # PER 8, PBR 0.8
-    assert r["score"] == 100 and r["grade"] == "A"
+def _rec(code, sector="화학", market="KOSPI", main=FIN_MAIN, **over):
+    return {"code": code, "market": market, "sector": sector,
+            "fin": F.fin_score(fin_rows(**over), main, close=8000, sector=sector)}
 
 
-def test_partial_points_are_linear():
-    r = F.fin_score(fin_rows(roe=7.5), FIN_MAIN, close=8000, sector="화학")
-    roe = next(i for i in r["items"] if i["key"] == "roe")
-    assert roe["points"] == pytest.approx(6.0)                    # 12점 × 50%
+def test_fin_score_is_relative_not_threshold():
+    # ROE 15(옛 기준 만점선), 16, 40 — 옛 방식은 셋 다 만점. 새 방식은 줄을 세운다
+    recs = [_rec("A", roe=15), _rec("B", roe=16), _rec("C", roe=40), _rec("D", roe=3)]
+    F.rank_pass(recs)
+    pts = {r["code"]: next(i for i in r["fin"]["items"] if i["key"] == "roe")["points"] for r in recs}
+    assert pts["C"] > pts["B"] > pts["A"] > pts["D"]
+    assert pts["C"] == pytest.approx(14.0) and pts["D"] == pytest.approx(0.0)
+    assert recs[2]["fin"]["rank"]["all"] == [1, 4]
+    assert recs[3]["fin"]["rank"]["bottom_pct"] == 0
 
 
 def test_missing_data_is_excluded_not_zero():
-    r = F.fin_score(fin_rows(), {"perf": None}, close=8000, sector="화학")   # 당좌비율 없음
-    q = next(i for i in r["items"] if i["key"] == "quick_ratio")
-    assert q["status"] == "nodata"
-    assert r["score"] == 100                                     # 나머지로 100점 환산
-    assert r["coverage"] == pytest.approx(0.85)
+    recs = [_rec("A", main={"perf": None}), _rec("B", roe=5), _rec("C", roe=1)]
+    F.rank_pass(recs)
+    q = next(i for i in recs[0]["fin"]["items"] if i["key"] == "quick_ratio")
+    assert q["status"] == "nodata" and q["points"] is None
+    assert recs[0]["fin"]["score"] is not None and recs[0]["fin"]["coverage"] < 1
+    assert recs[0]["fin"]["rank"]["all"][0] == 1                 # 없는 항목 때문에 꼴찌가 되지 않는다
 
 
-def test_loss_company_per_is_zero_points():
-    r = F.fin_score(fin_rows(eps=-500, ni=-50, roe=-5), FIN_MAIN, close=8000, sector="화학")
-    per = next(i for i in r["items"] if i["key"] == "per")
+def test_loss_company_per_is_worst():
+    recs = [_rec("A", eps=-500, ni=-50, roe=-5), _rec("B"), _rec("C", eps=400)]
+    F.rank_pass(recs)
+    per = next(i for i in recs[0]["fin"]["items"] if i["key"] == "per")
     assert per["points"] == 0 and "적자" in per["display"]
+
+
+def test_per_is_compared_inside_sector_when_big_enough():
+    # 반도체 8종목은 PER 20~27, 은행 8종목은 PER 4~7.5. 전 종목으로 세우면 반도체는 전부 하위지만 업종 안에서는 갈린다
+    recs = [_rec(f"S{i}", sector="반도체", eps=8000 / (20 + i)) for i in range(8)] + \
+           [_rec(f"B{i}", sector="은행", eps=8000 / (4 + i * 0.5)) for i in range(8)]
+    F.rank_pass(recs)
+    per = lambda c: next(i for r in recs if r["code"] == c for i in r["fin"]["items"] if i["key"] == "per")
+    assert per("S0")["points"] == pytest.approx(8.0) and "반도체" in per("S0")["peer"]
+    assert per("B7")["points"] == pytest.approx(0.0)
+    assert recs[0]["fin"]["rank"]["sector"][:2] == [1, 8]
+
+
+def _vrec(w5=60, m5=1.0, n=500, risk=90, bad=0, bottom=50, os_n=2, low=False):
+    h = {"n": n, "w5": w5, "m5": m5}
+    return {"sig": {"os": {"event": {"n": os_n}, "hist": h, "grade": "A"}, "nh": None, "stats": {"low_value": low, "value20": 3}},
+            "fin": {"score": 50, "rank": {"bottom_pct": bottom}}, "risk": {"score": risk, "bad": bad, "unknown": 0}}
+
+
+def test_verdict_rules():
+    assert F.verdict(_vrec())["key"] == "go"
+    assert F.verdict(_vrec(w5=49))["key"] == "weak"              # 승률 50% 이하
+    assert F.verdict(_vrec(m5=-0.1))["key"] == "weak"            # 평균 수익 마이너스
+    assert F.verdict(_vrec(risk=55, bad=2))["key"] == "veto"     # 악재가 크면 승률이 넘어도 비추
+    assert F.verdict(_vrec(bottom=10))["key"] == "veto"          # 재무 하위 20%
+    assert F.verdict(_vrec(os_n=1))["key"] == "none"             # 하나짜리 과매도는 신호로 안 침
+    assert F.verdict(_vrec(n=50))["key"] == "weak"               # 표본 부족
+    assert F.verdict(_vrec(low=True))["notes"]                   # 거래 적으면 메모
+
+
+def test_52week_high_event_fires_once_on_breakout():
+    close = [100.0] * 260 + [103, 104, 105, 99, 110]
+    d = I.compute_all(make_df(close))
+    ev = d["nh_event"].to_numpy()
+    assert ev[260] and not ev[261] and not ev[262]               # 넘은 첫날만
+    assert ev[264]                                               # 밀렸다가 다시 넘으면 새 신호
+    assert ev.sum() == 2
+
+
+def test_wise_overview_description():
+    html = '<h5><span>기업개요</span></h5> <p>[기준:2026.09.14]</p><div class="cmp_comment"><ul class="dot_cmp">' \
+           '<li class="dot_cmp" data-cd="1">동사는 <b>반도체</b>를 만듦.</li><li class="dot_cmp">둘째 문장.</li></ul></div> WICS : 반도체 <'
+    d = S.parse_wise_overview(html)
+    assert d["desc"] == ["동사는 반도체를 만듦.", "둘째 문장."] and d["desc_date"] == "2026.09.14"
+
+
+def test_groups_get_their_own_table():
+    prepared, breadth, market = build_world()[:3]
+    codes = list(prepared)
+    info = {c: {"market": "KOSPI", "group": "KL" if i % 2 else "KM"} for i, c in enumerate(codes)}
+    t = H.build_all(prepared, breadth, market, info)
+    assert set(t["groups"]) <= {"KL", "KM"} and "nh" in t and "chase" in t
+    assert H.for_group(t, "KQ") is t                              # 묶음 표가 없으면 전 종목 표
 
 
 def test_financial_sector_skips_debt_items():

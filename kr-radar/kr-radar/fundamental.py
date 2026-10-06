@@ -1,7 +1,8 @@
 """
-fundamental.py — ④-b 재무 점수(교과서 기준 100점) + ④ 악재 스크리닝(100점 감점식) + 총점
+fundamental.py — 재무 점수(상대평가 100점) + 악재 스크리닝(100점 감점식) + 최종 판정
 
-재무 점수: 지표마다 '만점 기준'과 '0점 기준' 사이를 직선으로 부분점수.
+재무 점수: 지표마다 '비교 대상 안에서 몇 %를 이겼나'에 배점을 곱한다 (rank_pass).
+           PER·PBR은 같은 업종끼리, 나머지는 전 종목과 비교. 50점이 딱 중간.
            데이터가 없는 지표는 빼고 나머지로 100점 환산 (없는 걸 0점 처리하지 않음).
 악재 점수: 100점에서 출발해 악재가 하나씩 확인될 때마다 감점.
            조회에 실패한 항목은 '확인 불가'로 따로 표시 (깨끗하다고 치지 않음).
@@ -22,6 +23,8 @@ FIN_NAMES = {
     "debt_ratio": ("부채비율", "빚 ÷ 자기자본. 낮을수록 튼튼", "%"),
     "quick_ratio": ("당좌비율", "1년 안에 갚을 빚 대비 바로 현금화할 수 있는 자산. 높을수록 단기 부도 위험↓", "%"),
     "growth": ("매출 성장률", "최근 결산연도 매출이 전년보다 얼마나 늘었나", "%"),
+    "reserve": ("유보율", "벌어서 회사 안에 쌓아둔 돈이 자본금의 몇 배인가. 높을수록 버틸 체력이 큼", "%"),
+    "streak": ("흑자 지속", "최근 결산연도들 가운데 영업이익이 흑자였던 해의 비율", "%"),
     "per": ("PER", "주가 ÷ 주당순이익. 이익 대비 몇 배에 거래되나 (낮을수록 싸다)", "배"),
     "pbr": ("PBR", "주가 ÷ 주당순자산. 장부가치 대비 몇 배 (낮을수록 싸다)", "배"),
 }
@@ -102,6 +105,20 @@ def fin_metrics(fin_y: dict | None, main: dict | None, close: float | None) -> d
         g = (sales[-1][1] / sales[-2][1] - 1) * 100
         out["growth"] = (g, sales[-1][0], f"{g:+.1f}%")
 
+    v, p = _latest(perf, "reserve_ratio")
+    if v is None:
+        v, p = _latest(src, "reserve_ratio")
+    if v is not None:
+        out["reserve"] = (v, p, f"{v:,.0f}%")
+
+    ops = [(r["period"], r["v"].get("op")) for r in (src or perf) if r["v"].get("op") is not None]
+    if len(ops) < 2 and perf:
+        ops = [(r["period"], r["v"].get("op")) for r in perf if r["v"].get("op") is not None]
+    if len(ops) >= 2:
+        ops = ops[-4:]
+        share = sum(1 for _, o in ops if o > 0) / len(ops) * 100
+        out["streak"] = (share, ops[-1][0], f"최근 {len(ops)}년 중 {sum(1 for _, o in ops if o > 0)}년 흑자")
+
     eps, p = _latest(src, "eps")
     if eps is not None and close:
         if eps > 0:
@@ -117,38 +134,117 @@ def fin_metrics(fin_y: dict | None, main: dict | None, close: float | None) -> d
 
 
 def fin_score(fin_y, main, close, sector) -> dict:
+    """종목 하나의 재무 '원재료'. 점수는 전 종목이 모인 뒤 rank_pass 에서 매긴다 (상대평가)."""
     m = fin_metrics(fin_y, main, close)
     fin_sector = is_financial(sector)
-    items, earned, avail, applicable = [], 0.0, 0.0, 0.0
-    for key, pts, full, zero in C.FIN_ITEMS:
+    items = []
+    for key, pts, higher, peer in C.FIN_ITEMS:
         name, explain, _ = FIN_NAMES[key]
+        base = {"key": key, "name": name, "explain": explain, "max": pts, "points": None, "period": None}
         if fin_sector and key in C.FIN_SKIP_FOR_FINANCIALS:
-            items.append({"key": key, "name": name, "explain": explain, "max": pts, "points": None,
-                          "status": "skip", "display": "금융업이라 제외", "period": None})
-            continue
-        applicable += pts
-        if key not in m:
-            items.append({"key": key, "name": name, "explain": explain, "max": pts, "points": None,
-                          "status": "nodata", "display": "데이터 없음", "period": None})
-            continue
-        v, period, disp = m[key]
-        ratio = 0.0 if v == float("inf") else _lin(v, full, zero)
-        got = round(pts * ratio, 1)
-        earned += got
-        avail += pts
-        cmp = "이하" if full < zero else "이상"
-        items.append({"key": key, "name": name, "explain": explain, "max": pts, "points": got,
-                      "ratio": ratio, "status": "ok", "display": disp, "period": period,
-                      "rule": f"{full:g}{FIN_NAMES[key][2]} {cmp} 만점 · {zero:g}{FIN_NAMES[key][2]} {'이상' if cmp=='이하' else '이하'} 0점"})
-    coverage = avail / applicable if applicable else 0
-    score = round(earned / avail * 100) if avail and coverage >= C.FIN_MIN_COVERAGE else None
+            items.append({**base, "status": "skip", "display": "금융업이라 제외"})
+        elif key not in m:
+            items.append({**base, "status": "nodata", "display": "데이터 없음"})
+        else:
+            v, period, disp = m[key]
+            items.append({**base, "status": "ok", "display": disp, "period": period,
+                          "value": None if v == float("inf") else float(v), "worst": bool(v == float("inf"))})
     upside = None
     if main and main.get("target_price") and close:
         upside = (main["target_price"] / close - 1) * 100
-    return {"score": score, "grade": grade(score), "items": items, "coverage": round(coverage, 2),
-            "financial_sector": fin_sector,
+    return {"score": None, "grade": "-", "items": items, "coverage": 0, "financial_sector": fin_sector,
             "target_price": main.get("target_price") if main else None,
-            "opinion": main.get("opinion") if main else None, "upside": upside}
+            "opinion": main.get("opinion") if main else None, "upside": upside, "rank": None}
+
+
+def _pct_beaten(vals: list[tuple[str, float]]) -> dict[str, float]:
+    """[(종목, 좋을수록 큰 값)] → 종목별 '몇 %를 이겼나' (0~1, 동점은 절반씩)."""
+    import bisect
+    arr = sorted(v for _, v in vals)
+    n = len(arr)
+    out = {}
+    for code, v in vals:
+        lo, hi = bisect.bisect_left(arr, v), bisect.bisect_right(arr, v)
+        out[code] = (lo + (hi - lo - 1) / 2) / (n - 1) if n > 1 else 0.5
+    return out
+
+
+def _rank(recs: list[dict], getter) -> dict[str, tuple[int, int]]:
+    vals = sorted(((getter(r), r["code"]) for r in recs if getter(r) is not None), reverse=True)
+    out, prev, rk = {}, None, 0
+    for i, (v, code) in enumerate(vals, 1):
+        if v != prev:
+            rk, prev = i, v
+        out[code] = (rk, len(vals))
+    return out
+
+
+def rank_pass(recs: list[dict]) -> None:
+    """전 종목을 모아 재무 점수를 상대평가로 매기고 순위를 붙인다.
+    점수 = Σ 배점 × (비교 대상 안에서 이긴 비율). PER·PBR은 같은 업종 안에서, 나머지는 전 종목과 비교.
+    절대 기준(ROE 15% 이상이면 만점 등)을 쓰면 기준만 간신히 넘은 회사와 압도적인 회사가 같은 점수가 돼서 바꿨다."""
+    by_sector: dict[str, list[dict]] = {}
+    for r in recs:
+        if r.get("fin") and r.get("sector"):
+            by_sector.setdefault(r["sector"], []).append(r)
+    for key, pts, higher, peer in C.FIN_ITEMS:
+        def good(it):
+            if it.get("worst"):
+                return -1e18
+            return it["value"] if higher else -it["value"]
+
+        pool = {}
+        for r in recs:
+            it = next((i for i in (r.get("fin") or {}).get("items", []) if i["key"] == key and i["status"] == "ok"), None)
+            if it:
+                pool[r["code"]] = (r, it)
+        allp = _pct_beaten([(c, good(it)) for c, (r, it) in pool.items()])
+        secp: dict[str, tuple[float, int, str]] = {}
+        if peer == "sector":
+            for sec, rs in by_sector.items():
+                mem = [(r["code"], good(pool[r["code"]][1])) for r in rs if r["code"] in pool]
+                if len(mem) >= C.FIN_SECTOR_MIN:
+                    for c, p in _pct_beaten(mem).items():
+                        secp[c] = (p, len(mem), sec)
+        for c, (r, it) in pool.items():
+            if c in secp:
+                p, n, sec = secp[c]
+                it["peer"] = f"{sec} {n}종목"
+            else:
+                p, n = allp[c], len(pool)
+                it["peer"] = f"전 종목 {n}개"
+            it["pct"] = round(p * 100)
+            it["points"] = round(pts * p, 1)
+            it["ratio"] = p
+            it["rule"] = f"{it['peer']} 중 상위 {max(1, round((1 - p) * 100))}%"
+
+    for r in recs:
+        f = r.get("fin")
+        if not f:
+            continue
+        ok = [i for i in f["items"] if i["status"] == "ok" and i.get("points") is not None]
+        applicable = sum(i["max"] for i in f["items"] if i["status"] != "skip")
+        avail = sum(i["max"] for i in ok)
+        f["coverage"] = round(avail / applicable, 2) if applicable else 0
+        f["score"] = round(sum(i["points"] for i in ok) / avail * 100) if avail and f["coverage"] >= C.FIN_MIN_COVERAGE else None
+        f["grade"] = grade(f["score"])
+
+    sc = lambda r: (r.get("fin") or {}).get("score")
+    r_all = _rank(recs, sc)
+    r_mkt = {}
+    for m in ("KOSPI", "KOSDAQ"):
+        r_mkt.update(_rank([r for r in recs if r["market"] == m], sc))
+    r_sec = {}
+    for sec, rs in by_sector.items():
+        if len([r for r in rs if sc(r) is not None]) >= C.FIN_SECTOR_MIN:
+            r_sec.update({c: (v[0], v[1], sec) for c, v in _rank(rs, sc).items()})
+    for r in recs:
+        f = r.get("fin")
+        if f and f["score"] is not None:
+            a = r_all[r["code"]]
+            f["rank"] = {"all": list(a), "market": list(r_mkt.get(r["code"], (None, None))),
+                         "sector": list(r_sec[r["code"]]) if r["code"] in r_sec else None,
+                         "bottom_pct": round((a[1] - a[0]) / max(1, a[1] - 1) * 100)}   # 내 아래에 몇 %가 있나
 
 
 def grade(score):
@@ -323,3 +419,56 @@ def total_score(chart: int | None, fin: int | None, risk: int | None) -> dict:
     s = sum(parts[k] * w[k] for k in w) / tw
     return {"score": round(s), "weights": {k: round(v / tw, 3) for k, v in w.items()},
             "missing": [k for k, v in parts.items() if v is None]}
+
+
+# ─────────────────────────────────────────────
+# 최종 판정 — 차트 → 재무 → 악재를 다 본 뒤의 한 줄
+# ─────────────────────────────────────────────
+def verdict(rec: dict) -> dict:
+    """규칙 (2026-10-06 사용자 결정)
+      · 지금 들어갔을 때 과거 같은 상태의 5일 승률이 50%를 넘고 평균 수익이 플러스면 '조건 통과'
+      · 그래도 악재가 크거나(악재 점수 60 미만) 재무 점수가 전 종목 하위 20%면 '비추'
+    과거 통계를 규칙에 넣은 결과일 뿐, 투자 권유가 아니다."""
+    sig = rec.get("sig") or {}
+    fin, risk = rec.get("fin") or {}, rec.get("risk") or {}
+    os_e = (sig.get("os") or {}).get("event")
+    pick = None
+    if os_e and os_e["n"] >= C.OS_MIN_COUNT:
+        pick = ("os", f"과매도 {os_e['n']}개 겹침", sig["os"]["hist"], sig["os"].get("grade"))
+    elif sig.get("nh") and sig["nh"].get("market_ok"):
+        pick = ("nh", "52주 신고가 돌파", sig["nh"]["hist"], sig["nh"].get("grade"))
+    notes, veto = [], []
+    if risk.get("score") is not None and risk["score"] < 60:
+        veto.append(f"악재 점수 {risk['score']}점 (위험 {risk.get('bad', 0)}건)")
+    elif risk.get("bad"):
+        notes.append(f"악재 위험 항목 {risk['bad']}건 — 내용 확인")
+    rk = fin.get("rank")
+    if rk and rk["bottom_pct"] < C.FIN_VETO_PCT:
+        veto.append(f"재무 점수 {fin['score']}점 — 전 종목 하위 {max(1, rk['bottom_pct'])}%")
+    elif fin.get("score") is None:
+        notes.append("재무 점수를 낼 데이터가 부족해요")
+    if (sig.get("stats") or {}).get("low_value"):
+        notes.append(f"하루 거래대금이 {sig['stats']['value20']}억으로 적어요. 원하는 값에 사고팔기 어려울 수 있어요")
+    if risk.get("unknown"):
+        notes.append(f"악재 스크리닝 {risk['unknown']}개 항목은 조회에 실패해 확인하지 못했어요")
+    if not pick:
+        why = "최근 5거래일 안에 과매도 2개 겹침도, 52주 신고가 돌파도 없어요"
+        if os_e:
+            why = "과매도 조건이 하나만 켜졌어요 (하나짜리는 과거에 효과가 없었어요)"
+        elif sig.get("nh"):
+            why = "52주 신고가를 돌파했지만 시장 폭이 50% 미만이에요 (과거 이런 장에서는 안 통했어요)"
+        return {"key": "none", "label": "신호 없음", "why": why, "veto": veto, "notes": notes, "signal": None}
+    kind, name, h, g = pick
+    out = {"signal": kind, "signal_name": name, "grade": g, "veto": veto, "notes": notes,
+           "w5": (h or {}).get("w5"), "m5": (h or {}).get("m5"), "n": (h or {}).get("n")}
+    if not h or h.get("n", 0) < C.MIN_SAMPLE:
+        return {**out, "key": "weak", "label": "판단 보류", "why": "과거 같은 상태의 기록이 너무 적어요"}
+    passed = h["w5"] > C.WIN_MIN and (h.get("m5") or 0) > 0
+    if not passed:
+        return {**out, "key": "weak", "label": "승률 미달",
+                "why": f"{name} — 과거 같은 상태 {h['n']:,}번의 5일 승률이 {h['w5']}%, 평균 {h.get('m5', 0):+.1f}%라 기준(승률 {C.WIN_MIN}% 초과·평균 플러스)에 못 미쳐요"}
+    if veto:
+        return {**out, "key": "veto", "label": "비추",
+                "why": f"{name} — 과거 승률은 {h['w5']}%로 기준을 넘지만, " + " · ".join(veto) + " 때문에 걸러요"}
+    return {**out, "key": "go", "label": "조건 통과",
+            "why": f"{name} — 과거 같은 상태 {h['n']:,}번의 5일 승률 {h['w5']}%, 평균 {h.get('m5', 0):+.1f}%. 재무와 악재에서 걸러낼 만큼 큰 문제는 없어요"}

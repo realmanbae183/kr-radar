@@ -1,8 +1,10 @@
 """
-universe.py — 350종목 명단 만들기
-  코스피: 코스피200 공식 명단 (실패하면 코스피 시총 상위 200으로 대체하고 그 사실을 기록)
-  코스닥: 시총 상위 150 (코스닥150 공식 명단은 거래소 로그인이 필요해서 대체)
-바이오 포함 (사용자 결정). 스팩·ETF·ETN·리츠·우선주는 제외.
+universe.py — 종목 명단 만들기
+  코스피: 전 종목 (보통주). 시가총액 상위 200 = '코스피 대형'(KL), 나머지 = '코스피 중소형'(KM)
+  코스닥: 시가총액 상위 150 (KQ)
+스팩·ETF·ETN·리츠·우선주는 제외. 바이오 포함(사용자 결정).
+묶음을 나누는 이유: 2026-10-06 측정에서 과매도 겹침은 모든 묶음에서 통했지만,
+거래량 급등 추격은 코스닥150에서만 플러스였고 코스피 중소형에서는 손해였다. 등급도 묶음별 과거 기록으로 매긴다.
 """
 from __future__ import annotations
 
@@ -21,33 +23,32 @@ def is_excluded(code: str, name: str) -> bool:
 
 
 def build_universe() -> tuple[list[dict], list[str]]:
-    """반환: (종목 목록, 경고 메시지들)"""
+    """반환: (종목 목록, 경고 메시지들). 종목마다 group(KL/KM/KQ)이 붙는다."""
     notes: list[str] = []
-    stocks: list[dict] = []
+    kp = S.fetch_marcap_json("KOSPI", 60)          # ETF가 섞여 있어 넉넉히 넘긴다 (빈 페이지에서 멈춤)
+    if not kp.data or len(kp.data) < C.KOSPI_COUNT:
+        raise RuntimeError("코스피 종목 명단을 못 받음: " + str(kp.error))
+    if not kp.ok:
+        notes.append("코스피 명단을 끝까지 못 받음 (일부만 사용): " + str(kp.error)[:150])
+    kq = S.fetch_marcap_json("KOSDAQ", 6)
+    if not kq.data:
+        raise RuntimeError("코스닥 종목 명단을 못 받음: " + str(kq.error))
 
-    k200 = S.fetch_kospi200()
-    if k200.ok:
-        stocks += [{"code": c, "name": n, "market": "KOSPI"} for c, n in k200.data if not is_excluded(c, n)]
-    else:
-        notes.append(k200.error + " → 코스피 시총 상위 200으로 대체")
-        print("  ! 코스피200 명단 실패:", k200.error)
-        rank = S.fetch_marcap_rank(0, 6)
-        if not rank.ok:
-            raise RuntimeError("코스피 종목 명단을 어느 곳에서도 못 받음: " + rank.error + " / 코스피200: " + k200.error)
-        picked = [r for r in rank.data if not is_excluded(r["code"], r["name"])][: C.KOSPI_COUNT]
-        stocks += [{"code": r["code"], "name": r["name"], "market": "KOSPI", "marcap": r["marcap"]} for r in picked]
-
-    kq = S.fetch_marcap_rank(1, 5)
-    if not kq.ok:
-        raise RuntimeError("코스닥 종목 명단을 못 받음: " + kq.error)
-    picked = [r for r in kq.data if not is_excluded(r["code"], r["name"])][: C.KOSDAQ_COUNT]
-    stocks += [{"code": r["code"], "name": r["name"], "market": "KOSDAQ", "marcap": r["marcap"]} for r in picked]
-    notes.append("코스닥은 공식 코스닥150 명단 대신 '시가총액 상위 150'을 사용")
-
-    # 중복 제거
-    seen, uniq = set(), []
-    for s in stocks:
-        if s["code"] not in seen:
-            seen.add(s["code"])
-            uniq.append(s)
-    return uniq, notes
+    stocks, seen = [], set()
+    rows = sorted([r for r in kp.data if not is_excluded(r["code"], r["name"])], key=lambda r: -(r.get("marcap") or 0))
+    for i, r in enumerate(rows):
+        if r["code"] in seen:
+            continue
+        seen.add(r["code"])
+        stocks.append({"code": r["code"], "name": r["name"], "market": "KOSPI", "marcap": r.get("marcap"),
+                       "group": "KL" if i < C.KOSPI_LARGE else "KM", "halt": bool(r.get("halt"))})
+    n_kospi = len(stocks)
+    rows = sorted([r for r in kq.data if not is_excluded(r["code"], r["name"])], key=lambda r: -(r.get("marcap") or 0))
+    for r in rows[: C.KOSDAQ_COUNT]:
+        if r["code"] in seen:
+            continue
+        seen.add(r["code"])
+        stocks.append({"code": r["code"], "name": r["name"], "market": "KOSDAQ", "marcap": r.get("marcap"),
+                       "group": "KQ", "halt": bool(r.get("halt"))})
+    notes.append(f"코스피 전 종목 {n_kospi}개(보통주) + 코스닥 시가총액 상위 {len(stocks) - n_kospi}개")
+    return stocks, notes

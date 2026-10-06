@@ -189,8 +189,13 @@ def fetch_marcap_json(market: str, pages: int) -> Fetch:
                 code = it.get("itemCode") or it.get("symbolCode")
                 name = it.get("stockName") or it.get("stockNameEng")
                 if code and name:
-                    rows.append({"code": str(code), "name": str(name).strip(), "marcap": parse_korean_money_eok(it.get("marketValue"))
-                                 if it.get("marketValue") not in (None, "") else None})
+                    if (it.get("stockEndType") or "stock") != "stock":      # ETF·ETN 등은 건너뜀
+                        continue
+                    mv = to_num(it.get("marketValueRaw"))
+                    rows.append({"code": str(code), "name": str(name).strip(),
+                                 "marcap": mv / 1e8 if mv else (parse_korean_money_eok(it.get("marketValue"))
+                                                                if it.get("marketValue") not in (None, "") else None),
+                                 "halt": ((it.get("tradeStopType") or {}).get("name") or "TRADING") != "TRADING"})
     except Exception as e:
         return Fetch(False, rows, f"JSON API 조회 오류: {e}")
     if not rows:
@@ -575,8 +580,16 @@ def parse_mobile_finance(obj) -> dict:
 
 
 def parse_wise_overview(html: str) -> dict:
-    """와이즈리포트 기업개요(c1010001): 업종(WICS), 투자의견·목표주가."""
+    """와이즈리포트 기업개요(c1010001): 업종(WICS), 기업 설명, 투자의견·목표주가."""
     res: dict[str, Any] = {}
+    lis = re.findall(r'<li[^>]*class="dot_cmp"[^>]*>(.*?)</li>', html, flags=re.S)
+    desc = [re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", x)).strip() for x in lis]
+    desc = [x for x in desc if x]
+    if desc:
+        res["desc"] = desc[:4]
+    m = re.search(r"기업개요</span></h5>.*?\[기준:([0-9.]+)\]", html, flags=re.S)
+    if m:
+        res["desc_date"] = m.group(1)
     text = re.sub(r"<[^>]+>", " ", html)
     text = re.sub(r"&nbsp;|\s+", " ", text)
     m = re.search(r"WICS\s*:\s*([^<]+?)\s*<", html) or re.search(r"WICS\s*:\s*(\S+)", text)
@@ -595,7 +608,7 @@ def parse_wise_overview(html: str) -> dict:
                         n = to_num(v)
                         res["opinion"] = _opinion_label(n) if n is not None else (str(v) if str(v) != "nan" else None)
                 break
-    except (ValueError, IndexError):
+    except Exception:          # 표가 없거나 읽기 실패 — 설명·업종만 쓰고 넘어감
         pass
     return res
 
@@ -631,7 +644,7 @@ def parse_integration(obj) -> dict:
 
 def fetch_main(code: str) -> Fetch:
     """종목 기본정보 = 모바일 종합정보 + 와이즈리포트 기업개요 + 모바일 연간 재무(당좌비율)."""
-    d: dict[str, Any] = {"sector": None, "marcap": None, "target_price": None, "opinion": None, "perf": None}
+    d: dict[str, Any] = {"sector": None, "marcap": None, "target_price": None, "opinion": None, "perf": None, "desc": None}
     errs = []
     try:
         integ = parse_integration(get_json(f"{MOBILE}/api/stock/{code}/integration"))

@@ -64,8 +64,15 @@ class DemoProvider:
         self.days = pd.bdate_range(end=datetime(2026, 9, 29), periods=nb)
 
     def universe(self):
-        return ([{"code": s["code"], "name": s["name"], "market": s["market"]} for s in self.stocks],
-                ["샘플 데이터 — 가상 종목 350개 (실제 종목 아님)"])
+        out, k = [], 0
+        for s in self.stocks:
+            if s["market"] == "KOSPI":
+                k += 1
+                g = "KL" if k <= 80 else "KM"
+            else:
+                g = "KQ"
+            out.append({"code": s["code"], "name": s["name"], "market": s["market"], "group": g})
+        return out, [f"샘플 데이터 — 가상 종목 {len(out)}개 (실제 종목 아님)"]
 
     # ───── 시세 ─────
     def _gen_prices(self, s) -> pd.DataFrame:
@@ -124,11 +131,15 @@ class DemoProvider:
         r = self._rng(code, 1)
         px = self.prices(code).data["Close"].iloc[-1]
         years = ["2022/12", "2023/12", "2024/12", "2025/12", "2026/12"]
-        perf = {"annual": [{"period": y, "est": y == "2026/12", "v": {"quick_ratio": float(r.uniform(40, 260))}}
+        perf = {"annual": [{"period": y, "est": y == "2026/12", "v": {"quick_ratio": float(r.uniform(40, 260)),
+                                                                     "reserve_ratio": float(r.uniform(80, 9000))}}
                            for y in years], "quarter": []}
         tp = float(px * r.uniform(0.85, 1.6)) if r.random() < 0.7 else None
         return Fetch(True, {"sector": s["sector"], "marcap": None, "target_price": tp,
-                            "opinion": "매수" if tp and tp > px * 1.1 else ("중립" if tp else None), "perf": perf})
+                            "opinion": "매수" if tp and tp > px * 1.1 else ("중립" if tp else None), "perf": perf,
+                            "desc": [f"동사는 {s['sector']} 업종의 가상 기업으로, 화면 확인을 위해 지어낸 회사임.",
+                                     "실제 실행에서는 이 자리에 와이즈리포트의 기업개요 문장이 들어감."],
+                            "desc_date": "2026.09.14"})
 
     def _fin_rows(self, code):
         s = self.by_code[code]

@@ -50,6 +50,18 @@ def find_ui() -> str:
                        + " → 새 index.html 을 run.py 와 같은 폴더에 올려주세요")
 
 
+ICON_FILES = ("icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png")
+MANIFEST = {
+    "name": "버거대왕의 국장 레이더", "short_name": "버거대왕", "start_url": "./", "scope": "./",
+    "display": "standalone", "background_color": "#eaf3ff", "theme_color": "#eaf3ff", "lang": "ko",
+    "icons": [
+        {"src": "assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+        {"src": "assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+        {"src": "assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"},
+    ],
+}
+
+
 def find_image() -> str:
     for p in (os.path.join(HERE, "burger-king.png"), os.path.join(HERE, "web", "burger-king.png")):
         if os.path.exists(p):
@@ -77,8 +89,8 @@ def build(recs: list[dict], meta: dict, out_dir: str | None = None, inline_chart
             with open(os.path.join(cdir, f"{r['code']}.js"), "w", encoding="utf-8") as f:
                 f.write(f'window.__chart&&window.__chart("{r["code"]}",' + json.dumps(slim(ch), separators=(",", ":")) + ");")
         for it in (r.get("fin") or {}).get("items", []):       # 종목마다 똑같은 설명 문구는 한 번만 저장
-            fin_text[it["key"]] = {"explain": it.pop("explain", ""),
-                                   "rule": it.pop("rule", None) or fin_text.get(it["key"], {}).get("rule")}
+            fin_text[it["key"]] = {"explain": it.pop("explain", ""), "name": it["name"], "max": it["max"]}
+            it.pop("ratio", None)
         for it in (r.get("risk") or {}).get("items", []):
             risk_text[it["key"]] = it.pop("explain", "")
         slim_recs.append(r)
@@ -90,9 +102,23 @@ def build(recs: list[dict], meta: dict, out_dir: str | None = None, inline_chart
         f.write(js)
     page = ('<!doctype html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
             '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">\n'
+            '<meta name="theme-color" content="#eaf3ff">\n'
+            '<meta name="mobile-web-app-capable" content="yes">\n'
+            '<meta name="apple-mobile-web-app-capable" content="yes">\n'
+            '<meta name="apple-mobile-web-app-title" content="버거대왕">\n'
+            '<meta name="apple-mobile-web-app-status-bar-style" content="default">\n'
+            '<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">\n'
+            '<link rel="icon" type="image/png" href="assets/icon-192.png">\n'
+            '<link rel="manifest" href="manifest.webmanifest">\n'
             '</head>\n<body>\n' + body + '\n</body>\n</html>\n')
     with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as f:
         f.write(body if fragment else page)
     shutil.copyfile(find_image(), os.path.join(out, "assets", "burger-king.png"))
+    for name in ICON_FILES:                                  # 폰 홈 화면 아이콘
+        p = os.path.join(HERE, name)
+        if os.path.exists(p):
+            shutil.copyfile(p, os.path.join(out, "assets", name))
+    with open(os.path.join(out, "manifest.webmanifest"), "w", encoding="utf-8") as f:
+        json.dump(MANIFEST, f, ensure_ascii=False, indent=1)
     print(f"[리포트] {out}/index.html  (data.js {len(js) / 1e6:.1f}MB)")
     return out
