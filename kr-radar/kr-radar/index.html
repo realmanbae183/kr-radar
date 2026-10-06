@@ -407,6 +407,8 @@ a{color:var(--navy)}
 .brand{font-family:var(--f-body);font-weight:700;font-size:17px;letter-spacing:-.02em}
 .nav a{font-weight:600;border-radius:10px;padding:7px 12px}
 .nav a[aria-current="page"]{background:var(--ink);color:var(--card)!important}
+.nav{max-width:100%;overflow-x:auto;scrollbar-width:none} .nav::-webkit-scrollbar{display:none} .nav a{white-space:nowrap;flex:none}
+@media (max-width:720px){.nav{order:9;flex:1 0 100%;margin-inline:-4px}}
 .clock{border:0;background:var(--paper);border-radius:10px;padding:6px 11px}
 .clock.kr.live{background:var(--warn-soft);color:var(--warn)}
 .clock.us{border:0;color:var(--navy);background:var(--navy-soft)} .clock.us b{color:var(--navy)}
@@ -462,6 +464,134 @@ main{padding-block:26px 64px}
 .filters input[type=search],.filters select{border:0;background:var(--card);border-radius:12px;padding:10px 14px;box-shadow:var(--shadow)}
 .toggle{font-weight:500;color:var(--ink-soft)} .toggle input{accent-color:var(--navy)}
 .count-line{color:var(--ink-faint)}
+#v-today{max-width:760px;margin-inline:auto}
+.heroart{display:block;position:relative;isolation:isolate;padding:6% 4% 0}
+.heroart::before{content:"";position:absolute;z-index:-1;left:4%;right:4%;top:10%;aspect-ratio:1/1;border-radius:50%;background:radial-gradient(circle at 50% 38%,#fff 0,#fff 34%,color-mix(in srgb,var(--navy) 16%,#fff) 100%);box-shadow:0 0 0 14px color-mix(in srgb,#fff 55%,transparent)}
+.heroart::after{content:"";position:absolute;z-index:-1;left:22%;right:22%;bottom:-2%;height:7%;border-radius:50%;background:rgba(20,40,90,.16);filter:blur(6px)}
+.heroart img{display:block;width:100%;height:auto;transition:transform .25s}
+.heroart + figcaption{margin-top:20px!important;text-align:center}
+.heroart:hover img{transform:translateY(-4px) rotate(-1.5deg)}
+:root[data-theme="dark"] .heroart::before{background:radial-gradient(circle at 50% 38%,#33405c 0,#273045 60%,#1c2333 100%);box-shadow:0 0 0 14px rgba(255,255,255,.05)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .heroart::before{background:radial-gradient(circle at 50% 38%,#33405c 0,#273045 60%,#1c2333 100%);box-shadow:0 0 0 14px rgba(255,255,255,.05)}}
+/* 증시캘린더 */
+#v-cal{max-width:900px;margin-inline:auto;--c-kr:#1b5fd0;--c-us:#d6336c;--c-earn:#7a3ff2;--c-expiry:#b7791f;--c-closed:#6b7684}
+.cal-head{display:flex;align-items:center;gap:16px;margin-bottom:14px}
+.cal-head img{width:clamp(84px,18vw,128px);height:auto;flex:none;filter:drop-shadow(0 8px 8px rgba(20,40,90,.18))}
+.cal-head h2{margin:0;font-size:clamp(24px,4.4vw,32px);font-weight:700;letter-spacing:-.03em}
+.cal-say{position:relative;margin:8px 0 0;background:var(--card);border-radius:4px 18px 18px 18px;padding:10px 14px;box-shadow:var(--shadow);font-size:14.5px;color:var(--ink-soft)}
+.cal-say b{color:var(--ink)}
+.cal-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-nav{display:flex;align-items:center;gap:6px}
+.cal-nav b{min-width:7.2em;text-align:center;font-size:18px}
+.cal-nav button,.cal-chips button{border:0;background:var(--card);color:var(--ink-soft);border-radius:12px;padding:8px 13px;font:inherit;font-weight:600;font-size:14px;cursor:pointer;box-shadow:var(--shadow)}
+.cal-chips{display:flex;flex-wrap:wrap;gap:6px}
+.cal-chips button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.cal-chips i,.cal-ev i,.cal-row i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--dot);flex:none}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}
+.cal-dow{background:var(--paper-2);text-align:center;font-size:12.5px;font-weight:600;color:var(--ink-faint);padding:7px 0}
+.cal-day{background:var(--card);min-height:86px;padding:6px 6px 8px;border:0;text-align:left;font:inherit;color:inherit;cursor:pointer;display:flex;flex-direction:column;align-items:stretch;justify-content:flex-start;min-width:0}
+.cal-day .n{align-self:flex-start}
+.cal-day.out{background:var(--paper-2);cursor:default}
+.cal-day .n{display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:24px;border-radius:12px;font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums}
+.cal-day.sun .n,.cal-day.off .n{color:var(--red)} .cal-day.sat .n{color:var(--navy)}
+.cal-day.today .n{background:var(--ink);color:var(--paper)!important;padding:0 7px}
+.cal-day.sel{box-shadow:inset 0 0 0 2px var(--navy)}
+.cal-ev{display:flex;align-items:center;font-size:11.5px;line-height:1.3;margin-top:3px;color:var(--ink-soft);white-space:nowrap;overflow:hidden}
+.cal-ev span{overflow:hidden;text-overflow:ellipsis}
+.cal-ev.hi{color:var(--ink);font-weight:600}
+@media (max-width:640px){.cal-day{min-height:58px;padding:5px 3px;flex-direction:row;flex-wrap:wrap;align-items:flex-start;align-content:flex-start}.cal-ev span{display:none}.cal-ev{display:inline-flex;margin:4px 0 0 2px}.cal-ev i{margin-right:0}}
+.cal-list{margin-top:16px;display:grid;gap:10px}
+.cal-list h3{margin:6px 0 0;font-size:15px;font-weight:700}
+.cal-list h3 small{font-weight:400;color:var(--ink-faint);margin-left:6px}
+.cal-row{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:13px 15px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:baseline}
+.cal-row i{align-self:center;margin:0}
+.cal-row b{font-weight:600}
+.cal-row time{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-size:13.5px;white-space:nowrap}
+.cal-row p{grid-column:2/-1;margin:0;font-size:13px;color:var(--ink-faint)}
+.cal-row.past{opacity:.55}
+.cal-row .tag{font-size:11.5px;font-weight:700;color:var(--dot);margin-right:6px}
+/* 소개: 두 캐릭터가 풀밭에 누워 있는 그림 한 장이 화면을 채우고, 캐릭터 자리를 누르면 말풍선 */
+#v-about{position:relative;width:100vw;margin-left:calc(50% - 50vw);min-height:460px;overflow:hidden;background:linear-gradient(#47b1fd 0 50%,#7aae2c 50% 100%)}
+#abImg{position:absolute;max-width:none;display:block}
+.ab-fade{position:absolute;left:0;right:0;height:56px;pointer-events:none}
+#abFadeT{background:linear-gradient(#47b1fd,rgba(71,177,253,0))} #abFadeB{background:linear-gradient(rgba(122,174,44,0),#7aae2c)}
+.ab-top{position:absolute;left:0;right:0;top:22px;text-align:center;padding:0 16px;z-index:2}
+.ab-top h2{margin:0;font:400 clamp(30px,6vw,60px)/1.1 "Black Han Sans",var(--f-body);color:#fff;-webkit-text-stroke:8px #1b3f8f;paint-order:stroke fill;letter-spacing:-.01em}
+.ab-top p{margin:10px auto 0;display:inline-block;background:rgba(255,255,255,.88);color:#1b2a44;border-radius:999px;padding:6px 16px;font-size:14px;font-weight:600}
+.ab-ch{position:absolute;border:0;background:none;padding:0;cursor:pointer;border-radius:40%;-webkit-tap-highlight-color:transparent;z-index:3}
+.ab-ch:focus-visible{outline:3px solid #fff;outline-offset:2px}
+.ab-ch .tagname{position:absolute;left:50%;top:-6px;transform:translate(-50%,-100%);background:#fff;color:#1b2a44;border-radius:999px;padding:5px 12px;font:400 14px/1.2 "Jua",var(--f-body);box-shadow:0 4px 12px rgba(0,0,0,.22);white-space:nowrap;animation:abBob 1.8s ease-in-out infinite}
+@keyframes abBob{50%{transform:translate(-50%,calc(-100% - 5px))}}
+@media (prefers-reduced-motion:reduce){.ab-ch .tagname{animation:none}}
+.ab-bub{position:absolute;left:50%;bottom:calc(100% + 10px);transform:translateX(-50%);width:max-content;max-width:min(78vw,380px);background:#fff;color:#1b2a44;border-radius:22px;padding:14px 18px;font:400 clamp(15px,2.2vw,19px)/1.5 "Jua",var(--f-body);box-shadow:0 10px 30px rgba(0,0,0,.25);text-align:left;z-index:4}
+.ab-bub::after{content:"";position:absolute;left:50%;top:100%;margin-left:-10px;border:10px solid transparent;border-top-color:#fff}
+.ab-bub b{display:block;font-weight:400;color:#c8102e;margin-bottom:2px}
+#abJr .ab-bub b{color:#1b5fd0}
+.ab-bub small{display:block;margin-top:6px;font:500 12px/1 var(--f-body);color:#8b95a1}
+@media (max-width:700px){#abKing .ab-bub{left:0;transform:none}#abKing .ab-bub::after{left:30%}#abJr .ab-bub{left:auto;right:0;transform:none}#abJr .ab-bub::after{left:70%}}
+.ab-cta{position:absolute;left:0;right:0;bottom:22px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:0 12px;z-index:2}
+.ab-cta a{background:#fff;color:#1b2a44;border-radius:999px;padding:11px 18px;font-weight:700;font-size:14.5px;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.2)}
+.ab-cta a.main{background:#e0182d;color:#fff;font:400 17px/1.2 "Jua",var(--f-body);padding:12px 22px}
+body.about-on .foot{display:none}
+body.about-on main{padding-bottom:0}
+/* 정사각형 한 장. 안쪽 크기는 전부 판 너비 기준(cqw)이라 어디서 봐도 비율이 같다 */
+.sq{container-type:inline-size;width:100%;aspect-ratio:1/1;position:relative;overflow:hidden;border-radius:20px;background:#f2f4f6;color:#191f28;--t:var(--up);--up:#e0182d;--down:#1a5fd6;--line:#e5e8eb;--ink:#191f28;--soft:#6b7684;--cream:#f2f4f6;box-shadow:var(--shadow)}
+.sq.dn{--t:var(--down)}
+.sq *{position:absolute}
+.sq .num{font-variant-numeric:tabular-nums}
+.sq .up{color:var(--up)}
+.sq .dnc{color:var(--down)}
+.sq .sky{left:0;top:0;width:100%;height:25%;object-fit:cover;object-position:50% 62%}
+.sq .fade{left:0;top:19%;width:100%;height:6.2%;background:linear-gradient(transparent,var(--cream))}
+.sq .cal{left:1.6%;top:1.6%;width:13.2%;height:12.4%;background:#fff;border-radius:1.6cqw;overflow:hidden;box-shadow:0 .4cqw 1cqw rgba(0,0,0,.22);text-align:center}
+.sq .cal i{left:0;top:0;width:100%;height:26%;background:var(--t)}
+.sq .cal u{top:8%;width:9%;height:16%;background:#2b2b2b;border-radius:1cqw}
+.sq .cal b{left:0;top:31%;width:100%;font:900 3cqw/1.15 "Noto Sans KR",sans-serif;color:#111;white-space:nowrap}
+.sq .cal span{left:0;top:63%;width:100%;font:700 2.6cqw/1.15 "Noto Sans KR",sans-serif;color:#111}
+.sq .ttl{left:16.6%;top:3.6%;font:400 9.8cqw/1 "Black Han Sans","Noto Sans KR",sans-serif;color:var(--t);white-space:nowrap;-webkit-text-stroke:1.5cqw #fff;paint-order:stroke fill;filter:drop-shadow(0 .5cqw .5cqw rgba(0,0,0,.2));letter-spacing:-.02em}
+.sq .sub{left:19%;top:15.4%;font:400 3.1cqw/1 "Jua","Noto Sans KR",sans-serif;color:#1c2a3a;white-space:nowrap;-webkit-text-stroke:.7cqw #fff;paint-order:stroke fill}
+.sq .king{top:3.4%;height:21.4%}
+.sq .bub{right:1.4%;top:1.6%;background:#fff;border-radius:3cqw;padding:1cqw 1.8cqw;font:400 2.15cqw/1.3 "Jua","Noto Sans KR",sans-serif;text-align:center;box-shadow:0 .3cqw .8cqw rgba(0,0,0,.18);white-space:nowrap;z-index:2}
+.sq .panel{left:1.2%;width:97.6%;background:#fff;box-shadow:0 .2cqw .6cqw rgba(0,0,0,.05);border:.16cqw solid var(--line);border-radius:2cqw}
+.sq .h{font:400 3.1cqw/1 "Jua","Noto Sans KR",sans-serif;white-space:nowrap}
+.sq .cap{font:500 1.75cqw/1 "Noto Sans KR",sans-serif;color:var(--soft);white-space:nowrap}
+.sq .vline{width:.14cqw;background:var(--line)}
+.sq .ix .h{color:var(--up)} 
+.sq .ix .v{font:900 3.5cqw/1 "Noto Sans KR",sans-serif;white-space:nowrap;transform:translateX(-50%)}
+.sq .ix .c{font:700 2.15cqw/1 "Noto Sans KR",sans-serif;white-space:nowrap;transform:translateX(-50%)}
+.sq .ix svg{overflow:visible}
+.sq .ix svg path[stroke]{stroke-width:.24cqw}
+.sq .ix .ax{font:500 1.3cqw/1 "Noto Sans KR",sans-serif;color:var(--soft);white-space:nowrap}
+.sq .ix .hl{font:500 1.55cqw/1.5 "Noto Sans KR",sans-serif;color:var(--ink);white-space:nowrap}
+.sq .g{text-align:center;transform:translateX(-50%);width:11%}
+.sq .g *{position:static;display:block}
+.sq .g img{height:5cqw;margin:0 auto .7cqw}
+.sq .g .cap{font-size:1.7cqw;color:var(--ink);margin-bottom:1.1cqw}
+.sq .g b{font:700 1.85cqw/1 "Noto Sans KR",sans-serif;margin-bottom:1.3cqw;white-space:nowrap}
+.sq .g em{font:700 1.7cqw/1.25 "Noto Sans KR",sans-serif;font-style:normal;white-space:nowrap}
+.sq .g small{font:500 1.5cqw/1.35 "Noto Sans KR",sans-serif;color:var(--ink);margin-top:1.1cqw;white-space:nowrap}
+.sq .lg{right:1.6%;top:1.5cqw;height:2.4cqw;display:flex;width:44%}
+.sq .lg span{position:static;flex:1;font:500 1.15cqw/2.4cqw "Noto Sans KR",sans-serif;text-align:center;color:#fff}
+.sq .tm{left:1.6%;right:1.6%;top:5.2cqw;bottom:1.4cqw;display:flex;gap:.25cqw;border-radius:1cqw;overflow:hidden}
+.sq .tm *{position:static}
+.sq .tm .big{flex:0 0 27%;display:flex;align-items:center;justify-content:center;gap:1.6cqw;color:#fff}
+.sq .tm .big img{height:7.4cqw}
+.sq .tm .big span{display:block;white-space:nowrap;font:400 2.6cqw/1.2 "Jua","Noto Sans KR",sans-serif}
+.sq .tm .big b{display:block;margin-top:.3cqw;font:700 3.7cqw/1.1 "Noto Sans KR",sans-serif}
+.sq .tm .rt{flex:1;display:flex;flex-direction:column;gap:.25cqw}
+.sq .tm .rw{flex:1;display:flex;gap:.25cqw}
+.sq .tm .t{display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;font:400 2.15cqw/1.2 "Jua","Noto Sans KR",sans-serif;min-width:0;white-space:nowrap}
+.sq .tm .t b{font:700 2.4cqw/1.2 "Noto Sans KR",sans-serif}
+.sq .iv{text-align:center;transform:translateX(-50%);width:23%}
+.sq .iv *{position:static;display:block}
+.sq .iv .cap{font:400 2.3cqw/1 "Jua","Noto Sans KR",sans-serif;color:var(--ink);margin-bottom:.4cqw}
+.sq .iv img{height:10.4cqw;margin:0 auto}
+.sq .iv b{font:900 2.9cqw/1.2 "Noto Sans KR",sans-serif;white-space:nowrap}
+.sq .iv small{font:700 1.5cqw/1.3 "Noto Sans KR",sans-serif;display:inline-block;padding:.1cqw 1cqw;border-radius:1cqw;color:#fff;margin-top:.3cqw}
+.sq .note{left:2.4%;bottom:.75%;font:500 1.4cqw/1 "Noto Sans KR",sans-serif;color:var(--soft);white-space:nowrap}
+.sq .src{right:2.4%;bottom:.75%;font:500 1.4cqw/1 "Noto Sans KR",sans-serif;color:var(--soft);white-space:nowrap}
+.foot a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+.foot .links{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:8px;font-size:13.5px}
 .rk-list{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
 .rk-row{display:grid;grid-template-columns:3.2em minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;border:0;border-bottom:1px solid var(--line);background:none;padding:12px 14px;text-align:left;font:inherit;color:inherit;cursor:pointer}
 .rk-row:last-child{border-bottom:0} .rk-row:hover{background:var(--paper-2)} .rk-row:focus-visible{outline:2px solid var(--navy);outline-offset:-2px}
@@ -542,9 +672,12 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
       버거대왕 국장 레이더
     </a>
     <nav class="nav" aria-label="메뉴">
+      <a href="#today" data-nav="today" id="navToday" hidden>오늘의 국장</a>
+      <a href="#cal" data-nav="cal" id="navCal" hidden>증시캘린더</a>
       <a href="#home" data-nav="home">오늘의 후보</a>
       <a href="#search" data-nav="search">종목 찾기</a>
       <a href="#rules" data-nav="rules">왕의 규칙</a>
+      <a href="#about" data-nav="about">버거대왕</a>
     </nav>
     <div class="clocks">
       <span class="clock kr" id="krClock" title="이 페이지(국장)가 계산된 시각">–</span>
@@ -566,10 +699,10 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
       <div class="hero-stats" id="heroStats"></div>
     </div>
     <figure class="portrait">
-      <button class="frame" id="portraitBtn" type="button" aria-label="버거대왕 그림 크게 보기">
-        <img src="assets/burger-king.png" alt="왕관을 쓴 버거대왕이 돋보기로 떠 있는 캔들차트 화면들을 살펴보는 모습" width="1254" height="1254">
-      </button>
-      <figcaption>버거대왕이 오늘의 차트를 살피는 중 · 눌러서 크게 보기</figcaption>
+      <a class="heroart" href="#about" aria-label="버거대왕이 누구인지 보러 가기">
+        <img src="assets/gj/hero.png" alt="돋보기로 살펴보는 버거대왕" width="686" height="698">
+      </a>
+      <figcaption>버거대왕이 누구냐고요? 눌러보세요</figcaption>
     </figure>
   </div>
   <svg class="castle" viewBox="0 0 1200 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
@@ -619,7 +752,7 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
       <select id="mkt" aria-label="시장"><option value="all">코스피+코스닥</option><option value="KOSPI">코스피</option><option value="KOSDAQ">코스닥</option></select>
       <select id="sort" aria-label="정렬"><option value="grade">등급 순</option><option value="win">과거 승률 순</option><option value="recent">최근 신호 순</option><option value="deep">많이 빠진 순</option><option value="marcap">시가총액 순</option></select>
       <label class="toggle" id="weakLbl"><input type="checkbox" id="weak"> 하나만 뜬 약한 신호도</label>
-      <label class="toggle"><input type="checkbox" id="onlyGo"> 조건 통과만</label>
+      <label class="toggle"><input type="checkbox" id="onlyGo"> 추천만</label>
       <label class="toggle"><input type="checkbox" id="hideThin"> 거래 적은 종목 숨기기</label>
     </div>
     <div class="count-line" id="tabNote"></div>
@@ -640,6 +773,28 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
   </div>
 
   <div class="view" id="v-rules" hidden></div>
+  <div class="view" id="v-cal" hidden>
+    <div class="cal-head">
+      <img src="assets/gj/jr_cal.png" alt="미니 캘린더를 든 버거2세" width="482" height="556">
+      <div><h2>증시캘린더</h2><p class="cal-say" id="calSay"></p></div>
+    </div>
+    <div class="cal-bar">
+      <div class="cal-nav"><button type="button" id="calPrev" aria-label="이전 달">‹</button><b id="calMonth"></b><button type="button" id="calNext" aria-label="다음 달">›</button><button type="button" id="calNow">이번 달</button></div>
+      <div class="cal-chips" id="calChips" role="group" aria-label="일정 종류"></div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-list" id="calList"></div>
+    <p class="count-line" id="calNote" style="margin-top:14px"></p>
+  </div>
+  <div class="view" id="v-about" hidden>
+    <div class="ab-top"><h2>버거 왕국에 어서 오시게</h2><p id="abHint">버거대왕과 버거2세를 눌러보세요</p></div>
+    <img id="abImg" src="assets/gj/scene_w.jpg" alt="풀밭에 누워 쉬고 있는 버거대왕과 버거2세, 멀리 성과 호수" width="1672" height="941">
+    <div class="ab-fade" id="abFadeT"></div><div class="ab-fade" id="abFadeB"></div>
+    <button class="ab-ch" id="abKing" type="button" aria-label="버거대왕 소개 듣기"><span class="tagname">👑 버거대왕</span></button>
+    <button class="ab-ch" id="abJr" type="button" aria-label="버거2세 소개 듣기"><span class="tagname">📅 버거2세</span></button>
+    <div class="ab-cta"><a class="main" href="#home">저희와 함께 떠나보아요 →</a><a href="https://blog.naver.com/realfoodbae" target="_blank" rel="noopener">블로그 ↗</a><a href="https://www.instagram.com/stock_burger_king/" target="_blank" rel="noopener">인스타그램 ↗</a></div>
+  </div>
+  <div class="view" id="v-today" hidden><div class="sq" id="gjSq"></div><div style="display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap;margin-top:12px"><button class="more" id="gjSave" type="button" style="margin:0">그림으로 저장</button><span class="count-line" id="gjNote"></span></div></div>
 </main>
 
 <footer class="foot"><div class="wrap" id="foot"></div></footer>
@@ -691,7 +846,7 @@ const syncTheme=()=>{ $("#themeBtn").textContent = isDark()? "☀️ 낮":"🌙 
 $("#themeBtn").addEventListener("click",()=>{ root.setAttribute("data-theme", isDark()?"light":"dark"); try{localStorage.setItem("bk-theme",root.getAttribute("data-theme"))}catch(e){} syncTheme(); redrawAll(); });
 try{ const t=localStorage.getItem("bk-theme"); if(t) root.setAttribute("data-theme",t);}catch(e){}
 syncTheme();
-$("#portraitBtn").addEventListener("click",()=>{ const d=$("#portraitDlg"); if(d.showModal) d.showModal(); });
+
 
 /* 과거 성과 문장 */
 const base = () => (T.baseline||{}).all || null;
@@ -716,7 +871,7 @@ function header(){
   }
   const mk=M.market||{};
   $("#lede").textContent = `코스피 전 종목과 코스닥 150을 장중 30분마다 살펴봅니다. 과거 같은 상태의 성과, 재무 순위, 악재 점검까지 한 번에 볼 수 있어요.`;
-  $("#heroStats").innerHTML = [[cnt(S.length),"살펴본 종목"],[M.os_count??0,"과매도 후보"],[M.go_count??0,"조건 통과"],[mk.breadth!=null?mk.breadth+"%":"–","시장 폭"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  $("#heroStats").innerHTML = [[cnt(S.length),"살펴본 종목"],[M.os_count??0,"과매도 후보"],[M.go_count??0,"추천 종목"],[mk.breadth!=null?mk.breadth+"%":"–","시장 폭"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
   $("#asOf").textContent = `${M.as_of||""} ${ph.label||""} 기준 · 전 종목 중 20일선 위에 있는 종목 비율`;
   const b=[];
   if(M.mode==="demo") b.push(`<p class="banner demo">샘플 화면이에요. 종목 이름·가격·재무·과거 성과 숫자는 모두 지어낸 가상 데이터입니다.</p>`);
@@ -834,6 +989,7 @@ const fitem=(s,k)=>(s.fin?.items||[]).find(i=>i.key===k);
 const RK=[
   {k:"fin", g:"재무", n:"재무 종합 점수", v:s=>s.fin?.score, d:-1, show:v=>v+"점", note:"재무 점수가 높은 순서예요. 점수는 기준값이 아니라 다른 종목을 얼마나 이겼는지로 매겨요. PER·PBR은 같은 업종끼리 비교했어요."},
   ...Object.keys(FT).map(k=>({k:"f_"+k, g:"재무", n:FT[k].name, v:s=>{const i=fitem(s,k); return i&&i.status==="ok"?i.pct:null;}, d:-1, show:(v,s)=>fitem(s,k).display, sub:v=>`${v}% 이김`, note:`${FT[k].name}: ${FT[k].explain}. 좋은 쪽이 위로 오게 줄 세웠어요.`})),
+  {k:"div", g:"재무", n:"배당수익률 높은 순", v:s=>(s.fin?.div_yield>0?s.fin.div_yield:null), d:-1, show:v=>v.toFixed(2)+"%", note:"지금 주가 기준으로 1년에 받는 배당이 투자금의 몇 %인지예요. 높다고 좋은 회사는 아니에요. 주가가 많이 빠져서 높아 보이는 경우도 있고, 배당이 없는 종목은 순위에서 빠져요."},
   {k:"risk", g:"악재", n:"악재 점수 (깨끗한 순)", v:s=>s.risk?.score, d:-1, show:v=>v+"점", note:"악재 스크리닝 점수가 높은(걸린 게 적은) 순서예요. 100점이면 공시·실적·수급에서 걸린 게 없다는 뜻이에요."},
   {k:"rsi", g:"차트", chart:1, n:"RSI 낮은 순", v:s=>s.sig?.stats?.rsi, d:1, show:v=>v.toFixed(1), note:"RSI가 낮을수록 최근에 많이 빠졌다는 뜻이에요. 1등이 가장 좋다는 뜻이 아니라 가장 많이 빠졌다는 뜻이에요."},
   {k:"gap", g:"차트", chart:1, n:"20일선에서 많이 떨어진 순", v:s=>s.sig?.stats?.gap, d:1, show:v=>pct(v), note:"주가가 20일 평균보다 얼마나 아래에 있는지예요. 1등이 가장 좋다는 뜻이 아니라 가장 많이 떨어져 있다는 뜻이에요."},
@@ -1044,6 +1200,7 @@ function finPage(s){
   const note=f.score==null? `데이터가 부족해서 점수를 내지 않았어요 (필요한 데이터의 ${Math.round(f.coverage*100)}%만 확보).` : f.coverage<1? `데이터가 없는 항목은 빼고 100점으로 환산했어요.`:"";
   return `<p style="margin:0 0 8px">재무 점수 <span class="num" style="font-size:24px">${f.score??"–"}</span> / 100 · 등급 ${esc(f.grade)} <span class="soft">50점이 전 종목의 딱 중간이에요. ${note}${f.financial_sector?" 금융업이라 부채비율·당좌비율·영업이익률은 제외.":""}</span></p>
     ${rankBoxes(f)}
+    ${f.div_yield!=null?`<p class="note" style="margin:0 0 8px">배당수익률 <b>${f.div_yield.toFixed(2)}%</b> · 지금 주가로 사면 1년에 받는 배당이 투자금의 몇 %인지예요${f.div_src&&f.div_src!=="네이버 종합정보"?` (${esc(f.div_src)}로 계산)`:""}. 점수에는 반영 안 함</p>`:""}
     ${f.target_price?`<p class="note" style="margin:0 0 8px">증권사 목표주가 ${won(f.target_price)}원${f.opinion?` · ${esc(f.opinion)}`:""} · 현재가 대비 ${pct(f.upside)} (점수에는 반영 안 함)</p>`:""}
     <div class="items">${f.items.map(it=>`<div class="item${it.status!=="ok"?" muted":""}"><div>${esc(it.name)}<small>${esc(it.explain)}</small></div>
       <div class="val">${esc(it.display)}<small>${it.points!=null?it.points.toFixed(1):"–"} / ${it.max}${it.period?" · "+esc(it.period):""}</small></div>
@@ -1060,7 +1217,7 @@ function riskPage(s){
 function verdictPage(s){
   const v=s.verdict||{key:"none",label:"신호 없음",why:""}, g=s.sig, o=g?.os, f=s.fin||{}, r=s.risk||{};
   const chartLine = v.signal? `${esc(v.signal_name)} · 등급 ${v.grade||"–"} · 과거 ${cnt(v.n)}번 · 5일 승률 ${v.w5??"–"}% · 평균 ${pct(v.m5)}` : esc(v.why||"");
-  const stamp = {go:"조건<br>통과", veto:"비추", weak:esc(v.label).replace(" ","<br>"), none:"신호<br>없음"}[v.key];
+  const stamp = {go:"추천", veto:"비추", weak:esc(v.label).replace(" ","<br>"), none:"신호<br>없음"}[v.key];
   const head = {go:"규칙상 들어갈 만한 자리", veto:"승률은 넘지만 걸러요", weak:"기준에 못 미쳐요", none:"지금은 볼 신호가 없어요"}[v.key];
   return `<div class="final ${v.key}"><div class="stamp"><div>${stamp}</div></div><div style="min-width:0">
       <h3>${head}</h3><p>${esc(v.why||"")}</p>
@@ -1070,7 +1227,7 @@ function verdictPage(s){
       <div class="sumrow"><b>재무</b><span>${f.score!=null?`${f.score}점 · 전 종목 ${f.rank.all[0]}등 / ${cnt(f.rank.all[1])}${f.rank.sector?` · ${esc(f.rank.sector[2])} ${f.rank.sector[0]}등 / ${f.rank.sector[1]}`:""}`:"점수를 낼 데이터 부족"}</span><span class="vd vd-${f.score==null?"none":f.rank.bottom_pct<RU.fin_veto?"veto":"go"}">${f.score==null?"확인 불가":f.rank.bottom_pct<RU.fin_veto?`하위 ${RU.fin_veto}% 안`:"통과"}</span></div>
       <div class="sumrow"><b>악재</b><span>${r.score!=null?`${r.score}점 · 위험 ${r.bad} · 주의 ${r.warn}${r.unknown?` · 확인 불가 ${r.unknown}`:""}`:"데이터 없음"}</span><span class="vd vd-${r.score==null?"none":r.score<60?"veto":r.bad?"weak":"go"}">${r.score==null?"확인 불가":r.score<60?"위험":r.bad?"주의":"통과"}</span></div>
     </div>
-    <p class="note" style="margin:10px 0 0">판정 규칙: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 통과. 다만 악재 점수가 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추. 과거 통계를 규칙에 넣은 결과이고, 앞으로도 그렇다는 보장은 없어요. 투자 권유가 아닙니다.</p></div>`;
+    <p class="note" style="margin:10px 0 0">판정 규칙: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 추천. 다만 악재 점수가 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추. 과거 통계를 규칙에 넣은 결과이고, 앞으로도 그렇다는 보장은 없어요. 투자 권유가 아닙니다.</p></div>`;
 }
 const STEPS=[["차트 분석",s=>s.sig?.os?.event?`과매도 ${s.sig.os.event.n}개 · 등급 ${s.sig.os.grade||"–"}`:s.sig?.nh?"52주 신고가":"신호 없음"],
              ["재무",s=>s.fin?.score!=null?`${s.fin.score}점 · ${s.fin.rank.all[0]}등`:"데이터 부족"],
@@ -1130,7 +1287,7 @@ function renderRules(){
       <li>52주 신고가 돌파는 시장 폭이 50% 이상일 때만 후보로 봅니다. 승률은 낮고 맞을 때 크게 먹는 유형입니다.</li>
       <li>거래량 실린 구름대 돌파는 시장도 종목도 상승 추세일 때만 따로 봅니다.</li>
       <li>등급과 과거 성과는 종목이 속한 묶음(코스피 대형 · 코스피 중소형 · 코스닥 150)의 기록으로 계산합니다.</li>
-      <li>최종 판정: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 통과. 악재 점수 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추.</li></ul>
+      <li>최종 판정: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 추천. 악재 점수 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추.</li></ul>
       <p class="note">매크로(금리·유가·환율)는 규칙에 넣지 않았어요. 직접 판단해서 얹는 영역입니다. 투자 권유가 아니라 공부용 도구예요.</p></div>
     <div class="panel"><h3>근거</h3>
       <p class="note" style="margin:0 0 10px">${esc(tm.from||"")} ~ ${esc(tm.to||"")} · ${tm.stocks??"–"}종목 · 신호일 종가에 사서 N거래일 뒤 종가에 팔고 왕복 비용 ${tm.cost??RU.cost}%를 뺀 결과. ${esc(tm.built||"")} 계산. 정식 실행 때마다 다시 계산돼요.</p>
@@ -1175,17 +1332,153 @@ function renderRules(){
       <p class="note">평일 장중 30분마다 시세만 새로 받아 갱신하고, 15:45와 18:10에 전부 새로 받아요. 급할 땐 위쪽 '지금 갱신'을 눌러 GitHub에서 Run workflow를 누르면 2~3분 뒤 반영돼요.</p></div>`;
 }
 
+/* ── 오늘의 국장 ── */
+const gf=(n,d=2)=>Math.abs(n).toLocaleString("ko-KR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const gcl=n=>n>=0?"up":"dnc", gar=n=>n>=0?"▲":"▼", gsg=n=>n>0?"+":n<0?"-":"";
+function gheat(p){ const a=Math.min(1,Math.abs(p)/3.5), m=.5+.5*a, [r,g,b]=p>=0?[226,30,48]:[30,104,222];
+  return `background:rgb(${Math.round(255-(255-r)*m)},${Math.round(255-(255-g)*m)},${Math.round(255-(255-b)*m)})`; }
+function gchart(d,i){ let s=i*7+3; const r=()=>(s=(s*9301+49297)%233280)/233280, n=46, a=[d.v-d.c];
+  for(let k=1;k<n;k++){ const t=k/(n-1), dip=k<5?-(d.hi-d.lo)*.5*Math.sign(d.c)*(1-k/5)*(k/2):0; a.push((d.v-d.c)+d.c*t+dip+(r()-.5)*(d.hi-d.lo)*.16); } a[n-1]=d.v;
+  const lo=Math.min(...a,d.lo), hi=Math.max(...a,d.hi), X=k=>k/(n-1)*100, Y=v=>(hi-v)/(hi-lo)*100, col=d.c>=0?"var(--up)":"var(--down)";
+  const p=a.map((v,k)=>(k?"L":"M")+X(k).toFixed(1)+" "+Y(v).toFixed(1)).join("");
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="${p}L100 100L0 100Z" fill="${col}" opacity=".14"/><path d="${p}" fill="none" stroke="${col}" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`; }
+function renderToday(D){
+  const k=D.idx[0], upDay=k.c>=0, sq=document.getElementById("gjSq"); sq.classList.toggle("dn",!upDay);
+  const ix=D.idx.map((d,i)=>{ const cx=11.5+i*22; return `
+    <div class="h" style="left:${cx}%;top:1.2cqw;transform:translateX(-50%);color:var(--${d.c>=0?"up":"down"})">${d.n}</div>
+    <div class="v num" style="left:${cx}%;top:5cqw">${gf(d.v)}</div>
+    <div class="c num ${gcl(d.c)}" style="left:${cx}%;top:9.4cqw">${gar(d.c)} ${gf(d.c)} (${gsg(d.p)}${gf(d.p)}%)</div>
+    <div style="left:${cx-9.6}%;top:13cqw;width:14.2%;height:7.2cqw">${gchart(d,i).replace("<svg",'<svg style="position:absolute;inset:0;width:100%;height:100%"')}</div>
+    <div class="ax num" style="left:${cx+5.2}%;top:12.8cqw">${gf(d.hi)}</div><div class="ax num" style="left:${cx+5.2}%;top:16cqw">${gf((d.hi+d.lo)/2)}</div><div class="ax num" style="left:${cx+5.2}%;top:19.2cqw">${gf(d.lo)}</div>
+    <div class="ax" style="left:${cx-9}%;top:20.8cqw">10:15</div><div class="ax" style="left:${cx-3.6}%;top:20.8cqw">12:30</div><div class="ax" style="left:${cx+1.6}%;top:20.8cqw">14:30</div>
+    <div class="hl num" style="left:${cx-8.6}%;top:23.4cqw">장중 최고&emsp;&emsp;${gf(d.hi)}<br>장중 최저&emsp;&emsp;${gf(d.lo)}</div>
+    ${i?`<div class="vline" style="left:${cx-11}%;top:1.2cqw;height:25cqw"></div>`:""}`; }).join("");
+  const gx=[47.9,56.7,65.5,74.3], mx=[87.8,96.2].map(x=>x-1.6);
+  const cell=(g,x,unit)=>`<div class="g" style="left:${x}%;top:5.6cqw"><img src="assets/gj/${g.i}.png" alt=""><span class="cap">${g.n}</span><b class="num">${g.v}</b><em class="num ${gcl(g.c)}">${gar(g.c)} ${unit?gf(g.c,0)+"억":gf(g.c)}${unit?"":`<br>(${gsg(g.p)}${gf(g.p)}%)`}</em>${g.s?`<small class="num">${g.s}</small>`:""}</div>`;
+  const s=D.sec, tile=([n,p])=>`<div class="t" style="flex:${n.length>5?1.35:1};${gheat(p)}"><span>${n}</span><b class="num">${gsg(p)}${gf(p)}%</b></div>`;
+  const fx=[35,59.5,84];
+  sq.innerHTML=`<img class="sky" src="assets/gj/sky.jpg" alt=""><div class="fade"></div>
+  <div class="cal"><i></i><u style="left:22%"></u><u style="left:69%"></u><b>${D.date}</b><span>(${D.dow})</span></div>
+  <div class="ttl">오늘의 국장${upDay?"↑":"↓"}</div><div class="sub">한눈에 보는 국내시장</div>
+  <img class="king" src="assets/gj/king_${upDay?"up":"dn"}.png" alt="버거대왕" style="right:1.2%">
+  <div class="bub" style="right:22.5%;top:14.2%">${upDay?"오늘도<br>돈 많이 벌어가거라!":"이런 날도<br>있는 법이니라"}</div>
+  <section class="panel ix" style="top:24.6%;height:28.2%">${ix}
+    <div class="vline" style="left:43.2%;top:1.2cqw;height:25cqw"></div>
+    <div class="h" style="left:61.1%;top:1.2cqw;transform:translateX(-50%);color:#1f3fae">글로벌 지표</div>
+    ${D.glob.map((g,i)=>cell(g,gx[i])).join("")}${[52.3,61.1,69.9].map(x=>`<div class="vline" style="left:${x}%;top:5.4cqw;height:21cqw"></div>`).join("")}
+    <div class="vline" style="left:79%;top:1.2cqw;height:25cqw"></div>
+    <div class="h" style="left:89%;top:1.2cqw;transform:translateX(-50%);color:#167a2f">투자심리</div>
+    ${D.mood.map((g,i)=>cell(g,[84,94][i],true)).join("")}<div class="vline" style="left:89%;top:5.4cqw;height:21cqw"></div></section>
+  <section class="panel" style="top:53.4%;height:23.6%">
+    <div class="h" style="left:1.8%;top:1.2cqw">업종별 등락률 TOP 10 <span class="cap" style="position:static;font-size:1.9cqw">(단위: %)</span></div>
+    <div class="cap" style="right:46.6%;top:1.8cqw">등락률</div>
+    <div class="lg">${[-10,-5,-3,-1,-0.5,0.5,1,3,5,10].map(p=>`<span style="${gheat(p)}">${p>0?"+":""}${p}%</span>`).join("")}</div>
+    <div class="tm"><div class="big" style="${gheat(s[0][1])}"><img src="assets/gj/chip.png" alt=""><div><span>${s[0][0]}</span><b class="num">${gsg(s[0][1])}${gf(s[0][1])}%</b></div></div>
+      <div class="rt"><div class="rw">${s.slice(1,5).map(tile).join("")}</div><div class="rw">${s.slice(5).map(tile).join("")}</div></div></div></section>
+  <section class="panel" style="top:77.6%;height:19.4%">
+    <div class="h" style="left:1.8%;top:1.2cqw">투자자 동향</div>
+    <div class="cap" style="left:1.9%;top:5.2cqw;font-size:1.8cqw">일간 · 단위: 억원</div><img src="assets/gj/crown.png" alt="" style="left:5.6%;top:8.6cqw;height:8cqw">
+    ${D.flow.map(([n,key,v],i)=>`<div class="iv" style="left:${fx[i]}%;top:1.4cqw"><span class="cap">${n}</span><img src="assets/gj/${key}_${v>=0?"up":"dn"}.png" alt="${n} ${v>=0?"순매수":"순매도"}"><b class="num ${gcl(v)}">${gsg(v)}${gf(v,0)}억</b></div>
+      <div class="cap" style="left:${fx[i]+5.8}%;top:8.6cqw;padding:.5cqw 1.3cqw;border-radius:1.4cqw;color:#fff;font-weight:700;background:var(--${v>=0?"up":"down"})">${v>=0?"순매수":"순매도"}</div>`).join("")}
+    <div class="vline" style="left:23%;top:2cqw;height:15cqw"></div><div class="vline" style="left:48.8%;top:2cqw;height:15cqw"></div><div class="vline" style="left:73.4%;top:2cqw;height:15cqw"></div></section>
+  <div class="note">※ 본 정보는 투자 참고용이며, 투자의 책임은 본인에게 있습니다.</div><div class="src">데이터: 네이버 금융</div>`;
+}
+
+function loadScript(src){ return new Promise((ok,no)=>{ if(window.htmlToImage) return ok(); const t=document.createElement("script"); t.src=src; t.onload=ok; t.onerror=()=>no(new Error("저장 도구를 못 불러왔어요")); document.head.appendChild(t); }); }
+async function saveToday(){
+  const b=$("#gjSave"), el=$("#gjSq"), old=b.textContent; b.disabled=true; b.textContent="그림 만드는 중…";
+  try{
+    await loadScript("assets/gj/html-to-image.js");
+    const o={canvasWidth:1500, canvasHeight:1500, pixelRatio:1, cacheBust:false, style:{borderRadius:"0"}};
+    await htmlToImage.toPng(el,o);                       // 사파리는 첫 번째에 그림이 빠져서 두 번 그린다
+    const url=await htmlToImage.toPng(el,o), a=document.createElement("a");
+    a.href=url; a.download=`오늘의국장_${(M.today?.date||"").replace(/\s/g,"")}.png`; document.body.appendChild(a); a.click(); a.remove();
+    b.textContent="저장했어요";
+  }catch(e){ b.textContent="저장 실패: "+(e.message||"다시 눌러주세요"); }
+  setTimeout(()=>{ b.textContent=old; b.disabled=false; },2500);
+}
+$("#gjSave").addEventListener("click",saveToday);
+/* ── 증시캘린더 ── */
+const CAL=M.calendar||null, cal={ym:null, cat:"all", sel:null};
+const DOW=["일","월","화","수","목","금","토"];
+const ymd=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const dnice=s=>{ const d=new Date(s+"T00:00:00"); return `${d.getMonth()+1}월 ${d.getDate()}일 (${DOW[d.getDay()]})`; };
+function calEvents(){ return CAL.events.filter(e=>cal.cat==="all"||e.cat===cal.cat); }
+function renderCal(){
+  if(!CAL) return; const today=CAL.today; if(!cal.ym) cal.ym=today.slice(0,7);
+  const [y,m]=cal.ym.split("-").map(Number), first=new Date(y,m-1,1), days=new Date(y,m,0).getDate(), ev=calEvents();
+  const by={}; ev.forEach(e=>(by[e.d]=by[e.d]||[]).push(e));
+  const months=[...new Set(CAL.events.map(e=>e.d.slice(0,7)))].sort(), lo=months[0], hi=months[months.length-1];
+  $("#calMonth").textContent=`${y}년 ${m}월`; $("#calPrev").disabled=cal.ym<=lo; $("#calNext").disabled=cal.ym>=hi;
+  $("#calChips").innerHTML=[["all","전체"],...Object.entries(CAL.cats)].map(([k,n])=>`<button type="button" data-cat="${k}" aria-pressed="${cal.cat===k}">${k==="all"?"":`<i style="--dot:var(--c-${k})"></i>`}${esc(n)}</button>`).join("");
+  let h=DOW.map(d=>`<div class="cal-dow">${d}</div>`).join("");
+  for(let i=0;i<first.getDay();i++) h+=`<div class="cal-day out"></div>`;
+  for(let d=1;d<=days;d++){ const key=`${cal.ym}-${String(d).padStart(2,"0")}`, es=by[key]||[], wd=(first.getDay()+d-1)%7;
+    const off=es.some(e=>e.cat==="closed"&&e.title.startsWith("한국"));
+    h+=`<button type="button" class="cal-day${wd===0?" sun":wd===6?" sat":""}${off?" off":""}${key===today?" today":""}${key===cal.sel?" sel":""}" data-d="${key}" aria-label="${dnice(key)} 일정 ${es.length}개"><span class="n">${d}</span>${es.slice(0,3).map(e=>`<span class="cal-ev${e.imp>=3?" hi":""}"><i style="--dot:var(--c-${e.cat})"></i><span>${esc(e.title)}</span></span>`).join("")}</button>`; }
+  const tail=(7-(first.getDay()+days)%7)%7; for(let i=0;i<tail;i++) h+=`<div class="cal-day out"></div>`;
+  $("#calGrid").innerHTML=h;
+  const list=cal.sel? ev.filter(e=>e.d===cal.sel) : ev.filter(e=>e.d.slice(0,7)===cal.ym);
+  let out="", last="";
+  list.forEach(e=>{ if(e.d!==last){ last=e.d; const diff=Math.round((new Date(e.d)-new Date(today))/864e5); out+=`<h3>${dnice(e.d)}<small>${diff===0?"오늘":diff===1?"내일":diff>0?diff+"일 뒤":"지남"}</small></h3>`; }
+    out+=`<div class="cal-row${e.d<today?" past":""}" style="--dot:var(--c-${e.cat})"><i></i><b><span class="tag">${esc(CAL.cats[e.cat])}</span>${esc(e.title)}</b><time>${e.t?e.t+(e.t<"06:00"?" (새벽)":""):"종일"}</time>${e.note||e.src?`<p>${esc(e.note)}${e.note&&e.src?" · ":""}${e.src?"출처: "+esc(e.src):""}</p>`:""}</div>`; });
+  $("#calList").innerHTML=(cal.sel?`<button class="back" type="button" id="calAll" style="justify-self:start">← ${m}월 전체 일정 보기</button>`:"")+(out||`<p class="empty">${cal.sel?"이날은 일정이 없어요.":"이 달에는 넣어둔 일정이 없어요."}</p>`);
+  const wk=CAL.events.filter(e=>{ const diff=(new Date(e.d)-new Date(today))/864e5; return diff>=0&&diff<=7; }), big=wk.filter(e=>e.imp>=3), nx=CAL.events.find(e=>e.d>=today&&e.imp>=3);
+  $("#calSay").innerHTML=wk.length? `앞으로 일주일 동안 일정이 <b>${wk.length}개</b> 있어요! ${big.length?`그중 꼭 봐야 할 건 <b>${esc(big[0].title)}</b> (${dnice(big[0].d)}${big[0].t?" "+big[0].t:""})이에요.`:nx?`큰 일정은 없고, 다음 큰 일정은 <b>${esc(nx.title)}</b> (${dnice(nx.d)})이에요.`:""}` : `앞으로 일주일은 조용해요.${nx?` 다음 큰 일정은 <b>${esc(nx.title)}</b> (${dnice(nx.d)})이에요.`:""}`;
+  $("#calNote").textContent=`시각은 모두 한국 시간이에요. ${CAL.pending} 출처: ${CAL.sources}.`;
+}
+function bindCal(){
+  if(!CAL) return; $("#navCal").hidden=false;
+  const step=n=>{ const [y,m]=cal.ym.split("-").map(Number), d=new Date(y,m-1+n,1); cal.ym=ymd(d).slice(0,7); cal.sel=null; renderCal(); };
+  $("#calPrev").addEventListener("click",()=>step(-1)); $("#calNext").addEventListener("click",()=>step(1));
+  $("#calNow").addEventListener("click",()=>{ cal.ym=CAL.today.slice(0,7); cal.sel=null; renderCal(); });
+  $("#calChips").addEventListener("click",e=>{ const b=e.target.closest("[data-cat]"); if(b){ cal.cat=b.dataset.cat; renderCal(); } });
+  $("#calGrid").addEventListener("click",e=>{ const b=e.target.closest("[data-d]"); if(b){ cal.sel=cal.sel===b.dataset.d?null:b.dataset.d; renderCal(); } });
+  $("#calList").addEventListener("click",e=>{ if(e.target.closest("#calAll")){ cal.sel=null; renderCal(); } });
+}
+bindCal();
+/* ── 소개 (캐릭터를 누르면 말풍선) ── */
+const AB={
+  abKing:{name:"👑 버거대왕", img:"kg", lines:["안녕하도다~ 나는 버거대왕이도다!","주식과 경제 이야기를 쉽고 재미있게 전하고, 매일 시장을 분석하는 최고 미남이도다!!"]},
+  abJr:{name:"📅 버거2세", img:"jr", lines:["안녕하세요~ 저는 버거2세예요!","아빠 버거대왕을 도와 경제 캘린더를 만들고, 중요한 경제 일정을 알려주는 역할을 하고 있답니다!"]},
+};
+const abAt={abKing:-1,abJr:-1};
+function abShow(id){
+  Object.keys(AB).forEach(k=>{ const el=$("#"+k), c=AB[k], on=k===id; el.querySelector(".ab-bub")?.remove();
+    if(on) abAt[k]=(abAt[k]+1)%c.lines.length; else abAt[k]=-1;
+    el.querySelector(".tagname").hidden=on;
+    if(on){ const b=document.createElement("span"); b.className="ab-bub"; b.setAttribute("role","status");
+      b.innerHTML=`<b>${c.name}</b>${esc(c.lines[abAt[k]])}<small>${abAt[k]<c.lines.length-1?"한 번 더 누르면 이어서 말해요":"다른 캐릭터도 눌러보세요"}</small>`; el.appendChild(b); } });
+  $("#abHint").hidden=!!id;
+}
+Object.keys(AB).forEach(k=>$("#"+k).addEventListener("click",e=>{ e.stopPropagation(); abShow(k); }));
+$("#v-about").addEventListener("click",e=>{ if(!e.target.closest(".ab-ch,.ab-cta")) abShow(null); });
+const AB_BOX={abKing:[.21,.44,.55,.80], abJr:[.56,.54,.75,.80]};      // 그림 안에서 캐릭터가 있는 자리 (왼쪽, 위, 오른쪽, 아래 비율)
+function abFit(){ const v=$("#v-about"); if(v.hidden) return;
+  const top0=v.getBoundingClientRect().top+window.scrollY, W=v.clientWidth, H=Math.max(460,window.innerHeight-top0); v.style.height=H+"px";
+  const iw=1672, ih=941, cover=Math.max(W/iw,H/ih), fit=W/(0.60*iw), sc=Math.min(cover,fit), w=iw*sc, h=ih*sc;
+  const left=Math.min(0,Math.max(W-w, W/2-0.48*w)), top=sc<cover? (H-h)*0.5 : Math.min(0,Math.max(H-h,(H-h)*0.8));
+  const im=$("#abImg"); im.style.cssText=`left:${left}px;top:${top}px;width:${w}px;height:${h}px`;
+  const short=sc<cover; $("#abFadeT").hidden=$("#abFadeB").hidden=!short;
+  if(short){ $("#abFadeT").style.top=(top-1)+"px"; $("#abFadeB").style.top=(top+h-55)+"px"; v.style.background=`linear-gradient(#47b1fd 0 ${top+10}px,#7aae2c ${top+h-10}px 100%)`; } else v.style.background="";
+  Object.entries(AB_BOX).forEach(([k,[x0,y0,x1,y1]])=>{ $("#"+k).style.cssText=`left:${left+x0*w}px;top:${top+y0*h}px;width:${(x1-x0)*w}px;height:${(y1-y0)*h}px`; });
+}
+window.addEventListener("resize",abFit);
 /* ── 화면 전환 ── */
-const views={home:$("#v-home"),stock:$("#v-stock"),search:$("#v-search"),rules:$("#v-rules")};
+const views={home:$("#v-home"),stock:$("#v-stock"),search:$("#v-search"),rules:$("#v-rules"),today:$("#v-today"),about:$("#v-about"),cal:$("#v-cal")};
+if(M.today) $("#navToday").hidden=false;
 function route(){
   const h=(location.hash||"#home").slice(1); let name="home", m;
-  if((m=h.match(/^stock-([0-9A-Za-z]{6})(?:-([1-4]))?$/))) name="stock"; else if(h==="search") name="search"; else if(h==="rules") name="rules";
+  if((m=h.match(/^stock-([0-9A-Za-z]{6})(?:-([1-4]))?$/))) name="stock"; else if(h==="search") name="search"; else if(h==="rules") name="rules"; else if(h==="today"&&M.today) name="today"; else if(h==="about") name="about"; else if(h==="cal"&&M.calendar) name="cal";
   Object.entries(views).forEach(([k,el])=>el.hidden=(k!==name));
   $("#hero").hidden = name!=="home";
   document.querySelectorAll("[data-nav]").forEach(a=>{ const on=a.dataset.nav===name||(name==="stock"&&a.dataset.nav==="home"); if(on) a.setAttribute("aria-current","page"); else a.removeAttribute("aria-current"); });
   if(name==="stock"){ live.length=0; const keep=route._code===m[1]; renderStock(m[1], m[2]?+m[2]:1); if(!keep) window.scrollTo(0,0); else { const y=$(".steps").getBoundingClientRect().top+window.scrollY-70; if(window.scrollY>y) window.scrollTo(0,y); } route._code=m[1]; } else route._code=null;
   if(name==="rules"){ renderRules(); window.scrollTo(0,0); }
   if(name==="search"){ renderSearch(); }
+  if(name==="cal"){ renderCal(); window.scrollTo(0,0); }
+  document.body.classList.toggle("about-on",name==="about"); if(name==="about"){ abShow(null); window.scrollTo(0,0); abFit(); }
+  if(name==="today"){ renderToday(M.today); $("#gjNote").textContent=M.today.sample?"견본 숫자예요. 실제 데이터 연결 전입니다.":`${M.today.date} 장 마감 기준 · 하루 한 번 갱신`; window.scrollTo(0,0); }
   if(name==="home"){ drawSpark(); }
 }
 window.addEventListener("hashchange",route);
@@ -1193,7 +1486,7 @@ $("#sq").addEventListener("input",renderSearch);
 $("#sRows").addEventListener("click",e=>{ const b=e.target.closest(".card"); if(b) location.hash="stock-"+b.dataset.code;});
 
 header(); marketSection(); bindList(); renderList();
-$("#foot").innerHTML=`버거대왕의 국장 레이더 · ${esc(M.generated||"")} 생성 · 데이터: 네이버 금융, 와이즈리포트, DART · 공부용 자동 분석이며 투자 권유가 아닙니다.`;
+$("#foot").innerHTML=`<div class="links"><a href="https://blog.naver.com/realfoodbae" target="_blank" rel="noopener">버거대왕 블로그 (경제먹는사나이) ↗</a><a href="https://www.instagram.com/stock_burger_king/" target="_blank" rel="noopener">버거대왕 인스타그램 ↗</a></div>버거대왕의 국장 레이더 · ${esc(M.generated||"")} 생성 · 데이터: 네이버 금융, 와이즈리포트, DART · 공부용 자동 분석이며 투자 권유가 아닙니다.`;
 route();
 })();
 </script>

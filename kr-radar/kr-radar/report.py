@@ -114,6 +114,9 @@ def build(recs: list[dict], meta: dict, out_dir: str | None = None, inline_chart
     with open(os.path.join(out, "index.html"), "w", encoding="utf-8") as f:
         f.write(body if fragment else page)
     shutil.copyfile(find_image(), os.path.join(out, "assets", "burger-king.png"))
+    gj = os.path.join(HERE, "gj")                            # 오늘의 국장 그림들
+    if os.path.isdir(gj):
+        shutil.copytree(gj, os.path.join(out, "assets", "gj"), dirs_exist_ok=True)
     for name in ICON_FILES:                                  # 폰 홈 화면 아이콘
         p = os.path.join(HERE, name)
         if os.path.exists(p):

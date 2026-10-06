@@ -624,3 +624,45 @@ def test_notify_sends_only_new(tmp_path, monkeypatch):
     assert msg2 is None
     if state["os"] or state["bo"]:
         assert msg and "시장 폭" in msg
+
+
+def test_dividend_yield_from_integration_and_fallback():
+    import sources as S, fundamental as F
+    obj = {"totalInfos": [{"code": "marketValue", "key": "시총", "value": "100억"},
+                          {"code": "dividendYieldRatio", "key": "배당수익률", "value": "3.25%"}]}
+    assert S.parse_integration(obj)["div_yield"] == 3.25
+    fin = {"annual": [{"period": "2025/12", "est": False, "v": {"dps": 500.0}}], "quarter": []}
+    r = F.fin_score(fin, {}, 10000.0, "전자장비")
+    assert r["div_yield"] == 5.0 and "주당배당금" in r["div_src"]
+    assert F.fin_score(fin, {"div_yield": 2.0}, 10000.0, "전자장비")["div_yield"] == 2.0
+    assert F.fin_score({"annual": [], "quarter": []}, {}, 10000.0, "전자장비")["div_yield"] is None
+
+
+def test_schedule_calendar_rules_and_timezones():
+    import schedule as K
+    from datetime import date
+    ev = {(e["d"], e["title"]): e for e in K.events(date(2026, 10, 1), date(2027, 3, 31))}
+    assert ev[("2026-10-08", "옵션 만기일")]["t"] == "15:20"                       # 10월 둘째 목요일
+    assert ("2026-12-10", "선물·옵션 동시만기일") in ev                              # 12월은 동시만기
+    assert ev[("2026-10-14", "미국 9월 소비자물가 (CPI)")]["t"] == "21:30"          # 서머타임: 08:30 ET = 21:30 KST
+    assert ev[("2026-11-10", "미국 10월 소비자물가 (CPI)")]["t"] == "22:30"         # 서머타임 끝난 뒤
+    assert ev[("2026-10-29", "미국 기준금리 결정 (FOMC)")]["t"] == "03:00"          # 미국 28일 14:00 = 한국 29일 새벽
+    assert ("2026-10-22", "한국은행 기준금리 결정 (금통위)") in ev
+    assert K.nth_weekday(2027, 1, 3, 2).isoformat() == "2027-01-14"
+    b = K.build(date(2026, 10, 7))
+    assert b["today"] == "2026-10-07" and b["events"] == sorted(b["events"], key=lambda x: (x["d"], x["t"] or "99", -x["imp"]))
+
+
+def test_fred_calendar_merge_keeps_manual_and_adds_new():
+    import schedule as K
+    from datetime import date
+    rows = [{"release_name": "Consumer Price Index", "date": "2026-10-14"},          # 손으로 넣은 것과 겹침 → 버림
+            {"release_name": "Producer Price Index", "date": "2026-10-15"},          # 새 일정
+            {"release_name": "Producer Price Index", "date": "2026-10-15"},          # 중복
+            {"release_name": "Some Other Release", "date": "2026-10-16"}]
+    auto = K.fred_events("k", date(2026, 10, 1), date(2026, 10, 31), get=lambda u, p: {"release_dates": rows})
+    assert [e["title"] for e in auto] == ["미국 소비자물가 (CPI)", "미국 생산자물가 (PPI)", "미국 생산자물가 (PPI)"]
+    merged = K._merge(K.events(date(2026, 10, 1), date(2026, 10, 31)), auto)
+    assert sum(1 for e in merged if e["d"] == "2026-10-14" and "소비자물가" in e["title"]) == 1
+    assert sum(1 for e in merged if "PPI" in e["title"]) == 1 and all("kind" not in e for e in merged)
+    assert K.build(date(2026, 10, 7), fred_key="")["auto"] == 0

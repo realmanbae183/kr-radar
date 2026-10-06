@@ -122,6 +122,22 @@ class DemoProvider:
         df = pd.DataFrame({"Open": c, "High": c, "Low": c, "Close": c, "Volume": 1.0}, index=self.days)
         return Fetch(True, df.tail(bars) if bars else df)
 
+    def today(self):
+        """오늘의 국장 견본 (2026-10-01 값)."""
+        return {"sample": True, "date": "10월 1일", "dow": "목",
+                "idx": [{"n": "코스피", "v": 6971.35, "c": 133.31, "p": 1.95, "hi": 6971.36, "lo": 6768.66},
+                        {"n": "코스닥", "v": 894.29, "c": 38.38, "p": 4.48, "hi": 894.29, "lo": 852.45}],
+                "glob": [{"n": "미국 USD", "i": "usa", "v": "1,361.40", "c": 3.40, "p": 0.25},
+                         {"n": "달러인덱스", "i": "earth", "v": "101.77", "c": 0.32, "p": 0.31},
+                         {"n": "국제 금", "i": "gold", "v": "4,187.60", "c": 0.90, "p": 0.02, "s": "1년 최고<br>5,626.80"},
+                         {"n": "WTI", "i": "oil", "v": "92.63", "c": 2.21, "p": 2.44, "s": "52주 최고<br>119.48"}],
+                "mood": [{"n": "고객예탁금", "i": "cash", "v": "1,077,257억", "c": 32364},
+                         {"n": "신용잔고", "i": "graph", "v": "325,091억", "c": 663}],
+                "sec": [["반도체와<br>반도체장비", 1.82, 0], ["은행", -1.49, 3], ["제약", 3.35, 4], ["전자장비와기기", 2.71, 5],
+                        ["전기제품", 0.77, 5], ["조선", -0.51, 3], ["자동차", 0.67, 4], ["전기장비", 0.14, 4],
+                        ["복합기업", -0.05, 4], ["우주항공과국방", 2.53, 5]],
+                "flow": [["개인", "ind", -14170], ["외국인", "for", -5575], ["기관", "ins", 3322]]}
+
     # ───── 재무 ─────
     def _rng(self, code, salt):
         return np.random.default_rng(self.by_code[code]["seed"] + salt)
@@ -135,7 +151,8 @@ class DemoProvider:
                                                                      "reserve_ratio": float(r.uniform(80, 9000))}}
                            for y in years], "quarter": []}
         tp = float(px * r.uniform(0.85, 1.6)) if r.random() < 0.7 else None
-        return Fetch(True, {"sector": s["sector"], "marcap": None, "target_price": tp,
+        dy = round(float(r.uniform(0, 7)), 2) if r.random() < 0.75 else None
+        return Fetch(True, {"sector": s["sector"], "marcap": None, "target_price": tp, "div_yield": dy,
                             "opinion": "매수" if tp and tp > px * 1.1 else ("중립" if tp else None), "perf": perf,
                             "desc": [f"동사는 {s['sector']} 업종의 가상 기업으로, 화면 확인을 위해 지어낸 회사임.",
                                      "실제 실행에서는 이 자리에 와이즈리포트의 기업개요 문장이 들어감."],

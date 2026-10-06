@@ -63,7 +63,7 @@ def build_message(recs: list[dict], meta: dict, prev: dict) -> tuple[str | None,
             e = o["event"]
             on = " · ".join(n for k, n in (("rsi", f"RSI {e['rsi']}"), ("bb", "볼린저 하단"), ("gap", f"이격 {e['gap']}%")) if e["flags"][k])
             v = (r.get("verdict") or {})
-            warn = {"go": " ✅조건 통과", "veto": " ⛔비추", "weak": " ·승률 미달"}.get(v.get("key") if v.get("signal") == "os" else None, "")
+            warn = {"go": " ✅추천", "veto": " ⛔비추", "weak": " ·승률 미달"}.get(v.get("key") if v.get("signal") == "os" else None, "")
             lines.append(f"[{o['grade'] or '-'}] {r['name']}({r['code']}) {e['n']}개 겹침 — {on}{warn}")
             lines.append(f"     {_hist_line(o['hist'])}")
         if len(new_os) > 15:

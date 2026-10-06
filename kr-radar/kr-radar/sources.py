@@ -628,6 +628,10 @@ def parse_integration(obj) -> dict:
             k = f"{x.get('code', '')} {x.get('key', '')}"
             if re.search(r"marketValue|시총|시가총액", k):
                 res["marcap"] = parse_korean_money_eok(x["value"])
+            elif re.search(r"dividendYield|배당수익률", k):
+                dy = to_num(x["value"])
+                if dy is not None and 0 <= dy < 50:
+                    res["div_yield"] = dy
     cons = obj.get("consensusInfo") if isinstance(obj, dict) else None
     if isinstance(cons, dict):
         res["target_price"] = to_num(_pick(cons, r"priceTarget", r"target"))
@@ -732,6 +736,74 @@ PROBE_URLS = {
 }
 
 
+API2 = "https://api.stock.naver.com"
+MARKET_PROBE_URLS = {      # 종목과 상관없는 시장 전체 주소 후보 (어느 것이 살아 있는지 확인용)
+    "mk_kospi_basic": MOBILE + "/api/index/KOSPI/basic",
+    "mk_kosdaq_basic": MOBILE + "/api/index/KOSDAQ/basic",
+    "mk_kospi_integration": MOBILE + "/api/index/KOSPI/integration",
+    "mk_kospi_trend": MOBILE + "/api/index/KOSPI/trend",
+    "mk_kosdaq_trend": MOBILE + "/api/index/KOSDAQ/trend",
+    "mk_kospi_price": MOBILE + "/api/index/KOSPI/price?pageSize=5&page=1",
+    "mk_kospi_minute_a": API2 + "/chart/domestic/index/KOSPI/minute",
+    "mk_kospi_minute_b": API2 + "/chart/domestic/index/KOSPI?periodType=dayCandle",
+    "mk_kospi_minute_c": "https://fchart.stock.naver.com/sise.nhn?symbol=KOSPI&timeframe=minute&count=420&requestType=0",
+    "mk_industry_a": MOBILE + "/api/stocks/industry?page=1&pageSize=100",
+    "mk_industry_b": API2 + "/stock/industry?page=1&pageSize=100",
+    "mk_industry_c": MOBILE + "/api/stocks/upjong?page=1&pageSize=100",
+    "mk_industry_d": MOBILE + "/front-api/domestic/industry/marketValue?pageSize=10",
+    "mk_fx_a": API2 + "/marketindex/exchange/FX_USDKRW",
+    "mk_fx_b": MOBILE + "/front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW",
+    "mk_dxy": API2 + "/marketindex/exchange/.DXY",
+    "mk_gold": API2 + "/marketindex/metals/GCcv1",
+    "mk_wti": API2 + "/marketindex/energy/CLcv1",
+    "mk_majors": API2 + "/marketindex/majors/part1",
+    "mk_deposit_a": "https://finance.naver.com/sise/sise_deposit.naver",
+    "mk_deposit_b": MOBILE + "/front-api/domestic/capital",
+    "mk_calendar_a": MOBILE + "/front-api/calendar/list?type=week",
+    "mk_calendar_b": API2 + "/calendar",
+    "mk_kind_ipo": "https://kind.krx.co.kr/listinvstg/pubofrprogcom.do?method=searchPubofrProgComMain",
+    "mk_kind_newlist": "https://kind.krx.co.kr/listinvstg/listingcompany.do?method=searchListingTypeMain",
+    "mk_nasdaq_earn": "https://api.nasdaq.com/api/calendar/earnings?date=" + datetime.now().strftime("%Y-%m-%d"),
+    "mk_dart_earn_notice": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=" + (datetime.now() - timedelta(days=20)).strftime("%Y%m%d"),
+    "mk_page_home": "https://stock.naver.com/domestic",
+    "mk_page_capital": "https://stock.naver.com/domestic/capital",
+    "mk_page_industry": "https://stock.naver.com/domestic/industry",
+    "mk_page_calendar": "https://stock.naver.com/calendar",
+    "mk_page_index": "https://stock.naver.com/domestic/index/KOSPI",
+    "mk_page_marketindex": "https://stock.naver.com/marketindex",
+}
+
+
+def probe_market(out_dir: str, summary: dict) -> None:
+    for name, url in MARKET_PROBE_URLS.items():
+        try:
+            if "{DART}" in url:
+                if not os.getenv("DART_API_KEY"):
+                    continue
+                real = url.replace("{DART}", os.getenv("DART_API_KEY"))
+            else:
+                real = url
+            r = _session().get(real, headers={"Referer": "https://stock.naver.com/", "Accept": "application/json, text/html, */*"}, timeout=15, allow_redirects=True)
+            r.url = url if "{DART}" in url else r.url        # 기록에 인증키가 남지 않게
+            time.sleep(C.REQUEST_SLEEP)
+            raw = r.content
+            try:
+                txt = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                txt = raw.decode("cp949", errors="replace")
+            if name.startswith("mk_page"):          # 페이지 원본은 길어서, 데이터 주소가 적힌 부분만 추려 둔다
+                hits = sorted(set(re.findall(r"[\"'`(]((?:https?:)?//[a-z.]*naver\.com/[A-Za-z0-9_\-./?=&{}$]{6,160}|/(?:front-)?api/[A-Za-z0-9_\-./?=&{}$]{4,160})", txt)))
+                nd = re.search(r'<script id="__NEXT_DATA__"[^>]*>(.*?)</script>', txt, flags=re.S)
+                body = "주소 후보:\n" + "\n".join(hits[:400]) + "\n\n__NEXT_DATA__:\n" + (nd.group(1)[:200_000] if nd else "(없음)") + "\n\nHEAD:\n" + txt[:20_000]
+            else:
+                body = txt[:150_000]
+            with open(os.path.join(out_dir, f"{name}.txt"), "w", encoding="utf-8") as f:
+                f.write(f"URL: {url}\nFINAL: {r.url}\nSTATUS: {r.status_code}\nTYPE: {r.headers.get('content-type')}\n\n" + body)
+            summary["results"][f"{name}.txt"] = {"status": r.status_code, "final": r.url, "bytes": len(raw)}
+        except Exception as e:
+            summary["results"][name] = {"error": str(e)[:200]}
+
+
 def probe(out_dir: str, codes=("005930", "247540")) -> dict:
     """각 주소의 실제 응답 원본을 파일로 저장 (Claude가 GitHub에서 직접 읽어 고칠 수 있게)."""
     os.makedirs(out_dir, exist_ok=True)
@@ -756,6 +828,10 @@ def probe(out_dir: str, codes=("005930", "247540")) -> dict:
                 summary["results"][fn] = {"status": r.status_code, "final": r.url, "bytes": len(raw)}
             except Exception as e:
                 summary["results"][f"{code}_{name}"] = {"error": str(e)[:200]}
+    try:
+        probe_market(out_dir, summary)
+    except Exception as e:                       # 탐색이 실패해도 본 실행에는 영향 없게
+        summary["results"]["mk_error"] = {"error": str(e)[:200]}
     with open(os.path.join(out_dir, "index.json"), "w", encoding="utf-8") as f:
         json.dump(summary, f, ensure_ascii=False, indent=1)
     return summary
