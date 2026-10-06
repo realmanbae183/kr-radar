@@ -1,0 +1,6 @@
+URL: https://stock.naver.com/api/domestic/market/deposit
+FINAL: https://stock.naver.com/api/domestic/market/deposit
+STATUS: 404
+TYPE: application/json; charset=utf-8
+
+{"message":"Route GET:/api/domestic/market/deposit not found","error":"Not Found","statusCode":404}

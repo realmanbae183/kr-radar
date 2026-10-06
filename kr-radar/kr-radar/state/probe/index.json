@@ -1,5 +1,5 @@
 {
- "at": "2026-10-06T15:38:01",
+ "at": "2026-10-06T16:36:01",
  "results": {
   "005930_integration.txt": {
    "status": 200,
@@ -106,6 +106,14 @@
    "final": "https://stock.naver.com/domestic/stock/247540/investmentinfo",
    "bytes": 133334
   },
+  "mk_freesis_fund.txt": {
+   "status": 200,
+   "bytes": 1292
+  },
+  "mk_freesis_credit.txt": {
+   "status": 200,
+   "bytes": 1563
+  },
   "mk_kospi_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/index/KOSPI/basic",
@@ -194,12 +202,12 @@
   "mk_wti.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/energy/CLcv1",
-   "bytes": 4060
+   "bytes": 4057
   },
   "mk_majors.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/majors/part1",
-   "bytes": 23215
+   "bytes": 23212
   },
   "mk_deposit_a.txt": {
    "status": 200,
@@ -240,6 +248,51 @@
    "status": 200,
    "final": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=20260916",
    "bytes": 25691
+  },
+  "mk_dep_1.txt": {
+   "status": 404,
+   "final": "https://m.stock.naver.com/api/domestic/capital",
+   "bytes": 4209
+  },
+  "mk_dep_2.txt": {
+   "status": 404,
+   "final": "https://m.stock.naver.com/api/stocks/deposit",
+   "bytes": 0
+  },
+  "mk_dep_3.txt": {
+   "status": 404,
+   "final": "https://m.stock.naver.com/api/domestic/deposit?page=1&pageSize=10",
+   "bytes": 4209
+  },
+  "mk_dep_4.txt": {
+   "status": 404,
+   "final": "https://api.stock.naver.com/domestic/deposit",
+   "bytes": 306
+  },
+  "mk_dep_5.txt": {
+   "status": 404,
+   "final": "https://api.stock.naver.com/stock/domestic/deposit?page=1&pageSize=10",
+   "bytes": 306
+  },
+  "mk_dep_6.txt": {
+   "status": 404,
+   "final": "https://stock.naver.com/api/domestic/market/stock/deposit?page=1&pageSize=10",
+   "bytes": 124
+  },
+  "mk_dep_7.txt": {
+   "status": 404,
+   "final": "https://stock.naver.com/api/domestic/market/deposit",
+   "bytes": 99
+  },
+  "mk_dep_8.txt": {
+   "status": 404,
+   "final": "https://m.stock.naver.com/front-api/market/stock/kr/deposit?page=1&pageSize=10",
+   "bytes": 124
+  },
+  "mk_dep_page.txt": {
+   "status": 200,
+   "final": "https://stock.naver.com/market/stock/kr/deposit",
+   "bytes": 135449
   },
   "mk_page_home.txt": {
    "status": 404,

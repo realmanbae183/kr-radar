@@ -1,0 +1,5 @@
+URL: https://m.stock.naver.com/api/stocks/deposit
+FINAL: https://m.stock.naver.com/api/stocks/deposit
+STATUS: 404
+TYPE: None
+

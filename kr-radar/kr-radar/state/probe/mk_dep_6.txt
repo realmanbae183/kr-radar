@@ -1,0 +1,6 @@
+URL: https://stock.naver.com/api/domestic/market/stock/deposit?page=1&pageSize=10
+FINAL: https://stock.naver.com/api/domestic/market/stock/deposit?page=1&pageSize=10
+STATUS: 404
+TYPE: application/json; charset=utf-8
+
+{"message":"Route GET:/api/domestic/market/stock/deposit?page=1&pageSize=10 not found","error":"Not Found","statusCode":404}

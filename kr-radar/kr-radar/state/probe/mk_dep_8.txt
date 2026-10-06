@@ -1,0 +1,6 @@
+URL: https://m.stock.naver.com/front-api/market/stock/kr/deposit?page=1&pageSize=10
+FINAL: https://m.stock.naver.com/front-api/market/stock/kr/deposit?page=1&pageSize=10
+STATUS: 404
+TYPE: application/json; charset=utf-8
+
+{"message":"Route GET:/front-api/market/stock/kr/deposit?page=1&pageSize=10 not found","error":"Not Found","statusCode":404}
