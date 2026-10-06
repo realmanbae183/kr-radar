@@ -96,6 +96,9 @@ jobs:
         env:
           DART_API_KEY: ${{ secrets.DART_API_KEY }}
           FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          SITE_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: python run.py --intraday
 
       - name: 정식 실행 (코스피 전 종목 + 코스닥 150)
