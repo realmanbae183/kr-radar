@@ -1,5 +1,16 @@
 [
 {
+"corp_code": "00877059",
+"corp_name": "삼성바이오로직스",
+"stock_code": "207940",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261007800351",
+"flr_nm": "삼성바이오로직스",
+"rcept_dt": "20261007",
+"rm": "유"
+},
+{
 "corp_code": "00401731",
 "corp_name": "LG전자",
 "stock_code": "066570",

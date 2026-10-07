@@ -1202,7 +1202,7 @@ TYPE: text/html; charset=utf-8
 						flag: 4,
 						cmp_cd: '247540',
 						grp_cd: grp==10?"01":"03",
-                        encparam: 'M0lURjZVM3JCWHRvRk95YUNMeGtJdz09'
+                        encparam: 'WDUzRFlYZXFQT2dFL21qdTFXenNzdz09'
 					}
 				, function (res) {
 					var data = []
@@ -1311,7 +1311,7 @@ TYPE: text/html; charset=utf-8
 			, {
 				flag: flag,
 				cmp_cd: '247540',
-                encparam: 'M0lURjZVM3JCWHRvRk95YUNMeGtJdz09'
+                encparam: 'WDUzRFlYZXFQT2dFL21qdTFXenNzdz09'
 			}
 				, function (res) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
@@ -1613,7 +1613,7 @@ TYPE: text/html; charset=utf-8
 				, freq_typ: _freq_typ
 				, extY: extY
                 , extQ: extQ
-                , encparam: 'M0lURjZVM3JCWHRvRk95YUNMeGtJdz09'
+                , encparam: 'WDUzRFlYZXFQT2dFL21qdTFXenNzdz09'
                 , id: 'aFVlanREZS' ? 'aFVlanREZS' : ''
 				},
 				success: function (data) {
