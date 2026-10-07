@@ -2155,5 +2155,5 @@ function setCorpInfo(isurCd, kisComCd, repIsuSrtCd, comNm, comAbbrv, isurSymbl, 
 	});
 	
 </script>		
-<script type="text/javascript"  src="/dEfoXPy0OBNtW5BApatuSxlN/4p7azJr3uO/C3RlDCcC/cQt/4WlBoeQcR?v=ab14f781-e34c-5836-9493-796bc20a173e" defer></script></body>
+<script type="text/javascript"  src="/dEfoXPy0OBNtW5BApatuSxlN/4p7azJr3uO/C3RlDCcC/bnU/4cGUoZAQR?v=e4a78137-3a86-fc20-4ae9-9beea1d0173e" defer></script></body>
 </html>

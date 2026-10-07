@@ -3,4 +3,4 @@ FINAL: https://api.stock.naver.com/domestic/deposit
 STATUS: 404
 TYPE: text/html;charset=ISO-8859-1
 
-<html><body><h1>Whitelabel Error Page</h1><p>This application has no explicit mapping for /error, so you are seeing this as a fallback.</p><div id='created'>Wed Oct 07 11:04:55 KST 2026</div><div>There was an unexpected error (type=Not Found, status=404).</div><div>No message available</div></body></html>
+<html><body><h1>Whitelabel Error Page</h1><p>This application has no explicit mapping for /error, so you are seeing this as a fallback.</p><div id='created'>Wed Oct 07 11:44:16 KST 2026</div><div>There was an unexpected error (type=Not Found, status=404).</div><div>No message available</div></body></html>

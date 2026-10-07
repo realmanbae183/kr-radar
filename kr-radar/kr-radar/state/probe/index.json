@@ -1,15 +1,15 @@
 {
- "at": "2026-10-07T02:03:30",
+ "at": "2026-10-07T02:42:51",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9250
+   "bytes": 9252
   },
   "005930_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/basic",
-   "bytes": 4028
+   "bytes": 4022
   },
   "005930_trend20.txt": {
    "status": 200,
@@ -54,12 +54,12 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10061
+   "bytes": 10063
   },
   "247540_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/integration",
-   "bytes": 9430
+   "bytes": 9432
   },
   "247540_basic.txt": {
    "status": 200,
@@ -145,12 +145,12 @@
   "mk_kospi_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/index/KOSPI/integration",
-   "bytes": 16794
+   "bytes": 16798
   },
   "mk_kospi_trend.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/index/KOSPI/trend",
-   "bytes": 102
+   "bytes": 103
   },
   "mk_kosdaq_trend.txt": {
    "status": 200,
@@ -165,7 +165,7 @@
   "mk_kospi_minute_a.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/chart/domestic/index/KOSPI/minute",
-   "bytes": 18491
+   "bytes": 24251
   },
   "mk_kospi_minute_b.txt": {
    "status": 200,
@@ -180,7 +180,7 @@
   "mk_industry_a.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/industry?page=1&pageSize=100",
-   "bytes": 9488
+   "bytes": 9486
   },
   "mk_industry_b.txt": {
    "status": 404,
@@ -265,7 +265,7 @@
   "mk_dart_earn_notice.txt": {
    "status": 200,
    "final": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=20260917",
-   "bytes": 25149
+   "bytes": 25132
   },
   "mk_dep_1.txt": {
    "status": 404,
