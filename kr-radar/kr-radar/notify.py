@@ -18,16 +18,21 @@ import config as C
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 
-def _send(text: str) -> None:
+def _send(text: str) -> bool:
     tok, chat = os.getenv("TELEGRAM_BOT_TOKEN"), os.getenv("TELEGRAM_CHAT_ID")
     if not (tok and chat):
         print("[알림] 텔레그램 설정 없음 → 건너뜀")
-        return
-    for i in range(0, len(text), 3800):
-        r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage",
-                          data={"chat_id": chat, "text": text[i:i + 3800], "disable_web_page_preview": "true"}, timeout=20)
-        if not r.ok:
-            print("[알림] 전송 실패:", r.text[:200])
+        return False
+    ok = False
+    for one in [c.strip() for c in chat.replace("\n", ",").split(",") if c.strip()]:
+        for i in range(0, len(text), 3800):
+            r = requests.post(f"https://api.telegram.org/bot{tok}/sendMessage",
+                              data={"chat_id": one, "text": text[i:i + 3800], "disable_web_page_preview": "true"}, timeout=20)
+            if r.ok:
+                ok = True
+            else:
+                print("[알림] 전송 실패:", r.text[:200])
+    return ok
 
 
 def _hist_line(h: dict | None) -> str:
@@ -114,7 +119,7 @@ def top_new(recs: list[dict], sent: set) -> tuple[list[dict], set]:
 
 
 def alert_top(recs: list[dict], meta: dict) -> None:
-    path = os.path.join(HERE, "cache", "alerted.json")
+    path = os.path.join(HERE, "cache", "alerted2.json")
     try:
         with open(path, encoding="utf-8") as f:
             sent = set(json.load(f))
@@ -137,7 +142,8 @@ def alert_top(recs: list[dict], meta: dict) -> None:
         url = os.getenv("SITE_URL")
         if url:
             lines += ["", url]
-        _send("\n".join(lines))
+        if not _send("\n".join(lines)):
+            return
     else:
         print("[알림] 새로 뜬 A·B 등급 없음")
     os.makedirs(os.path.dirname(path), exist_ok=True)
