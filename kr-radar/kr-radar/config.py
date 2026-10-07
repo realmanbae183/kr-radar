@@ -124,3 +124,5 @@ SITE_TITLE = "버거대왕의 국장 레이더"
 REFRESH_URL = "https://github.com/realmanbae183/kr-radar/actions/workflows/kr-radar.yml"   # '지금 갱신' 버튼이 여는 곳
 UI_VERSION = "v3-20261006"   # 화면 파일(index.html)과 짝이 맞는지 확인하는 표시
 US_SCREENER_URL = "https://realmanbae183.github.io/screener/"   # 위쪽 메뉴 '미장' 버튼이 여는 주소
+
+GOATCOUNTER = "burgerking-radar"   # 방문자 집계(고트카운터) 계정 이름. 비우면 집계 안 함. 통계 화면: https://burgerking-radar.goatcounter.com

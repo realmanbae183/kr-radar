@@ -868,7 +868,8 @@ const BUCKET = {lt30:"30% 미만", "30_50":"30~50%", ge50:"50% 이상"};
 function header(){
   const ph=M.phase||{};
   const k=$("#krClock"); k.innerHTML = `<b>국장</b> ${esc(ph.now||"")} ${esc(ph.label||"")}`; if(ph.key==="intraday") k.classList.add("live");
-  const rl=$("#refreshLink"); if(M.refresh_url) rl.href=M.refresh_url; else rl.hidden=true;
+  let owner=false; try{ if(/[?&]owner\b/.test(location.search)) localStorage.setItem("bk-owner","1"); if(/[?&]visitor\b/.test(location.search)) localStorage.removeItem("bk-owner"); owner=localStorage.getItem("bk-owner")==="1"; }catch(e){}
+  const rl=$("#refreshLink"); if(M.refresh_url&&owner) rl.href=M.refresh_url; else rl.hidden=true;   // 갱신 버튼은 주인에게만 보인다
   const a=$("#usLink"); if(!M.us_url){ a.hidden=true; } else {
     a.href=M.us_url;
     const two=n=>String(n).padStart(2,"0");
@@ -1336,7 +1337,7 @@ function renderRules(){
     <div class="panel"><h3>데이터 상태</h3>
       <div class="tw"><table><thead><tr><th>출처</th><th class="n">성공</th><th class="n">저장분 대체</th><th class="n">실패</th><th>메모</th></tr></thead><tbody>${health}</tbody></table></div>
       ${(M.notes||[]).length?`<p class="note">${M.notes.map(esc).join("<br>")}</p>`:""}
-      <p class="note">평일 장중 30분마다 시세만 새로 받아 갱신하고, 15:45와 18:10에 전부 새로 받아요. 급할 땐 위쪽 '지금 갱신'을 눌러 GitHub에서 Run workflow를 누르면 2~3분 뒤 반영돼요.</p></div>`;
+      <p class="note">평일 장중 30분마다 시세만 새로 받아 갱신하고, 15:45와 18:10에 전부 새로 받아요.</p></div>`;
 }
 
 /* ── 오늘의 국장 ── */
@@ -1485,6 +1486,7 @@ function route(){
   if(name==="stock"){ live.length=0; const keep=route._code===m[1]; renderStock(m[1], m[2]?+m[2]:1); if(!keep) window.scrollTo(0,0); else { const y=$(".steps").getBoundingClientRect().top+window.scrollY-70; if(window.scrollY>y) window.scrollTo(0,y); } route._code=m[1]; } else route._code=null;
   if(name==="rules"){ renderRules(); window.scrollTo(0,0); }
   if(name==="search"){ renderSearch(); }
+  try{ if(window.goatcounter&&window.goatcounter.count&&route._seen!==name){ if(route._seen!==undefined) window.goatcounter.count({path:"/"+name, title:name, event:false}); route._seen=name; } }catch(e){}
   if(name==="cal"){ renderCal(); window.scrollTo(0,0); }
   document.body.classList.toggle("about-on",name==="about"); if(name==="about"){ abShow(null); window.scrollTo(0,0); abFit(); }
   if(name==="today"){ renderToday(M.today); $("#gjNote").textContent=M.today.sample?"견본 숫자예요.":`${M.today.date} ${M.today.closed===false?"장중 (잠정)":"장 마감 기준"} · 실행할 때마다 갱신`; window.scrollTo(0,0); }
