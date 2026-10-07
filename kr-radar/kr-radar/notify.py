@@ -65,7 +65,7 @@ def build_message(recs: list[dict], meta: dict, prev: dict) -> tuple[str | None,
             e = o["event"]
             on = " · ".join(n for k, n in (("rsi", f"RSI {e['rsi']}"), ("bb", "볼린저 하단"), ("gap", f"이격 {e['gap']}%")) if e["flags"][k])
             v = (r.get("verdict") or {})
-            warn = {"go": " ✅추천", "veto": " ⛔비추", "weak": " ·승률 미달"}.get(v.get("key") if v.get("signal") == "os" else None, "")
+            warn = {"go": " ✅조건 통과", "veto": " ⛔비추", "weak": " ·승률 미달"}.get(v.get("key") if v.get("signal") == "os" else None, "")
             lines.append(f"[{o['grade'] or '-'}] {r['name']}({r['code']}) {e['n']}개 겹침 — {on}{warn}")
             lines.append(f"     {_hist_line(o['hist'])}")
         if len(new_os) > 15:
@@ -129,7 +129,7 @@ def alert_top(recs: list[dict], meta: dict) -> None:
             o = r["sig"]["os"]
             e, st = o["event"], r["sig"]["stats"]
             v = r.get("verdict") or {}
-            mark = {"go": " ✅추천", "veto": " ⛔비추"}.get(v.get("key") if v.get("signal") == "os" else None, "")
+            mark = {"go": " ✅조건 통과", "veto": " ⛔비추"}.get(v.get("key") if v.get("signal") == "os" else None, "")
             lines.append(f"[{o['grade']}] {r['name']}({r['code']}) {st.get('close'):,.0f}원 {st.get('chg', 0):+.2f}%{mark}")
             lines.append(f"     {e['n']}개 겹침 · {_hist_line(o['hist'])}")
         if len(fresh) > 12:

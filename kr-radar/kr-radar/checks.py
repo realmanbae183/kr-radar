@@ -709,3 +709,32 @@ def test_freesis_mood_from_real_shape():
     m = S.parse_freesis_mood(fund, credit)
     assert m[0] == {"n": "고객예탁금", "i": "cash", "v": "1,008,422억", "c": -37955, "asof": "10/2"}
     assert m[1]["v"] == "336,282억" and m[1]["c"] == 1474
+
+
+def test_us_earnings_from_nasdaq_shape():
+    import schedule as K
+    from datetime import date
+    j = {"data": {"rows": [
+        {"symbol": "NVDA", "name": "NVIDIA Corporation", "marketCap": "$4,500,000,000,000", "time": "time-after-hours", "fiscalQuarterEnding": "Oct/2026"},
+        {"symbol": "STZ", "name": "Constellation Brands Inc", "marketCap": "$19,350,904,800", "time": "time-after-hours"},
+        {"symbol": "XYZ", "name": "Big Co Inc.", "marketCap": "$250,000,000,000", "time": "time-pre-market"},
+        {"symbol": "GOOG", "name": "Alphabet", "marketCap": "$2,000,000,000,000", "time": "time-not-supplied"}]}}
+    ev = K.parse_nasdaq_earnings("2026-11-18", j)
+    assert [e["title"] for e in ev] == ["엔비디아 실적 발표", "알파벳(구글) 실적 발표", "Big Co 실적 발표"]
+    assert ev[0]["d"] == "2026-11-19" and ev[0]["t"] == "06:05" and ev[0]["imp"] == 3 and ev[0]["cat"] == "earn"      # 미국 장 마감 뒤 = 한국 다음 날 새벽
+    assert ev[2]["d"] == "2026-11-18" and ev[2]["t"] == "22:00" and "cap" not in ev[0]
+    got = K.us_earnings(date(2026, 11, 16), days=5, get=lambda day: j if day == "2026-11-18" else {"data": {"rows": []}})
+    assert len(got) == 3
+    assert K.build(date(2026, 10, 7))["earn_auto"] == 0          # 견본·시험에서는 인터넷을 쓰지 않는다
+
+
+def test_kind_ipo_table_to_events():
+    import schedule as K
+    from datetime import date
+    html = """<table><thead><tr><th>회사명</th><th>신고서제출일</th><th>수요예측일정</th><th>청약일정</th><th>납입일</th><th>확정공모가</th><th>상장예정일</th><th>상장주선인</th></tr></thead>
+    <tbody><tr><td>진코스텍</td><td>2026-09-01</td><td>2026-09-22 ~ 2026-09-26</td><td>2026-10-05 ~ 2026-10-06</td><td>2026-10-08</td><td>23,500</td><td>2026-10-15</td><td>하나증권</td></tr>
+    <tr><td>가나스팩12호</td><td>-</td><td>-</td><td>2026-10-12 ~ 2026-10-13</td><td>-</td><td>2,000</td><td>2026-10-20</td><td>-</td></tr>
+    <tr><td>옛날회사</td><td>-</td><td>-</td><td>2026-07-01 ~ 2026-07-02</td><td>-</td><td>-</td><td>2026-07-10</td><td>-</td></tr></tbody></table>"""
+    ev = K.parse_kind_ipo(html, date(2026, 10, 1), date(2026, 12, 1))
+    assert [(e["d"], e["title"]) for e in ev] == [("2026-10-05", "진코스텍 공모주 청약 시작"), ("2026-10-15", "진코스텍 신규 상장")]
+    assert ev[0]["note"] == "청약 기간 10/5 ~ 10/6" and ev[0]["cat"] == "ipo"

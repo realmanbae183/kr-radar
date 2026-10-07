@@ -432,7 +432,7 @@ def total_score(chart: int | None, fin: int | None, risk: int | None) -> dict:
 # ─────────────────────────────────────────────
 def verdict(rec: dict) -> dict:
     """규칙 (2026-10-06 사용자 결정)
-      · 지금 들어갔을 때 과거 같은 상태의 5일 승률이 50%를 넘고 평균 수익이 플러스면 '추천'
+      · 지금 들어갔을 때 과거 같은 상태의 5일 승률이 50%를 넘고 평균 수익이 플러스면 '조건 통과'
       · 그래도 악재가 크거나(악재 점수 60 미만) 재무 점수가 전 종목 하위 20%면 '비추'
     과거 통계를 규칙에 넣은 결과일 뿐, 투자 권유가 아니다."""
     sig = rec.get("sig") or {}
@@ -476,5 +476,5 @@ def verdict(rec: dict) -> dict:
     if veto:
         return {**out, "key": "veto", "label": "비추",
                 "why": f"{name} — 과거 승률은 {h['w5']}%로 기준을 넘지만, " + " · ".join(veto) + " 때문에 걸러요"}
-    return {**out, "key": "go", "label": "추천",
+    return {**out, "key": "go", "label": "조건 통과",
             "why": f"{name} — 과거 같은 상태 {h['n']:,}번의 5일 승률 {h['w5']}%, 평균 {h.get('m5', 0):+.1f}%. 재무와 악재에서 걸러낼 만큼 큰 문제는 없어요"}

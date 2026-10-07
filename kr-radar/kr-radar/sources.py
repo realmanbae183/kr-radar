@@ -904,7 +904,64 @@ def fetch_mood_freesis() -> list:
     return parse_freesis_mood(freesis_post(FREESIS_OBJS["mk_freesis_fund"]).json(), freesis_post(FREESIS_OBJS["mk_freesis_credit"]).json())
 
 
+def probe_calendar(out_dir: str, summary: dict) -> None:
+    """한국 실적 발표 예고(DART)와 공모주 일정(KIND)을 어떻게 받는지 확인하기 위한 응답 저장."""
+    key = os.getenv("DART_API_KEY")
+    if key:
+        try:
+            hits, bgn = [], (datetime.now() - timedelta(days=25)).strftime("%Y%m%d")
+            for page in range(1, 31):
+                j = _session().get("https://opendart.fss.or.kr/api/list.json", params={"crtfc_key": key, "pblntf_ty": "I", "bgn_de": bgn, "page_no": page, "page_count": 100}, timeout=20).json()
+                hits += [x for x in j.get("list", []) if any(w in x.get("report_nm", "") for w in ("실적공시예고", "잠정)실적", "실적등에대한전망"))]
+                if page >= int(j.get("total_page", 1)):
+                    break
+                time.sleep(0.15)
+            with open(os.path.join(out_dir, "cal_dart_earn_list.txt"), "w", encoding="utf-8") as f:
+                f.write(json.dumps(hits, ensure_ascii=False, indent=0)[:120_000])
+            summary["results"]["cal_dart_earn_list.txt"] = {"count": len(hits)}
+            notice = next((x for x in hits if "예고" in x["report_nm"]), None)
+            if notice:
+                import zipfile
+                r = _session().get("https://opendart.fss.or.kr/api/document.xml", params={"crtfc_key": key, "rcept_no": notice["rcept_no"]}, timeout=30)
+                try:
+                    z = zipfile.ZipFile(io.BytesIO(r.content))
+                    raw = z.read(z.namelist()[0])
+                    try:
+                        txt = raw.decode("utf-8")
+                    except UnicodeDecodeError:
+                        txt = raw.decode("cp949", errors="replace")
+                except Exception:
+                    txt = r.text
+                with open(os.path.join(out_dir, "cal_dart_earn_doc.txt"), "w", encoding="utf-8") as f:
+                    f.write(f"{notice['corp_name']} {notice['report_nm']} {notice['rcept_no']}\n\n" + txt[:60_000])
+                summary["results"]["cal_dart_earn_doc.txt"] = {"bytes": len(txt)}
+        except Exception as e:
+            summary["results"]["cal_dart"] = {"error": str(e)[:200].replace(key, "***")}
+    today = datetime.now()
+    form = {"method": "searchPubofrProgComSub", "currentPageSize": "100", "pageIndex": "1", "orderMode": "1", "orderStat": "D", "searchType": "", "forward": "pubofrprogcom_sub",
+            "searchCorpName": "", "fromDate": (today - timedelta(days=30)).strftime("%Y-%m-%d"), "toDate": (today + timedelta(days=60)).strftime("%Y-%m-%d"), "marketType": "", "repMajAgntComp": ""}
+    for name, url, data in (("cal_kind_ipo_post", "https://kind.krx.co.kr/listinvstg/pubofrprogcom.do", form),
+                            ("cal_kind_newlist_post", "https://kind.krx.co.kr/listinvstg/listingcompany.do", {**form, "method": "searchListingTypeSub", "forward": "listingtype_sub"}),
+                            ("cal_kind_js", "https://kind.krx.co.kr/js/listinvstg/pubofrprogcom.js", None)):
+        try:
+            h = {"Referer": "https://kind.krx.co.kr/listinvstg/pubofrprogcom.do?method=searchPubofrProgComMain", "X-Requested-With": "XMLHttpRequest"}
+            r = _session().post(url, data=data, headers=h, timeout=20) if data else _session().get(url, headers=h, timeout=20)
+            try:
+                txt = r.content.decode("utf-8")
+            except UnicodeDecodeError:
+                txt = r.content.decode("cp949", errors="replace")
+            with open(os.path.join(out_dir, name + ".txt"), "w", encoding="utf-8") as f:
+                f.write(f"URL: {url}\nSTATUS: {r.status_code}\n\n" + txt[:80_000])
+            summary["results"][name + ".txt"] = {"status": r.status_code, "bytes": len(r.content)}
+        except Exception as e:
+            summary["results"][name] = {"error": str(e)[:200]}
+
+
 def probe_market(out_dir: str, summary: dict) -> None:
+    try:
+        probe_calendar(out_dir, summary)
+    except Exception as e:
+        summary["results"]["cal_error"] = {"error": str(e)[:200]}
     for name, obj in FREESIS_OBJS.items():
         try:
             r = freesis_post(obj)

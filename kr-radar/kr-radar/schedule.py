@@ -44,8 +44,8 @@ KR_CLOSED = [("2026-10-09", "한글날"), ("2026-12-25", "성탄절"), ("2026-12
 US_CLOSED = [("2026-11-26", "추수감사절 휴장"), ("2026-11-27", "조기 폐장 (추수감사절 다음 날, 평소보다 3시간 일찍)"),
              ("2026-12-24", "조기 폐장 (성탄 전야, 평소보다 3시간 일찍)"), ("2026-12-25", "성탄절 휴장"), ("2027-01-01", "신정 휴장")]
 
-CATS = {"kr": "한국", "us": "미국", "earn": "실적", "expiry": "만기일", "closed": "휴장"}
-PENDING = "2027년의 미국 물가·고용 발표일, 한국은행 금통위, 설 연휴 같은 휴장일은 공식 일정표가 나오면 추가해요. 기업 실적은 회사가 날짜를 확정·예고한 것만 넣어요. 공모주·배당락은 아직 없어요."
+CATS = {"kr": "한국", "us": "미국", "earn": "실적", "ipo": "공모주", "expiry": "만기일", "closed": "휴장"}
+PENDING = "2027년의 미국 물가·고용 발표일, 한국은행 금통위, 설 연휴 같은 휴장일은 공식 일정표가 나오면 추가해요. 미국 대형주 실적은 나스닥 실적 달력에서, 공모주는 한국거래소 공시에서 자동으로 받아요. 한국 기업 실적은 날짜가 확정·예고된 것만 넣어요. 배당락은 아직 없어요."
 
 
 def _kst(us_day: str, hh: int, mm: int) -> tuple[str, str]:
@@ -166,6 +166,125 @@ def fred_events(key: str, start: date, end: date, get=None) -> list[dict]:
     return out
 
 
+# ── 미국 대형주 실적 발표일: 나스닥의 날짜별 실적 발표 목록 ──
+US_NAMES = {"NVDA": "엔비디아", "AAPL": "애플", "MSFT": "마이크로소프트", "AMZN": "아마존", "GOOGL": "알파벳(구글)", "GOOG": "알파벳(구글)", "META": "메타",
+            "TSLA": "테슬라", "AVGO": "브로드컴", "TSM": "TSMC", "MU": "마이크론", "AMD": "AMD", "INTC": "인텔", "NFLX": "넷플릭스", "ORCL": "오라클",
+            "ASML": "ASML", "QCOM": "퀄컴", "AMAT": "어플라이드 머티어리얼즈", "LRCX": "램리서치", "JPM": "JP모건", "BAC": "뱅크오브아메리카", "GS": "골드만삭스",
+            "MS": "모건스탠리", "WFC": "웰스파고", "C": "씨티그룹", "BRK.B": "버크셔 해서웨이", "V": "비자", "MA": "마스터카드", "LLY": "일라이 릴리", "NVO": "노보 노디스크",
+            "UNH": "유나이티드헬스", "JNJ": "존슨앤드존슨", "PFE": "화이자", "WMT": "월마트", "COST": "코스트코", "HD": "홈디포", "KO": "코카콜라", "PEP": "펩시코",
+            "MCD": "맥도날드", "NKE": "나이키", "SBUX": "스타벅스", "DIS": "디즈니", "XOM": "엑슨모빌", "CVX": "셰브론", "BA": "보잉", "CAT": "캐터필러",
+            "GE": "GE 에어로스페이스", "PLTR": "팔란티어", "CRM": "세일즈포스", "ADBE": "어도비", "CSCO": "시스코", "IBM": "IBM", "UBER": "우버", "COIN": "코인베이스",
+            "DELL": "델", "SMCI": "슈퍼마이크로", "ARM": "ARM", "SNOW": "스노우플레이크", "PDD": "핀둬둬", "BABA": "알리바바", "TM": "도요타", "SONY": "소니"}
+US_TOP = {"NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "TSM", "MU"}
+US_CAP_MIN = 100e9            # 시가총액 1,000억 달러 이상이거나 위 목록에 있는 회사만
+
+
+def parse_nasdaq_earnings(day: str, j: dict) -> list[dict]:
+    """나스닥 실적 발표 목록(하루치) → 일정. 장 마감 뒤 발표는 한국 날짜로 다음 날 새벽."""
+    out = []
+    for r in ((j.get("data") or {}).get("rows") or []):
+        sym = str(r.get("symbol", "")).upper()
+        try:
+            cap = float(str(r.get("marketCap", "")).replace("$", "").replace(",", "") or 0)
+        except ValueError:
+            cap = 0.0
+        if sym not in US_NAMES and cap < US_CAP_MIN:
+            continue
+        name = US_NAMES.get(sym) or str(r.get("name", sym)).replace(" Inc.", "").replace(" Inc", "").replace(" Corporation", "").replace(", ", " ").strip()
+        when = str(r.get("time", ""))
+        if "after" in when:
+            d, t = _kst(day, 16, 5)
+            t, note = t, "미국 장 마감 뒤 발표 (한국 시간 새벽)"
+        elif "pre" in when:
+            d, t = _kst(day, 8, 0)
+            note = "미국 개장 전 발표 (한국 시간 저녁)"
+        else:
+            d, t, note = day, "", "발표 시각 미정 (미국 날짜 기준)"
+        q = str(r.get("fiscalQuarterEnding", ""))
+        out.append({**_ev(d, f"{name} 실적 발표", "earn", 3 if sym in US_TOP else 2, t, note + (f" · {q} 분기" if q else ""), "나스닥 실적 달력"), "cap": cap, "sym": sym})
+    out.sort(key=lambda e: -e["cap"])
+    seen, keep = set(), []
+    for e in out:
+        base = e["sym"].replace("GOOG", "GOOGL") if e["sym"] in ("GOOG",) else e["sym"]
+        if base in seen:
+            continue
+        seen.add(base)
+        keep.append({k: v for k, v in e.items() if k not in ("cap", "sym")})
+    return keep[:6]
+
+
+def us_earnings(today: date, days: int = 35, get=None) -> list[dict]:
+    if get is None:
+        import requests
+        ua = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+              "Accept": "application/json, text/plain, */*", "Origin": "https://www.nasdaq.com", "Referer": "https://www.nasdaq.com/"}
+        get = lambda day: requests.get("https://api.nasdaq.com/api/calendar/earnings", params={"date": day}, headers=ua, timeout=20).json()
+    out, fails = [], 0
+    for i in range(-1, days):
+        d = today + timedelta(days=i)
+        if d.weekday() >= 5:
+            continue
+        try:
+            out += parse_nasdaq_earnings(d.isoformat(), get(d.isoformat()))
+        except Exception:
+            fails += 1
+            if fails >= 4:
+                break
+    if not out and fails:
+        raise RuntimeError("나스닥 실적 달력을 받지 못함")
+    return out
+
+
+# ── 공모주 청약·상장 일정: 한국거래소 공시(KIND)의 공모기업 현황 표 ──
+def parse_kind_ipo(html: str, start: date, end: date) -> list[dict]:
+    import io
+    import re
+    import pandas as pd
+    out = []
+    for tb in pd.read_html(io.StringIO(html)):
+        cols = [" ".join(map(str, c)) if isinstance(c, tuple) else str(c) for c in tb.columns]
+        name_c = next((c for c in cols if "회사" in c or "기업" in c or "종목" in c), None)
+        sub_c = next((c for c in cols if "청약" in c), None)
+        list_c = next((c for c in cols if "상장" in c and ("예정" in c or "일" in c) and "주선" not in c), None)
+        if not name_c or not (sub_c or list_c):
+            continue
+        tb.columns = cols
+        for _, r in tb.iterrows():
+            name = re.sub(r"\s+", " ", str(r[name_c])).strip()
+            if not name or name == "nan" or "스팩" in name or "기업인수목적" in name:
+                continue
+            if sub_c:
+                ds = re.findall(r"(20\d\d)[-./](\d{1,2})[-./](\d{1,2})", str(r[sub_c]))
+                if ds:
+                    d0 = date(*map(int, ds[0]))
+                    d1 = date(*map(int, ds[-1]))
+                    if start <= d0 <= end:
+                        out.append(_ev(d0.isoformat(), f"{name} 공모주 청약" + (" 시작" if d1 != d0 else ""), "ipo", 2, "",
+                                       f"청약 기간 {d0.month}/{d0.day}" + (f" ~ {d1.month}/{d1.day}" if d1 != d0 else ""), "한국거래소 공시(KIND)"))
+            if list_c:
+                ds = re.findall(r"(20\d\d)[-./](\d{1,2})[-./](\d{1,2})", str(r[list_c]))
+                if ds:
+                    d0 = date(*map(int, ds[0]))
+                    if start <= d0 <= end:
+                        out.append(_ev(d0.isoformat(), f"{name} 신규 상장", "ipo", 2, "09:00", "상장 첫날은 가격 변동이 커요.", "한국거래소 공시(KIND)"))
+    uniq = {(e["d"], e["title"]): e for e in out}
+    return sorted(uniq.values(), key=lambda e: (e["d"], e["title"]))
+
+
+def ipo_events(start: date, end: date) -> list[dict]:
+    import requests
+    form = {"method": "searchPubofrProgComSub", "currentPageSize": "100", "pageIndex": "1", "orderMode": "1", "orderStat": "D", "forward": "pubofrprogcom_sub",
+            "searchCorpName": "", "fromDate": (start - timedelta(days=60)).isoformat(), "toDate": end.isoformat()}
+    r = requests.post("https://kind.krx.co.kr/listinvstg/pubofrprogcom.do", data=form, timeout=25,
+                      headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126.0 Safari/537.36",
+                               "Referer": "https://kind.krx.co.kr/listinvstg/pubofrprogcom.do?method=searchPubofrProgComMain", "X-Requested-With": "XMLHttpRequest"})
+    try:
+        html = r.content.decode("utf-8")
+    except UnicodeDecodeError:
+        html = r.content.decode("cp949", errors="replace")
+    return parse_kind_ipo(html, start, end)
+
+
 def _merge(base: list[dict], auto: list[dict]) -> list[dict]:
     """손으로 넣은 일정이 우선. 자동으로 받은 것은 같은 날 같은 지표가 없을 때만 더한다."""
     keys = {"Consumer Price Index": "소비자물가", "Employment Situation": "고용보고서", "Gross Domestic Product": "GDP", "Personal Income and Outlays": "PCE"}
@@ -180,14 +299,14 @@ def _merge(base: list[dict], auto: list[dict]) -> list[dict]:
     return sorted(out, key=lambda x: (x["d"], x["t"] or "99", -x["imp"]))
 
 
-def build(today: date | None = None, fred_key: str | None = None, cache_path: str | None = None) -> dict:
+def build(today: date | None = None, fred_key: str | None = None, cache_path: str | None = None, online: bool = False) -> dict:
     import json, os
     today = today or datetime.now(KST).date()
     start = (today.replace(day=1) - timedelta(days=1)).replace(day=1)      # 지난달 1일부터
     end = today + timedelta(days=190)
     ev, auto, note = events(start, end), [], ""
     fred_key = fred_key if fred_key is not None else os.getenv("FRED_API_KEY")
-    if fred_key:
+    if fred_key and (online or fred_key == "test"):
         try:
             cached = None
             if cache_path and os.path.exists(cache_path):
@@ -203,5 +322,40 @@ def build(today: date | None = None, fred_key: str | None = None, cache_path: st
                         json.dump({"day": today.isoformat(), "events": auto}, f, ensure_ascii=False)
         except Exception as e:
             note = f"미국 지표 자동 받기 실패: {str(e)[:120]}"
-    return {"today": today.isoformat(), "events": _merge(ev, auto), "cats": CATS, "pending": PENDING, "auto": len(auto), "note": note,
+    earn = []
+    if online:                                                  # 실제 실행일 때만 (시험·견본에서는 인터넷을 안 쓴다)
+        epath = cache_path.replace("fred_calendar", "us_earnings") if cache_path else None
+        try:
+            cached = None
+            if epath and os.path.exists(epath):
+                with open(epath, encoding="utf-8") as f:
+                    cached = json.load(f)
+            if cached and cached.get("day") == today.isoformat():
+                earn = cached["events"]
+            else:
+                earn = us_earnings(today)
+                if epath:
+                    os.makedirs(os.path.dirname(epath), exist_ok=True)
+                    with open(epath, "w", encoding="utf-8") as f:
+                        json.dump({"day": today.isoformat(), "events": earn}, f, ensure_ascii=False)
+        except Exception as e:
+            note = (note + " / " if note else "") + f"미국 실적 일정 실패: {str(e)[:100]}"
+        ipath = cache_path.replace("fred_calendar", "ipo") if cache_path else None
+        try:
+            cached = None
+            if ipath and os.path.exists(ipath):
+                with open(ipath, encoding="utf-8") as f:
+                    cached = json.load(f)
+            if cached and cached.get("day") == today.isoformat():
+                ipo = cached["events"]
+            else:
+                ipo = ipo_events(today - timedelta(days=7), today + timedelta(days=60))
+                if ipath:
+                    with open(ipath, "w", encoding="utf-8") as f:
+                        json.dump({"day": today.isoformat(), "events": ipo}, f, ensure_ascii=False)
+            earn = earn + ipo
+        except Exception as e:
+            note = (note + " / " if note else "") + f"공모주 일정 실패: {str(e)[:100]}"
+    ev = sorted(ev + earn, key=lambda x: (x["d"], x["t"] or "99", -x["imp"]))
+    return {"today": today.isoformat(), "events": _merge(ev, auto), "cats": CATS, "pending": PENDING, "auto": len(auto), "earn_auto": len(earn), "note": note,
             "sources": "미국 연준 · 미국 노동통계국 · 미국 경제분석국 · 한국은행 · 한국거래소 · MSCI 공식 일정" + (" · 세인트루이스 연준 발표 달력" if auto else "")}

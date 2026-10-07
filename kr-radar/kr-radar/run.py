@@ -337,14 +337,14 @@ def run(provider, limit: int | None = None, intraday: bool = False) -> tuple[lis
         print(f"[저장분] {CACHE_PATH}")
 
     m = meta["market"]
-    print(f"[4/4] 완료 {len(recs)}종목 · 과매도 후보 {meta['os_count']}(오늘 {meta['os_today']}) · 돌파 {meta['bo_count']} · 신고가 {meta['nh_count']} · 추천 {meta['go_count']} · "
+    print(f"[4/4] 완료 {len(recs)}종목 · 과매도 후보 {meta['os_count']}(오늘 {meta['os_today']}) · 돌파 {meta['bo_count']} · 신고가 {meta['nh_count']} · 조건 통과 {meta['go_count']} · "
           f"시장 폭 {m['breadth']}% · {meta['elapsed_sec']}초 · {phase['label']}")
     for h in health.values():
         if h["fail"] or h["stale"]:
             print(f"  ! {h['label']} 실패 {h['fail']} · 저장분 대체 {h['stale']} — 예: {h['sample_error'][:200]}")
     try:                                     # 증시캘린더 (공식 일정표 + 규칙 계산, 인터넷 불필요)
         import schedule
-        meta["calendar"] = schedule.build(cache_path=os.path.join(HERE, "cache", "fred_calendar.json"))
+        meta["calendar"] = schedule.build(cache_path=os.path.join(HERE, "cache", "fred_calendar.json"), online=getattr(provider, "name", "") == "live")
         if meta["calendar"].get("note"):
             meta.setdefault("notes", []).append(meta["calendar"]["note"])
     except Exception as e:

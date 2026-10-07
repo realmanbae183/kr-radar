@@ -478,7 +478,7 @@ main{padding-block:26px 64px}
 :root[data-theme="dark"] .heroart::before{background:radial-gradient(circle at 50% 38%,#33405c 0,#273045 60%,#1c2333 100%);box-shadow:0 0 0 14px rgba(255,255,255,.05)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .heroart::before{background:radial-gradient(circle at 50% 38%,#33405c 0,#273045 60%,#1c2333 100%);box-shadow:0 0 0 14px rgba(255,255,255,.05)}}
 /* 증시캘린더 */
-#v-cal{max-width:900px;margin-inline:auto;--c-kr:#1b5fd0;--c-us:#d6336c;--c-earn:#7a3ff2;--c-expiry:#b7791f;--c-closed:#6b7684}
+#v-cal{max-width:900px;margin-inline:auto;--c-kr:#1b5fd0;--c-us:#d6336c;--c-earn:#7a3ff2;--c-ipo:#0f9d6b;--c-expiry:#b7791f;--c-closed:#6b7684}
 .cal-head{display:flex;align-items:center;gap:16px;margin-bottom:14px}
 .cal-head img{width:clamp(84px,18vw,128px);height:auto;flex:none;filter:drop-shadow(0 8px 8px rgba(20,40,90,.18))}
 .cal-head h2{margin:0;font-size:clamp(24px,4.4vw,32px);font-weight:700;letter-spacing:-.03em}
@@ -759,7 +759,7 @@ dialog img{border:0;border-radius:24px} dialog button{background:var(--card);col
       <select id="mkt" aria-label="시장"><option value="all">코스피+코스닥</option><option value="KOSPI">코스피</option><option value="KOSDAQ">코스닥</option></select>
       <select id="sort" aria-label="정렬"><option value="grade">등급 순</option><option value="win">과거 승률 순</option><option value="recent">최근 신호 순</option><option value="deep">많이 빠진 순</option><option value="marcap">시가총액 순</option></select>
       <label class="toggle" id="weakLbl"><input type="checkbox" id="weak"> 하나만 뜬 약한 신호도</label>
-      <label class="toggle"><input type="checkbox" id="onlyGo"> 추천만</label>
+      <label class="toggle"><input type="checkbox" id="onlyGo"> 조건 통과만</label>
       <label class="toggle"><input type="checkbox" id="hideThin"> 거래 적은 종목 숨기기</label>
     </div>
     <div class="count-line" id="tabNote"></div>
@@ -878,7 +878,7 @@ function header(){
   }
   const mk=M.market||{};
   $("#lede").textContent = `코스피 전 종목과 코스닥 150을 장중 30분마다 살펴봅니다. 과거 같은 상태의 성과, 재무 순위, 악재 점검까지 한 번에 볼 수 있어요.`;
-  $("#heroStats").innerHTML = [[cnt(S.length),"살펴본 종목"],[M.os_count??0,"과매도 후보"],[M.go_count??0,"추천 종목"],[mk.breadth!=null?mk.breadth+"%":"–","시장 폭"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
+  $("#heroStats").innerHTML = [[cnt(S.length),"살펴본 종목"],[M.os_count??0,"과매도 후보"],[M.go_count??0,"조건 통과"],[mk.breadth!=null?mk.breadth+"%":"–","시장 폭"]].map(([v,l])=>`<div class="stat"><b>${v}</b><span>${l}</span></div>`).join("");
   $("#asOf").textContent = `${M.as_of||""} ${ph.label||""} 기준 · 전 종목 중 20일선 위에 있는 종목 비율`;
   const b=[];
   if(M.mode==="demo") b.push(`<p class="banner demo">샘플 화면이에요. 종목 이름·가격·재무·과거 성과 숫자는 모두 지어낸 가상 데이터입니다.</p>`);
@@ -1224,7 +1224,7 @@ function riskPage(s){
 function verdictPage(s){
   const v=s.verdict||{key:"none",label:"신호 없음",why:""}, g=s.sig, o=g?.os, f=s.fin||{}, r=s.risk||{};
   const chartLine = v.signal? `${esc(v.signal_name)} · 등급 ${v.grade||"–"} · 과거 ${cnt(v.n)}번 · 5일 승률 ${v.w5??"–"}% · 평균 ${pct(v.m5)}` : esc(v.why||"");
-  const stamp = {go:"추천", veto:"비추", weak:esc(v.label).replace(" ","<br>"), none:"신호<br>없음"}[v.key];
+  const stamp = {go:"조건<br>통과", veto:"비추", weak:esc(v.label).replace(" ","<br>"), none:"신호<br>없음"}[v.key];
   const head = {go:"규칙상 들어갈 만한 자리", veto:"승률은 넘지만 걸러요", weak:"기준에 못 미쳐요", none:"지금은 볼 신호가 없어요"}[v.key];
   return `<div class="final ${v.key}"><div class="stamp"><div>${stamp}</div></div><div style="min-width:0">
       <h3>${head}</h3><p>${esc(v.why||"")}</p>
@@ -1234,7 +1234,7 @@ function verdictPage(s){
       <div class="sumrow"><b>재무</b><span>${f.score!=null?`${f.score}점 · 전 종목 ${f.rank.all[0]}등 / ${cnt(f.rank.all[1])}${f.rank.sector?` · ${esc(f.rank.sector[2])} ${f.rank.sector[0]}등 / ${f.rank.sector[1]}`:""}`:"점수를 낼 데이터 부족"}</span><span class="vd vd-${f.score==null?"none":f.rank.bottom_pct<RU.fin_veto?"veto":"go"}">${f.score==null?"확인 불가":f.rank.bottom_pct<RU.fin_veto?`하위 ${RU.fin_veto}% 안`:"통과"}</span></div>
       <div class="sumrow"><b>악재</b><span>${r.score!=null?`${r.score}점 · 위험 ${r.bad} · 주의 ${r.warn}${r.unknown?` · 확인 불가 ${r.unknown}`:""}`:"데이터 없음"}</span><span class="vd vd-${r.score==null?"none":r.score<60?"veto":r.bad?"weak":"go"}">${r.score==null?"확인 불가":r.score<60?"위험":r.bad?"주의":"통과"}</span></div>
     </div>
-    <p class="note" style="margin:10px 0 0">판정 규칙: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 추천. 다만 악재 점수가 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추. 과거 통계를 규칙에 넣은 결과이고, 앞으로도 그렇다는 보장은 없어요. 투자 권유가 아닙니다.</p></div>`;
+    <p class="note" style="margin:10px 0 0">판정 규칙: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 통과. 다만 악재 점수가 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추. 과거 통계를 규칙에 넣은 결과이고, 앞으로도 그렇다는 보장은 없어요. 투자 권유가 아닙니다.</p></div>`;
 }
 const STEPS=[["차트 분석",s=>s.sig?.os?.event?`과매도 ${s.sig.os.event.n}개 · 등급 ${s.sig.os.grade||"–"}`:s.sig?.nh?"52주 신고가":"신호 없음"],
              ["재무",s=>s.fin?.score!=null?`${s.fin.score}점 · ${s.fin.rank.all[0]}등`:"데이터 부족"],
@@ -1294,7 +1294,7 @@ function renderRules(){
       <li>52주 신고가 돌파는 시장 폭이 50% 이상일 때만 후보로 봅니다. 승률은 낮고 맞을 때 크게 먹는 유형입니다.</li>
       <li>거래량 실린 구름대 돌파는 시장도 종목도 상승 추세일 때만 따로 봅니다.</li>
       <li>등급과 과거 성과는 종목이 속한 묶음(코스피 대형 · 코스피 중소형 · 코스닥 150)의 기록으로 계산합니다.</li>
-      <li>최종 판정: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 추천. 악재 점수 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추.</li></ul>
+      <li>최종 판정: 과거 같은 상태의 5일 승률이 ${RU.win_min}%를 넘고 평균 수익이 플러스면 통과. 악재 점수 60점 미만이거나 재무 점수가 전 종목 하위 ${RU.fin_veto}%면 비추.</li></ul>
       <p class="note">매크로(금리·유가·환율)는 규칙에 넣지 않았어요. 직접 판단해서 얹는 영역입니다. 투자 권유가 아니라 공부용 도구예요.</p></div>
     <div class="panel"><h3>근거</h3>
       <p class="note" style="margin:0 0 10px">${esc(tm.from||"")} ~ ${esc(tm.to||"")} · ${tm.stocks??"–"}종목 · 신호일 종가에 사서 N거래일 뒤 종가에 팔고 왕복 비용 ${tm.cost??RU.cost}%를 뺀 결과. ${esc(tm.built||"")} 계산. 정식 실행 때마다 다시 계산돼요.</p>
