@@ -103,10 +103,10 @@ TYPE: text/html; charset=utf-8
 						
 						<dt>EPS <b class="num">22,292</b></dt>
 						<dt class="line-left">BPS <b class="num">86,052</b></dt>
-						<dt class="line-left">PER <b class="num">12.38</b></dt>
-						<dt class="line-left">업종PER <b class="num">9.45</b></dt>
-						<dt class="line-left">PBR <b class="num">3.21</b></dt>
-						<dt class="line-left">현금배당수익률 <b class="num">0.60%</b></dt>
+						<dt class="line-left">PER <b class="num">12.20</b></dt>
+						<dt class="line-left">업종PER <b class="num">9.26</b></dt>
+						<dt class="line-left">PBR <b class="num">3.16</b></dt>
+						<dt class="line-left">현금배당수익률 <b class="num">0.61%</b></dt>
 						<dt class="right">12월 결산</dt>
 						
 					</dl>
@@ -139,7 +139,7 @@ TYPE: text/html; charset=utf-8
 											<dl class="header-table-row">
 												<dd class="header-table-cell"><h5><span>시세</span> 및 주주현황</h5></dd>
 												<dd class="header-table-cell unit">
-													<p>[기준:2026.10.02]</p>
+													<p>[기준:2026.10.06]</p>
 												</dd>
 											</dl>
 										</div>
@@ -154,8 +154,8 @@ TYPE: text/html; charset=utf-8
 													<tr>
 														<th scope="row" class="txt">주가/전일대비/수익률</th>
 														<td class="num"><strong>
-															276,000</strong>원 /
-														<span class="cBk">0원</span> / <span class="cBk">0%</span>
+															272,000</strong>원 /
+														<span class="cDn">-4,000원</span> / <span class="cDn">-1.45%</span>
 														</td>
 													</tr>
 													<tr>
@@ -174,14 +174,14 @@ TYPE: text/html; charset=utf-8
 													<tr>
 														<th scope="row" class="txt">거래량/거래대금</th>
 														<td class="num">
-															11,501,300주 /
-														31,674억원
+															12,913,800주 /
+														35,352억원
 														</td>
 													</tr>
 													<tr>
 														<th scope="row" class="txt">시가총액</th>
 														<td class="num">
-															16,135,729억원
+															15,901,878억원
 														</td>
 													</tr>
 													<tr>
@@ -193,18 +193,18 @@ TYPE: text/html; charset=utf-8
 													<tr>
 														<th scope="row" class="txt">발행주식수/유동비율</th>
 														<td class="num">
-															5,846,278,608주 / 74.95%
+															5,846,278,608주 / 74.92%
 														</td>
 													</tr>
 													<tr>
 														<th scope="row" class="txt">외국인지분율</th>
 														<td class="num">
-															46.42%</td>
+															46.41%</td>
 													</tr>
 													<tr>
 														<th scope="row" class="txt noline-bottom">수익률 <span class="span-sub">(1M/3M/6M/1Y)</span></th>
 														<td class="num noline-bottom">
-															<span class="cUp">+10.18%</span>/ <span class="cDn">-3.50%</span>/ <span class="cUp">+54.71%</span>/ <span class="cUp">+210.11%</span>
+															<span class="cUp">+6.46%</span>/ <span class="cDn">-14.47%</span>/ <span class="cUp">+40.86%</span>/ <span class="cUp">+205.62%</span>
 														</td>
 													</tr>
 												</tbody>
@@ -262,10 +262,10 @@ TYPE: text/html; charset=utf-8
 												<tr>
 													<th scope="row" style="" class="left" title="최대주주등"><div class="cut">최대주주등</div></th>
 													<td class="num">
-														17
+														18
 													</td>
 													<td class="num">
-														1,151,084,999
+														1,151,074,892
 													</td>
 													<td class="noline-right num ">
 														19.69
@@ -298,10 +298,10 @@ TYPE: text/html; charset=utf-8
 												<tr>
 													<th scope="row" style="" class="left" title="기타주주"><div class="cut">기타주주</div></th>
 													<td class="num">
-														1,304
+														1,303
 													</td>
 													<td class="num">
-														5,693,958
+														5,693,758
 													</td>
 													<td class="noline-right num ">
 														0.10
@@ -315,7 +315,7 @@ TYPE: text/html; charset=utf-8
 										<div class="header-table">
 											<table class="cmp-table" style="width:100%">
 												<tr class="cmp-table-row">
-													<td class="cmp-table-cell unit" style="*margin-top:-2px;padding-right:0">[기준: 2026.10.02]</td>
+													<td class="cmp-table-cell unit" style="*margin-top:-2px;padding-right:0">[기준: 2026.10.06]</td>
 												</tr>
 											</table>
 										</div>
@@ -336,10 +336,10 @@ TYPE: text/html; charset=utf-8
 											<tbody>
 												
 														<tr class="p_sJJ10">
-															<td class="line txt" title="삼성생명보험 외 16인">
-																<span class="cut"><a class='btn_moreE sJJ' data-nm='삼성생명보험' data-grp=10><span class='icon-sprite icon-moreE'>삼성생명보험 외 16인</span></a> 삼성생명보험 외 16인</span>
+															<td class="line txt" title="삼성생명보험 외 17인">
+																<span class="cut"><a class='btn_moreE sJJ' data-nm='삼성생명보험' data-grp=10><span class='icon-sprite icon-moreE'>삼성생명보험 외 17인</span></a> 삼성생명보험 외 17인</span>
 															</td>
-															<td class="line num">1,151,084,999</td>
+															<td class="line num">1,151,074,892</td>
 															<td class="noline-right num">19.69</td>
 														</tr>
 													
@@ -363,8 +363,8 @@ TYPE: text/html; charset=utf-8
 															<td class="line txt" title="자사주">
 																<span class="cut"><span style='width:15px; display:inline-block'>&nbsp;</span>자사주</span>
 															</td>
-															<td class="line num">133,670,794</td>
-															<td class="noline-right num">2.29</td>
+															<td class="line num">135,670,794</td>
+															<td class="noline-right num">2.32</td>
 														</tr>
 													
 											</tbody>
@@ -429,56 +429,56 @@ TYPE: text/html; charset=utf-8
 											
 											<tr>
 												<th class="left" scope="row">PER</th>
-												<td class="num">42.05</td>
-												<td class="num noline-right">5.85</td>
+												<td class="num">41.44</td>
+												<td class="num noline-right">5.81</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">PBR</th>
-												<td class="num">4.31</td>
-												<td class="num noline-right">2.54</td>
+												<td class="num">4.25</td>
+												<td class="num noline-right">2.50</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">PCR</th>
-												<td class="num">21.82</td>
-												<td class="num noline-right">4.98</td>
+												<td class="num">21.50</td>
+												<td class="num noline-right">4.93</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">EV/EBITDA</th>
-												<td class="num">18.49</td>
-												<td class="num noline-right">3.41</td>
+												<td class="num">18.21</td>
+												<td class="num noline-right">3.36</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">EPS</th>
 												<td class="num">6,564원</td>
-												<td class="num noline-right">47,142원</td>
+												<td class="num noline-right">46,850원</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">BPS</th>
 												<td class="num">63,997원</td>
-												<td class="num noline-right">108,527원</td>
+												<td class="num noline-right">108,623원</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">EBITDA</th>
 												<td class="num">905,276.4억원</td>
-												<td class="num noline-right">4,328,456.8억원</td>
+												<td class="num noline-right">4,315,587.5억원</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">현금DPS</th>
 												<td class="num">1,668원</td>
-												<td class="num noline-right">9,181원</td>
+												<td class="num noline-right">8,823원</td>
 											</tr>
 											
 											<tr>
 												<th class="left" scope="row">현금배당수익률</th>
-												<td class="num">0.60%</td>
-												<td class="num noline-right">3.33%</td>
+												<td class="num">0.61%</td>
+												<td class="num noline-right">3.24%</td>
 											</tr>
 											
 											<tr>
@@ -796,7 +796,7 @@ TYPE: text/html; charset=utf-8
 									</tr>
 								</table>
 								
-                                <div id="VGVTbkwxZ2"></div>
+                                <div id="aFVlanREZS"></div>
 
 								<div class="gibun_exp7_1 all clr">
 									
@@ -826,7 +826,7 @@ TYPE: text/html; charset=utf-8
 												<h5><span>투자의견</span> 컨센서스</h5>
 											</dd>
 											<dd class="header-table-cell unit">
-												<p>[기준:2026.10.02]</p>
+												<p>[기준:2026.10.06]</p>
 											</dd>
 										</dl>
 									</div>
@@ -866,10 +866,10 @@ TYPE: text/html; charset=utf-8
 													<td class="noline-bottom line-right center cUp">
 														<b>4.00</b>
 													</td>
-													<td class="noline-bottom line-right center">489,762</td>
-													<td class="noline-bottom line-right center">47,142</td>
-													<td class="noline-bottom line-right center">5.85</td>
-													<td class="noline-bottom center">21</td>
+													<td class="noline-bottom line-right center">495,227</td>
+													<td class="noline-bottom line-right center">46,850</td>
+													<td class="noline-bottom line-right center">5.81</td>
+													<td class="noline-bottom center">22</td>
 												</tr>
 											
 									</table>
@@ -915,6 +915,46 @@ TYPE: text/html; charset=utf-8
 									<tbody>
 										
 												<tr>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">교보</td>
+													<td class="line center">26/10/06</td>
+													<td class="line num">500,000</td>
+													<td class="line num">500,000</td>
+													<td class="line num"><span class="cBk">0.00</span></td>
+													<td class="line center" title="Buy">Buy</td>
+													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
+												</tr>
+											
+												<tr>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">한화투자</td>
+													<td class="line center">26/10/06</td>
+													<td class="line num">580,000</td>
+													<td class="line num">580,000</td>
+													<td class="line num"><span class="cBk">0.00</span></td>
+													<td class="line center" title="Buy">Buy</td>
+													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
+												</tr>
+											
+												<tr>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">미래에셋</td>
+													<td class="line center">26/10/06</td>
+													<td class="line num">400,000</td>
+													<td class="line num">400,000</td>
+													<td class="line num"><span class="cBk">0.00</span></td>
+													<td class="line center" title="매수">매수</td>
+													<td class="noline-right center" style="position: relative;" title="매수">매수</td>
+												</tr>
+											
+												<tr>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">SK</td>
+													<td class="line center">26/10/06</td>
+													<td class="line num">610,000</td>
+													<td class="line num">610,000</td>
+													<td class="line num"><span class="cBk">0.00</span></td>
+													<td class="line center" title="매수">매수</td>
+													<td class="noline-right center" style="position: relative;" title="매수">매수</td>
+												</tr>
+											
+												<tr>
 													<td style="background-color: #FFFFFF" class="line txt" scope="row">삼성</td>
 													<td class="line center">26/10/02</td>
 													<td class="line num">400,000</td>
@@ -935,6 +975,16 @@ TYPE: text/html; charset=utf-8
 												</tr>
 											
 												<tr>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">대신</td>
+													<td class="line center">26/10/01</td>
+													<td class="line num">560,000</td>
+													<td class="line num">560,000</td>
+													<td class="line num"><span class="cBk">0.00</span></td>
+													<td class="line center" title="Buy">Buy</td>
+													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
+												</tr>
+											
+												<tr>
 													<td style="background-color: #FFFFFF" class="line txt" scope="row">하나</td>
 													<td class="line center">26/10/01</td>
 													<td class="line num">480,000</td>
@@ -945,10 +995,10 @@ TYPE: text/html; charset=utf-8
 												</tr>
 											
 												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">대신</td>
-													<td class="line center">26/10/01</td>
-													<td class="line num">560,000</td>
-													<td class="line num">560,000</td>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">NH투자</td>
+													<td class="line center">26/09/30</td>
+													<td class="line num">530,000</td>
+													<td class="line num">530,000</td>
 													<td class="line num"><span class="cBk">0.00</span></td>
 													<td class="line center" title="Buy">Buy</td>
 													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
@@ -975,13 +1025,13 @@ TYPE: text/html; charset=utf-8
 												</tr>
 											
 												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">NH투자</td>
-													<td class="line center">26/09/30</td>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">DS투자</td>
+													<td class="line center">26/09/29</td>
 													<td class="line num">530,000</td>
 													<td class="line num">530,000</td>
 													<td class="line num"><span class="cBk">0.00</span></td>
-													<td class="line center" title="Buy">Buy</td>
-													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
+													<td class="line center" title="BUY">BUY</td>
+													<td class="noline-right center" style="position: relative;" title="BUY">BUY</td>
 												</tr>
 											
 												<tr>
@@ -992,16 +1042,6 @@ TYPE: text/html; charset=utf-8
 													<td class="line num"><span class="cBk">0.00</span></td>
 													<td class="line center" title="STRONG BUY">STRONG BUY</td>
 													<td class="noline-right center" style="position: relative;" title="STRONG BUY">STRONG BUY</td>
-												</tr>
-											
-												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">DS투자</td>
-													<td class="line center">26/09/29</td>
-													<td class="line num">530,000</td>
-													<td class="line num">530,000</td>
-													<td class="line num"><span class="cBk">0.00</span></td>
-													<td class="line center" title="BUY">BUY</td>
-													<td class="noline-right center" style="position: relative;" title="BUY">BUY</td>
 												</tr>
 											
 												<tr>
@@ -1021,16 +1061,6 @@ TYPE: text/html; charset=utf-8
 													<td class="line num">300,000</td>
 													<td class="line num"><span class="cUp">-10.00</span></td>
 													<td class="line center" title="보유">보유</td>
-													<td class="noline-right center" style="position: relative;" title="매수">매수</td>
-												</tr>
-											
-												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">미래에셋</td>
-													<td class="line center">26/09/07</td>
-													<td class="line num">400,000</td>
-													<td class="line num">370,000</td>
-													<td class="line num"><span class="cBk">8.11</span></td>
-													<td class="line center" title="매수">매수</td>
 													<td class="noline-right center" style="position: relative;" title="매수">매수</td>
 												</tr>
 											
@@ -1065,33 +1095,13 @@ TYPE: text/html; charset=utf-8
 												</tr>
 											
 												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">현대차</td>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">다올투자</td>
 													<td class="line center">26/07/31</td>
-													<td class="line num">440,000</td>
-													<td class="line num">440,000</td>
+													<td class="line num">585,000</td>
+													<td class="line num">585,000</td>
 													<td class="line num"><span class="cBk">0.00</span></td>
 													<td class="line center" title="BUY">BUY</td>
 													<td class="noline-right center" style="position: relative;" title="BUY">BUY</td>
-												</tr>
-											
-												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">교보</td>
-													<td class="line center">26/07/31</td>
-													<td class="line num">500,000</td>
-													<td class="line num">500,000</td>
-													<td class="line num"><span class="cBk">0.00</span></td>
-													<td class="line center" title="Buy">Buy</td>
-													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
-												</tr>
-											
-												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">한화투자</td>
-													<td class="line center">26/07/31</td>
-													<td class="line num">580,000</td>
-													<td class="line num">580,000</td>
-													<td class="line num"><span class="cBk">0.00</span></td>
-													<td class="line center" title="Buy">Buy</td>
-													<td class="noline-right center" style="position: relative;" title="Buy">Buy</td>
 												</tr>
 											
 												<tr>
@@ -1105,10 +1115,10 @@ TYPE: text/html; charset=utf-8
 												</tr>
 											
 												<tr>
-													<td style="background-color: #FFFFFF" class="line txt" scope="row">다올투자</td>
+													<td style="background-color: #FFFFFF" class="line txt" scope="row">현대차</td>
 													<td class="line center">26/07/31</td>
-													<td class="line num">585,000</td>
-													<td class="line num">585,000</td>
+													<td class="line num">440,000</td>
+													<td class="line num">440,000</td>
 													<td class="line num"><span class="cBk">0.00</span></td>
 													<td class="line center" title="BUY">BUY</td>
 													<td class="noline-right center" style="position: relative;" title="BUY">BUY</td>
@@ -1292,7 +1302,7 @@ TYPE: text/html; charset=utf-8
 						flag: 4,
 						cmp_cd: '005930',
 						grp_cd: grp==10?"01":"03",
-                        encparam: 'YW9BMERNdmNuK1J3c09lajBSUE41UT09'
+                        encparam: 'K28xVFA4M3ZFRU5QejcwOGliSW5nZz09'
 					}
 				, function (res) {
 					var data = []
@@ -1369,13 +1379,13 @@ TYPE: text/html; charset=utf-8
 					eid = $(e.target).children().attr("id");
 				switch (eid) {
 					case "ct1":
-						Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", $("#ct1").data('flag'), "005930;20261002");
+						Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt1", $("#ct1").data('flag'), "005930;20261006");
 					break;
 				case "ct2":
 					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt2", "ct2", "005930");
 					break;
 				case "ct3":
-					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt3", "ct3", "005930;20261002");
+					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt3", "ct3", "005930;20261006");
 					break;
 				case "ct4":
 					Cmd_cmpPopChartTable($('.nm_k').text(), "frmCt4", "ct4", "005930;" + $("#bandChartGubun").val());
@@ -1401,7 +1411,7 @@ TYPE: text/html; charset=utf-8
 			, {
 				flag: flag,
 				cmp_cd: '005930',
-                encparam: 'YW9BMERNdmNuK1J3c09lajBSUE41UT09'
+                encparam: 'K28xVFA4M3ZFRU5QejcwOGliSW5nZz09'
 			}
 				, function (res) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
@@ -1641,7 +1651,7 @@ TYPE: text/html; charset=utf-8
 		else{
 			if($('#stock_price_relative_chart img').attr('src') == undefined)
 			{
-				$('#stock_price_relative_chart').html('<img src="/chartimg/page1/chart1/005930c1.png?20261002" />')
+				$('#stock_price_relative_chart').html('<img src="/chartimg/page1/chart1/005930c1.png?20261006" />')
 					
 			}
 			var src = $('#stock_price_relative_chart img').attr('src')
@@ -1652,7 +1662,7 @@ TYPE: text/html; charset=utf-8
 
 	// 펀더멘털 > 어닝서프라이즈
 	var EarnigList = function () {
-		var res = {"yymm":["202603","202606","202609"],"data":[{"1":401923.440000000000,"2":846738.708333333300,"3":1069435.263157894700},{"1":572000.000000000000,"2":894000.000000000000,"3":null},{"1":42.315660000000,"2":5.581570000000,"3":null},{"1":755.612160000000,"2":1811.867200000000,"3":null},{"1":184.950530000000,"2":56.204140000000,"3":null},{"1":358348.181818181800,"2":700171.000000000000,"3":883532.000000000000},{"1":471012.000000000000,"2":712695.000000000000,"3":null},{"1":31.439760000000,"2":1.788710000000,"3":null},{"1":486.681770000000,"2":1344.446880000000,"3":null},{"1":144.148190000000,"2":51.311460000000,"3":null}],"yymmdd":["2026/04/07(연결)","2026/07/07(연결)",null],"type":[1,1,0]};
+		var res = {"yymm":["202603","202606","202609"],"data":[{"1":401923.440000000000,"2":846738.708333333300,"3":1066401.000000000000},{"1":572000.000000000000,"2":894000.000000000000,"3":null},{"1":42.315660000000,"2":5.581570000000,"3":null},{"1":755.612160000000,"2":1811.867200000000,"3":null},{"1":184.950530000000,"2":56.204140000000,"3":null},{"1":358348.181818181800,"2":700171.000000000000,"3":883532.000000000000},{"1":471012.000000000000,"2":712695.000000000000,"3":null},{"1":31.439760000000,"2":1.788710000000,"3":null},{"1":486.681770000000,"2":1344.446880000000,"3":null},{"1":144.148190000000,"2":51.311460000000,"3":null}],"yymmdd":["2026/04/07(연결)","2026/07/07(연결)",null],"type":[1,1,0]};
 		tmp = _.template($("#tmpl-list").html());
 		$("#earning_list tbody").html(tmp(res));
 
@@ -1703,12 +1713,12 @@ TYPE: text/html; charset=utf-8
 				, freq_typ: _freq_typ
 				, extY: extY
                 , extQ: extQ
-                , encparam: 'YW9BMERNdmNuK1J3c09lajBSUE41UT09'
-                , id: 'VGVTbkwxZ2' ? 'VGVTbkwxZ2' : ''
+                , encparam: 'K28xVFA4M3ZFRU5QejcwOGliSW5nZz09'
+                , id: 'aFVlanREZS' ? 'aFVlanREZS' : ''
 				},
 				success: function (data) {
 					gtag('config', 'UA-74989022-7', {'page_path': '/company/ajax/cF1001.aspx'});
-					$('#VGVTbkwxZ2').html(data);
+					$('#aFVlanREZS').html(data);
 					if(extQ==0)
 					{
 						$('.r02c07').addClass('endLine')
@@ -1741,7 +1751,7 @@ TYPE: text/html; charset=utf-8
 		// 투자의견 및 목표주가 차트
 		$('#opinion_targetPrice').show();
 		if (chartType != 'image'){
-			var chartData2 = {"target_price":[{"x":1764288000000.0,"y":136615.0},{"x":1767052800000.0,"y":139385.0},{"x":1769731200000.0,"y":207654.0},{"x":1772150400000.0,"y":234660.0},{"x":1774915200000.0,"y":252720.0},{"x":1777507200000.0,"y":298750.0},{"x":1780012800000.0,"y":396250.0},{"x":1782777600000.0,"y":465208.0},{"x":1785456000000.0,"y":493542.0},{"x":1788134400000.0,"y":491875.0},{"x":1790726400000.0,"y":493864.0},{"x":1790899200000.0,"y":489762.0}],"close_price":[{"x":1764288000000.0,"y":100500.0},{"x":1767052800000.0,"y":119900.0},{"x":1769731200000.0,"y":160500.0},{"x":1772150400000.0,"y":216500.0},{"x":1774915200000.0,"y":167200.0},{"x":1777507200000.0,"y":220500.0},{"x":1780012800000.0,"y":317000.0},{"x":1782777600000.0,"y":334000.0},{"x":1785456000000.0,"y":262500.0},{"x":1788134400000.0,"y":260000.0},{"x":1790726400000.0,"y":268500.0},{"x":1790899200000.0,"y":276000.0}],"deg":[{"x":1764288000000.0,"y":4.00},{"x":1767052800000.0,"y":4.00},{"x":1769731200000.0,"y":4.00},{"x":1772150400000.0,"y":4.00},{"x":1774915200000.0,"y":4.00},{"x":1777507200000.0,"y":4.00},{"x":1780012800000.0,"y":4.04},{"x":1782777600000.0,"y":4.04},{"x":1785456000000.0,"y":4.04},{"x":1788134400000.0,"y":4.04},{"x":1790726400000.0,"y":4.00},{"x":1790899200000.0,"y":4.00}]};
+			var chartData2 = {"target_price":[{"x":1764288000000.0,"y":136615.0},{"x":1767052800000.0,"y":139385.0},{"x":1769731200000.0,"y":207654.0},{"x":1772150400000.0,"y":234660.0},{"x":1774915200000.0,"y":252720.0},{"x":1777507200000.0,"y":298750.0},{"x":1780012800000.0,"y":396250.0},{"x":1782777600000.0,"y":465208.0},{"x":1785456000000.0,"y":493542.0},{"x":1788134400000.0,"y":491875.0},{"x":1790726400000.0,"y":493864.0},{"x":1791244800000.0,"y":null}],"close_price":[{"x":1764288000000.0,"y":100500.0},{"x":1767052800000.0,"y":119900.0},{"x":1769731200000.0,"y":160500.0},{"x":1772150400000.0,"y":216500.0},{"x":1774915200000.0,"y":167200.0},{"x":1777507200000.0,"y":220500.0},{"x":1780012800000.0,"y":317000.0},{"x":1782777600000.0,"y":334000.0},{"x":1785456000000.0,"y":262500.0},{"x":1788134400000.0,"y":260000.0},{"x":1790726400000.0,"y":268500.0},{"x":1791244800000.0,"y":272000.0}],"deg":[{"x":1764288000000.0,"y":4.00},{"x":1767052800000.0,"y":4.00},{"x":1769731200000.0,"y":4.00},{"x":1772150400000.0,"y":4.00},{"x":1774915200000.0,"y":4.00},{"x":1777507200000.0,"y":4.00},{"x":1780012800000.0,"y":4.04},{"x":1782777600000.0,"y":4.04},{"x":1785456000000.0,"y":4.04},{"x":1788134400000.0,"y":4.04},{"x":1790726400000.0,"y":4.00},{"x":1791244800000.0,"y":null}]};
 			new Highcharts.Chart({
 				chart: {
 					renderTo: 'opinion_targetPrice',
@@ -1806,13 +1816,13 @@ TYPE: text/html; charset=utf-8
 			});
 			chartData2 = null;
 		} else {
-			$('#opinion_targetPrice').html('<img src="/chartimg/page1/chart2/005930.png?20261002" />');
+			$('#opinion_targetPrice').html('<img src="/chartimg/page1/chart2/005930.png?20261006" />');
 		}
 
 		// 투자의견 분포 차트 
 		$('#opinion').show();
 		if (chartType != 'image'){
-			var chartData3 = {"today":[{"name":"강력매수","y":1.0},{"name":"매수","y":19.0},{"name":"중립","y":1.0},{"name":"매도","y":null},{"name":"강력매도","y":null}],"a_month_ago":[{"name":"강력매수","y":1.0},{"name":"매수","y":20.0},{"name":"중립","y":1.0},{"name":"매도","y":null},{"name":"강력매도","y":null}]};
+			var chartData3 = {"today":[{"name":"강력매수","y":1.0},{"name":"매수","y":20.0},{"name":"중립","y":1.0},{"name":"매도","y":null},{"name":"강력매도","y":null}],"a_month_ago":[{"name":"강력매수","y":1.0},{"name":"매수","y":20.0},{"name":"중립","y":1.0},{"name":"매도","y":null},{"name":"강력매도","y":null}]};
 			new Highcharts.Chart({
 				chart: {
 					renderTo: 'opinion',
@@ -1853,7 +1863,7 @@ TYPE: text/html; charset=utf-8
 			});
 			chartData3 = null;
 		} else {
-			$('#opinion').html('<img src="/chartimg/page1/chart3/005930.png?20261002" />');
+			$('#opinion').html('<img src="/chartimg/page1/chart3/005930.png?20261006" />');
 		} 
 	//자동완성 상단 검색에서의 highlight기능추가하기
 	jQuery.fn.highlight = function (str, className) {
@@ -2095,8 +2105,8 @@ TYPE: text/html; charset=utf-8
 			});
 		}
 		else {
-			$('#per-chart').html("<img src='/chartimg/bandchart/per/" + cmp_cd + "_" + gubun + ".png?20261002' alt='PER 밴드 차트 이미지'/>");
-			$('#pbr-chart').html("<img src='/chartimg/bandchart/pbr/" + cmp_cd + "_" + gubun + ".png?20261002' alt='PBR 밴드 차트 이미지'/>");
+			$('#per-chart').html("<img src='/chartimg/bandchart/per/" + cmp_cd + "_" + gubun + ".png?20261006' alt='PER 밴드 차트 이미지'/>");
+			$('#pbr-chart').html("<img src='/chartimg/bandchart/pbr/" + cmp_cd + "_" + gubun + ".png?20261006' alt='PBR 밴드 차트 이미지'/>");
 		}
 	}
 	function RequestBandChart() {

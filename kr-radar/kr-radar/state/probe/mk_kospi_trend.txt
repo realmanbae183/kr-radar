@@ -3,4 +3,4 @@ FINAL: https://m.stock.naver.com/api/index/KOSPI/trend
 STATUS: 200
 TYPE: application/json;charset=UTF-8
 
-{"bizdate":"20261006","personalValue":"+7,441","foreignValue":"-17,575","institutionalValue":"-39"}
+{"bizdate":"20261007","personalValue":"+9,995","foreignValue":"-10,520","institutionalValue":"-2,018"}

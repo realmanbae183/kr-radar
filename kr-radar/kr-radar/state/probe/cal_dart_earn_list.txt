@@ -1,0 +1,211 @@
+[
+{
+"corp_code": "00401731",
+"corp_name": "LG전자",
+"stock_code": "066570",
+"corp_cls": "Y",
+"report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261007800145",
+"flr_nm": "LG전자",
+"rcept_dt": "20261007",
+"rm": "유"
+},
+{
+"corp_code": "00159786",
+"corp_name": "유니드",
+"stock_code": "014830",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261007800069",
+"flr_nm": "유니드",
+"rcept_dt": "20261007",
+"rm": "유"
+},
+{
+"corp_code": "00126186",
+"corp_name": "삼성에스디에스",
+"stock_code": "018260",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261006800215",
+"flr_nm": "삼성에스디에스",
+"rcept_dt": "20261006",
+"rm": "유"
+},
+{
+"corp_code": "00105961",
+"corp_name": "LG이노텍",
+"stock_code": "011070",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261002800710",
+"flr_nm": "LG이노텍",
+"rcept_dt": "20261002",
+"rm": "유"
+},
+{
+"corp_code": "00557508",
+"corp_name": "GKL",
+"stock_code": "114090",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261002800355",
+"flr_nm": "GKL",
+"rcept_dt": "20261002",
+"rm": "유"
+},
+{
+"corp_code": "00171265",
+"corp_name": "파라다이스",
+"stock_code": "034230",
+"corp_cls": "Y",
+"report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261002800293",
+"flr_nm": "파라다이스",
+"rcept_dt": "20261002",
+"rm": "유"
+},
+{
+"corp_code": "01133217",
+"corp_name": "카카오뱅크",
+"stock_code": "323410",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261002800262",
+"flr_nm": "카카오뱅크",
+"rcept_dt": "20261002",
+"rm": "유"
+},
+{
+"corp_code": "00302926",
+"corp_name": "현대로템",
+"stock_code": "064350",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261001800649",
+"flr_nm": "현대로템",
+"rcept_dt": "20261001",
+"rm": "유"
+},
+{
+"corp_code": "00164742",
+"corp_name": "현대자동차",
+"stock_code": "005380",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261001800412",
+"flr_nm": "현대자동차",
+"rcept_dt": "20261001",
+"rm": "유"
+},
+{
+"corp_code": "01387164",
+"corp_name": "샤페론",
+"stock_code": "378800",
+"corp_cls": "K",
+"report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261001900342",
+"flr_nm": "샤페론",
+"rcept_dt": "20261001",
+"rm": "코"
+},
+{
+"corp_code": "00231372",
+"corp_name": "롯데관광개발",
+"stock_code": "032350",
+"corp_cls": "Y",
+"report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261001800355",
+"flr_nm": "롯데관광개발",
+"rcept_dt": "20261001",
+"rm": "유"
+},
+{
+"corp_code": "00138242",
+"corp_name": "KG모빌리티",
+"stock_code": "003620",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261001800360",
+"flr_nm": "KG모빌리티",
+"rcept_dt": "20261001",
+"rm": "유"
+},
+{
+"corp_code": "00106641",
+"corp_name": "기아",
+"stock_code": "000270",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261001800325",
+"flr_nm": "기아",
+"rcept_dt": "20261001",
+"rm": "유"
+},
+{
+"corp_code": "00105873",
+"corp_name": "LG디스플레이",
+"stock_code": "034220",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261001800051",
+"flr_nm": "LG디스플레이",
+"rcept_dt": "20261001",
+"rm": "유"
+},
+{
+"corp_code": "01010615",
+"corp_name": "세나테크놀로지",
+"stock_code": "061090",
+"corp_cls": "K",
+"report_nm": "결산실적공시예고              ",
+"rcept_no": "20260930900323",
+"flr_nm": "세나테크놀로지",
+"rcept_dt": "20260930",
+"rm": "코"
+},
+{
+"corp_code": "00159698",
+"corp_name": "지역난방공사",
+"stock_code": "071320",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20260928800233",
+"flr_nm": "지역난방공사",
+"rcept_dt": "20260928",
+"rm": "유"
+},
+{
+"corp_code": "01390344",
+"corp_name": "HD현대중공업",
+"stock_code": "329180",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20260914800398",
+"flr_nm": "HD현대중공업",
+"rcept_dt": "20260914",
+"rm": "유"
+},
+{
+"corp_code": "00164830",
+"corp_name": "HD한국조선해양",
+"stock_code": "009540",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20260914800401",
+"flr_nm": "HD한국조선해양",
+"rcept_dt": "20260914",
+"rm": "유"
+},
+{
+"corp_code": "00164830",
+"corp_name": "HD한국조선해양",
+"stock_code": "009540",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)(자회사의 주요경영사항)              ",
+"rcept_no": "20260914800395",
+"flr_nm": "HD한국조선해양",
+"rcept_dt": "20260914",
+"rm": "유"
+}
+]
