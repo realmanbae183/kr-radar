@@ -1,4 +1,4 @@
-삼성바이오로직스 결산실적공시예고(안내공시)               20261007800351
+한화에어로스페이스 결산실적공시예고(안내공시)               20261008800483
 
 <html>
  <head> 
@@ -71,7 +71,7 @@
     text-align:left;
 }
 </STYLE> 
-  <title>삼성바이오로직스/결산실적공시 예고(안내공시)/(2026.10.07)결산실적공시 예고(안내공시)</title> 
+  <title>한화에어로스페이스/결산실적공시 예고(안내공시)/(2026.10.08)결산실적공시 예고(안내공시)</title> 
  </head> 
  <body> 
   <div class="xforms"> 
@@ -86,12 +86,12 @@
      <tbody> 
       <tr> 
        <td colspan="2" width="215"> <span style="width:215px;font-size:10pt;">1. 회사명</span> </td> 
-       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">삼성바이오로직스 <br xmlns:java="http://xml.apache.org/xalan/java">(SAMSUNG BIOLOGICS CO.,LTD.)</span> </td> 
+       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">한화에어로스페이스 주식회사 <br xmlns:java="http://xml.apache.org/xalan/java">(HANWHA AEROSPACE CO., LTD.)</span> </td> 
       </tr> 
       <tr> 
        <td rowspan="2" width="132"> <span style="width:132px;font-size:10pt;">2. 결산대상기간</span> </td> 
        <td width="83"> <span style="width:83px;font-size:10pt;">시작일</span> </td> 
-       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">2026-01-01</span> </td> 
+       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">2026-07-01</span> </td> 
       </tr> 
       <tr> 
        <td width="83"> <span style="width:83px;font-size:10pt;">종료일</span> </td> 
@@ -99,17 +99,11 @@
       </tr> 
       <tr> 
        <td colspan="2" width="215"> <span style="width:215px;font-size:10pt;">3. 결산실적 공시예정일</span> </td> 
-       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">2026-10-21</span> </td> 
+       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">2026-10-29</span> </td> 
       </tr> 
       <tr> 
        <td colspan="2" rowspan="2" width="215"> <span style="width:215px;font-size:10pt;">4. 기타 투자판단과 관련한 중요사항</span> </td> 
-       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">- 결산실적자료는 공정공시 후 당사 홈페이지 <br xmlns:java="http://xml.apache.org/xalan/java">
-         <!--?javax.xml.transform.disable-output-escaping?--> 
-         <!--?javax.xml.transform.enable-output-escaping?--> (https://www.samsungbiologics.com)에 <br xmlns:java="http://xml.apache.org/xalan/java">
-         <!--?javax.xml.transform.disable-output-escaping?--> 
-         <!--?javax.xml.transform.enable-output-escaping?--> 게시할 예정입니다. <br xmlns:java="http://xml.apache.org/xalan/java"> <br xmlns:java="http://xml.apache.org/xalan/java">- 상기 공시예정일은 당사 사정에 의해 변경될 수 <br xmlns:java="http://xml.apache.org/xalan/java">
-         <!--?javax.xml.transform.disable-output-escaping?--> 
-         <!--?javax.xml.transform.enable-output-escaping?--> 있습니다.</span> </td> 
+       <td colspan="2" width="385"> <span class="xforms_input" style="width:385px;font-size:10pt;">1. 당사는 상기 '3. 결산실적 공시예정일'에 2026년 3분기 실적을 공시할 예정입니다. <br xmlns:java="http://xml.apache.org/xalan/java"> <br xmlns:java="http://xml.apache.org/xalan/java">2. 결산실적공시를 통해 제공되는 실적은 확정치가 아닌 잠정치이며, 외부감사인의 회계 검토결과에 따라 변동될 수 있습니다. <br xmlns:java="http://xml.apache.org/xalan/java"> <br xmlns:java="http://xml.apache.org/xalan/java">3. 실적발표 자료는 공정공시 후 당사 홈페이지에 게재할 예정입니다. <br xmlns:java="http://xml.apache.org/xalan/java"> <br xmlns:java="http://xml.apache.org/xalan/java">4. 상기 일정은 당사의 사정에 의해 변경될 수 있습니다.</span> </td> 
       </tr> 
       <tr> 
        <td width="96"> <span style="width:96px;font-size:10pt;">※ 관련공시</span> </td> 

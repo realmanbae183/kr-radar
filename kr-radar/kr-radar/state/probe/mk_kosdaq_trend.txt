@@ -3,4 +3,4 @@ FINAL: https://m.stock.naver.com/api/index/KOSDAQ/trend
 STATUS: 200
 TYPE: application/json;charset=UTF-8
 
-{"bizdate":"20261007","personalValue":"+4,975","foreignValue":"-2,551","institutionalValue":"-2,152"}
+{"bizdate":"20261008","personalValue":"+496","foreignValue":"+609","institutionalValue":"-1,067"}

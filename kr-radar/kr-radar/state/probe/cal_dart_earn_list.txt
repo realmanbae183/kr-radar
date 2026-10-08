@@ -1,5 +1,60 @@
 [
 {
+"corp_code": "00126566",
+"corp_name": "한화에어로스페이스",
+"stock_code": "012450",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261008800483",
+"flr_nm": "한화에어로스페이스",
+"rcept_dt": "20261008",
+"rm": "유"
+},
+{
+"corp_code": "00265324",
+"corp_name": "CJ ENM",
+"stock_code": "035760",
+"corp_cls": "K",
+"report_nm": "결산실적공시예고              ",
+"rcept_no": "20261008900389",
+"flr_nm": "CJ ENM",
+"rcept_dt": "20261008",
+"rm": "코"
+},
+{
+"corp_code": "01168684",
+"corp_name": "스튜디오드래곤",
+"stock_code": "253450",
+"corp_cls": "K",
+"report_nm": "결산실적공시예고              ",
+"rcept_no": "20261008900270",
+"flr_nm": "스튜디오드래곤",
+"rcept_dt": "20261008",
+"rm": "코"
+},
+{
+"corp_code": "01515323",
+"corp_name": "LG에너지솔루션",
+"stock_code": "373220",
+"corp_cls": "Y",
+"report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261008800055",
+"flr_nm": "LG에너지솔루션",
+"rcept_dt": "20261008",
+"rm": "유"
+},
+{
+"corp_code": "00126380",
+"corp_name": "삼성전자",
+"stock_code": "005930",
+"corp_cls": "Y",
+"report_nm": "연결재무제표기준영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261008800004",
+"flr_nm": "삼성전자",
+"rcept_dt": "20261008",
+"rm": "유"
+},
+{
 "corp_code": "00877059",
 "corp_name": "삼성바이오로직스",
 "stock_code": "207940",
