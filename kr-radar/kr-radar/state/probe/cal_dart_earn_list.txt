@@ -1,5 +1,38 @@
 [
 {
+"corp_code": "00220561",
+"corp_name": "광주신세계",
+"stock_code": "037710",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261008800706",
+"flr_nm": "광주신세계",
+"rcept_dt": "20261008",
+"rm": "유"
+},
+{
+"corp_code": "00120526",
+"corp_name": "롯데쇼핑",
+"stock_code": "023530",
+"corp_cls": "Y",
+"report_nm": "결산실적공시예고(안내공시)              ",
+"rcept_no": "20261008800753",
+"flr_nm": "롯데쇼핑",
+"rcept_dt": "20261008",
+"rm": "유"
+},
+{
+"corp_code": "00136378",
+"corp_name": "신세계",
+"stock_code": "004170",
+"corp_cls": "Y",
+"report_nm": "영업(잠정)실적(공정공시)              ",
+"rcept_no": "20261008800651",
+"flr_nm": "신세계",
+"rcept_dt": "20261008",
+"rm": "유"
+},
+{
 "corp_code": "00126566",
 "corp_name": "한화에어로스페이스",
 "stock_code": "012450",

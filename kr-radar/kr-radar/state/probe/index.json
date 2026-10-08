@@ -1,10 +1,10 @@
 {
- "at": "2026-10-08T07:04:04",
+ "at": "2026-10-08T09:27:16",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9246
+   "bytes": 9245
   },
   "005930_basic.txt": {
    "status": 200,
@@ -54,7 +54,7 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10082
+   "bytes": 10084
   },
   "247540_integration.txt": {
    "status": 200,
@@ -107,10 +107,10 @@
    "bytes": 133334
   },
   "cal_dart_earn_list.txt": {
-   "count": 25
+   "count": 28
   },
   "cal_dart_earn_doc.txt": {
-   "bytes": 4208
+   "bytes": 125
   },
   "cal_kind_ipo_post.txt": {
    "status": 200,
@@ -145,7 +145,7 @@
   "mk_kospi_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/index/KOSPI/integration",
-   "bytes": 16846
+   "bytes": 16848
   },
   "mk_kospi_trend.txt": {
    "status": 200,
@@ -180,7 +180,7 @@
   "mk_industry_a.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/industry?page=1&pageSize=100",
-   "bytes": 9512
+   "bytes": 9501
   },
   "mk_industry_b.txt": {
    "status": 404,
@@ -200,12 +200,12 @@
   "mk_fx_a.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/exchange/FX_USDKRW",
-   "bytes": 2454
+   "bytes": 2451
   },
   "mk_fx_b.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW",
-   "bytes": 2280
+   "bytes": 2277
   },
   "mk_dxy.txt": {
    "status": 200,
@@ -225,7 +225,7 @@
   "mk_majors.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/majors/part1",
-   "bytes": 23214
+   "bytes": 23195
   },
   "mk_deposit_a.txt": {
    "status": 200,
@@ -265,7 +265,7 @@
   "mk_dart_earn_notice.txt": {
    "status": 200,
    "final": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=20260918",
-   "bytes": 24933
+   "bytes": 25500
   },
   "mk_dep_1.txt": {
    "status": 404,
