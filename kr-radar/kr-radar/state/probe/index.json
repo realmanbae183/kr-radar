@@ -1,5 +1,5 @@
 {
- "at": "2026-10-09T07:04:25",
+ "at": "2026-10-09T09:27:53",
  "results": {
   "005930_integration.txt": {
    "status": 200,
@@ -262,10 +262,8 @@
    "final": "https://api.nasdaq.com/api/calendar/earnings?date=2026-10-09",
    "bytes": 1291
   },
-  "mk_dart_earn_notice.txt": {
-   "status": 200,
-   "final": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=20260919",
-   "bytes": 25590
+  "mk_dart_earn_notice": {
+   "error": "HTTPSConnectionPool(host='opendart.fss.or.kr', port=443): Read timed out."
   },
   "mk_dep_1.txt": {
    "status": 404,
