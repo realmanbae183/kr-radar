@@ -1,20 +1,20 @@
 {
- "at": "2026-10-08T09:27:16",
+ "at": "2026-10-09T07:04:25",
  "results": {
   "005930_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/integration",
-   "bytes": 9245
+   "bytes": 9249
   },
   "005930_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/basic",
-   "bytes": 4028
+   "bytes": 4027
   },
   "005930_trend20.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/005930/trend?pageSize=20",
-   "bytes": 7022
+   "bytes": 7023
   },
   "005930_trend.txt": {
    "status": 200,
@@ -39,7 +39,7 @@
   "005930_wise_overview.txt": {
    "status": 200,
    "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=005930",
-   "bytes": 91187
+   "bytes": 91207
   },
   "005930_pc_main.txt": {
    "status": 200,
@@ -54,27 +54,27 @@
   "005930_marcap_kospi.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/marketValue/KOSPI?page=1&pageSize=5",
-   "bytes": 10084
+   "bytes": 10076
   },
   "247540_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/integration",
-   "bytes": 9430
+   "bytes": 9432
   },
   "247540_basic.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/basic",
-   "bytes": 4200
+   "bytes": 4199
   },
   "247540_trend20.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/trend?pageSize=20",
-   "bytes": 6824
+   "bytes": 6828
   },
   "247540_trend.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stock/247540/trend",
-   "bytes": 3413
+   "bytes": 3412
   },
   "247540_finance_annual.txt": {
    "status": 200,
@@ -94,7 +94,7 @@
   "247540_wise_overview.txt": {
    "status": 200,
    "final": "https://navercomp.wisereport.co.kr/v2/company/c1010001.aspx?cmp_cd=247540",
-   "bytes": 85720
+   "bytes": 85727
   },
   "247540_pc_main.txt": {
    "status": 200,
@@ -110,7 +110,7 @@
    "count": 28
   },
   "cal_dart_earn_doc.txt": {
-   "bytes": 125
+   "bytes": 137
   },
   "cal_kind_ipo_post.txt": {
    "status": 200,
@@ -126,11 +126,11 @@
   },
   "mk_freesis_fund.txt": {
    "status": 200,
-   "bytes": 1290
+   "bytes": 1177
   },
   "mk_freesis_credit.txt": {
    "status": 200,
-   "bytes": 1563
+   "bytes": 1424
   },
   "mk_kospi_basic.txt": {
    "status": 200,
@@ -145,7 +145,7 @@
   "mk_kospi_integration.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/index/KOSPI/integration",
-   "bytes": 16848
+   "bytes": 16858
   },
   "mk_kospi_trend.txt": {
    "status": 200,
@@ -165,7 +165,7 @@
   "mk_kospi_minute_a.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/chart/domestic/index/KOSPI/minute",
-   "bytes": 58034
+   "bytes": 58035
   },
   "mk_kospi_minute_b.txt": {
    "status": 200,
@@ -180,7 +180,7 @@
   "mk_industry_a.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/api/stocks/industry?page=1&pageSize=100",
-   "bytes": 9501
+   "bytes": 9506
   },
   "mk_industry_b.txt": {
    "status": 404,
@@ -200,17 +200,17 @@
   "mk_fx_a.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/exchange/FX_USDKRW",
-   "bytes": 2451
+   "bytes": 2452
   },
   "mk_fx_b.txt": {
    "status": 200,
    "final": "https://m.stock.naver.com/front-api/marketIndex/productDetail?category=exchange&reutersCode=FX_USDKRW",
-   "bytes": 2277
+   "bytes": 2278
   },
   "mk_dxy.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/exchange/.DXY",
-   "bytes": 4439
+   "bytes": 4445
   },
   "mk_gold.txt": {
    "status": 200,
@@ -220,12 +220,12 @@
   "mk_wti.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/energy/CLcv1",
-   "bytes": 4055
+   "bytes": 4061
   },
   "mk_majors.txt": {
    "status": 200,
    "final": "https://api.stock.naver.com/marketindex/majors/part1",
-   "bytes": 23195
+   "bytes": 23212
   },
   "mk_deposit_a.txt": {
    "status": 200,
@@ -250,22 +250,22 @@
   "mk_kind_ipo.txt": {
    "status": 200,
    "final": "https://kind.krx.co.kr/listinvstg/pubofrprogcom.do?method=searchPubofrProgComMain",
-   "bytes": 96766
+   "bytes": 96778
   },
   "mk_kind_newlist.txt": {
    "status": 200,
    "final": "https://kind.krx.co.kr/listinvstg/listingcompany.do?method=searchListingTypeMain",
-   "bytes": 114643
+   "bytes": 114655
   },
   "mk_nasdaq_earn.txt": {
    "status": 200,
-   "final": "https://api.nasdaq.com/api/calendar/earnings?date=2026-10-08",
-   "bytes": 2621
+   "final": "https://api.nasdaq.com/api/calendar/earnings?date=2026-10-09",
+   "bytes": 1291
   },
   "mk_dart_earn_notice.txt": {
    "status": 200,
-   "final": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=20260918",
-   "bytes": 25500
+   "final": "https://opendart.fss.or.kr/api/list.json?crtfc_key={DART}&pblntf_ty=I&page_count=100&bgn_de=20260919",
+   "bytes": 25590
   },
   "mk_dep_1.txt": {
    "status": 404,
